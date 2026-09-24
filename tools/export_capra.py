@@ -66,6 +66,39 @@ TRACKS = {
 }
 
 
+# LeetCode's own name for each classic problem, shown next to the DevOps name
+# so people can find a problem by the name they already know.
+LC_TITLES = {
+    981: "Time Based Key-Value Store", 362: "Design Hit Counter", 239: "Sliding Window Maximum",
+    652: "Find Duplicate Subtrees", 1244: "Design A Leaderboard",
+    1438: "Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit",
+    224: "Basic Calculator", 295: "Find Median from Data Stream", 359: "Logger Rate Limiter",
+    635: "Design Log Storage System", 1348: "Tweet Counts Per Frequency", 2034: "Stock Price Fluctuation",
+    1396: "Design Underground System", 23: "Merge k Sorted Lists", 632: "Smallest Range Covering Elements from K Lists",
+    1004: "Max Consecutive Ones III", 227: "Basic Calculator II", 71: "Simplify Path", 20: "Valid Parentheses",
+    394: "Decode String", 820: "Short Encoding of Words", 56: "Merge Intervals", 1094: "Car Pooling",
+    443: "String Compression", 44: "Wildcard Matching", 751: "IP to CIDR", 715: "Range Module",
+    1233: "Remove Sub-Folders from the Filesystem", 841: "Keys and Rooms", 2092: "Find All People With Secret",
+    721: "Accounts Merge", 1169: "Invalid Transactions",
+    1604: "Alert Using Same Key-Card Three or More Times in a One Hour Period", 1032: "Stream of Characters",
+    1797: "Design Authentication Manager", 722: "Remove Comments", 385: "Mini Parser", 210: "Course Schedule II",
+    207: "Course Schedule", 253: "Meeting Rooms II", 621: "Task Scheduler", 433: "Minimum Genetic Mutation",
+    146: "LRU Cache", 1606: "Find Servers That Handled Most Number of Requests", 1882: "Process Tasks Using Servers",
+    2402: "Meeting Rooms III", 528: "Random Pick with Weight", 1845: "Seat Reservation Manager", 460: "LFU Cache",
+    1188: "Design Bounded Blocking Queue", 1226: "The Dining Philosophers", 759: "Employee Free Time",
+    278: "First Bad Version", 165: "Compare Version Numbers", 2050: "Parallel Courses III",
+    1203: "Sort Items by Groups Respecting Dependencies", 2115: "Find All Possible Recipes from Given Supplies",
+    1462: "Course Schedule IV", 802: "Find Eventual Safe States", 1146: "Snapshot Array",
+    468: "Validate IP Address", 93: "Restore IP Addresses", 399: "Evaluate Division", 743: "Network Delay Time",
+    208: "Implement Trie (Prefix Tree)", 1192: "Critical Connections in a Network",
+    1319: "Number of Operations to Make Network Connected", 684: "Redundant Connection",
+    1514: "Path with Maximum Probability", 787: "Cheapest Flights Within K Stops",
+    1584: "Min Cost to Connect All Points", 994: "Rotting Oranges", 1971: "Find if Path Exists in Graph",
+    875: "Koko Eating Bananas", 1011: "Capacity To Ship Packages Within D Days", 410: "Split Array Largest Sum",
+    588: "Design In-Memory File System", 14: "Longest Common Prefix",
+}
+
+
 class ExportError(Exception):
     pass
 
@@ -78,11 +111,37 @@ def sections(readme: str) -> dict[int, str]:
     return {int(parts[i]): parts[i + 1].strip() for i in range(1, len(parts) - 1, 2)}
 
 
+def kebab(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+CHIP_ID = re.compile(r"\bDC-[A-Z]+-\d{2}\b[ \t]*")
+
+
+def name_refs(md: str, names: dict[str, str]) -> str:
+    """Replace chip IDs (DC-OBS-12) in prose with the problem's name.
+
+    When the name already follows the ID ("DC-OBS-12 Late & Corrected
+    Samples"), the ID is simply dropped.
+    """
+    def rep(m: re.Match) -> str:
+        cid = m.group(0).strip()
+        name = names.get(cid, cid)
+        after = md[m.end():]
+        return "" if after.startswith(name) else name + (" " if m.group(0) != cid else "")
+    return CHIP_ID.sub(rep, md)
+
+
+def strip_ids(code: str) -> str:
+    """Code shown in Capra's editor: drop chip IDs from docstrings and comments."""
+    return CHIP_ID.sub("", code)
+
+
 def title_of(readme: str) -> str:
     m = re.search(r"^# DC-[A-Z]+-\d+\s*·\s*(.+)$", readme, flags=re.M)
     if not m:
         raise ExportError("README has no '# DC-XXX-NN · Title' line")
-    return m.group(1).strip()
+    return m.group(1).replace("★", "").strip()
 
 
 def header_table(body: str) -> dict[str, str]:
@@ -95,8 +154,45 @@ def header_table(body: str) -> dict[str, str]:
 
 
 def bullets(body: str) -> list[str]:
-    items = [l.strip()[2:].strip() for l in body.splitlines() if l.strip().startswith(("- ", "* "))]
-    return items or [l.strip() for l in body.splitlines() if l.strip()]
+    """Top-level '- ' items, with wrapped continuation lines joined back on."""
+    items: list[str] = []
+    for line in body.splitlines():
+        if line.strip().startswith(("- ", "* ")):
+            items.append(line.strip()[2:].strip())
+        elif items and line.strip() and line.startswith((" ", "\t")):
+            items[-1] += " " + line.strip()
+    return items or [l.strip() for l in unwrap(body).splitlines() if l.strip()]
+
+
+BLOCK_START = re.compile(r"^\s*([-*+]|\d+\.)\s|^\s*(\||#|>|```)")
+
+
+def unwrap(md: str) -> str:
+    """Join hard-wrapped lines so Capra's markdown renderer keeps paragraphs whole.
+
+    A line is joined onto the previous one unless either is blank, starts a
+    list item, table row, heading, quote or code fence, or sits inside a fence.
+    """
+    out: list[str] = []
+    in_code = False
+    for line in md.split("\n"):
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            out.append(line)
+            continue
+        prev = out[-1] if out else ""
+        if (not in_code and line.strip() and prev.strip() and not BLOCK_START.match(line)
+                and not prev.strip().startswith(("|", "#", "```"))):
+            out[-1] = prev.rstrip() + " " + line.strip()
+        else:
+            out.append(line)
+    return "\n".join(out)
+
+
+def clean_starter(src: str) -> str:
+    """Drop the repo-only 'make try' instructions from a starter's docstring."""
+    src = re.sub(r"[ \t]*Run your code against the tests:[ \t]*\n[ \t]*make try[^\n]*\n", "\n", src)
+    return re.sub(r"\n{2,}(\"\"\")", r"\n\1", src, count=1)
 
 
 def numbered(body: str) -> list[str]:
@@ -175,7 +271,7 @@ def judge(cmp: str, expected: Any, actual: Any) -> bool:
 
 # ─────────────────────────────── export ───────────────────────────────
 
-def export_chip(folder: Path, matrix: dict[str, dict[str, str]]) -> dict[str, Any]:
+def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str, str]) -> dict[str, Any]:
     chip_id = re.match(r"(DC-[A-Z]+-\d+)", folder.name).group(1)
     readme = (folder / "README.md").read_text()
     sec = sections(readme)
@@ -192,8 +288,10 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]]) -> dict[str, An
         "difficulty": meta["difficulty"],
         "star": meta["star"] == "★",
         "premium": meta["premium"] == "P",
-        "freeAlt": re.sub(r"^Yes\s*\(P\)\.?\s*", "", premium) if meta["premium"] == "P" else "",
+        "freeAlt": name_refs(re.sub(r"^Yes\s*\(P\)\.?\s*", "", premium), names).replace("also chip ", "also here as ") if meta["premium"] == "P" else "",
         "lc": int(meta["lc"]),
+        "classic": LC_TITLES[int(meta["lc"])],
+        "urlSlug": kebab(title_of(readme)),
         "pattern": meta["pattern"],
         "subsystem": meta["subsystem"],
         "handbookId": None,
@@ -201,7 +299,10 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]]) -> dict[str, An
     for n, name in ((2, "scenario"), (3, "why"), (11, "talkTrack"), (12, "levelUp"), (13, "related")):
         if n not in sec:
             raise ExportError(f"README section {n} missing")
-    entry["devops"] = {"scenario": sec[2], "why": sec[3], "talkTrack": sec[11], "levelUp": sec[12], "related": sec[13]}
+    text = lambda md: name_refs(unwrap(md), names)
+    entry["devops"] = {"scenario": text(sec[2]), "why": text(sec[3]), "talkTrack": text(sec[11]),
+                       "levelUp": text(sec[12]), "related": text(sec[13])}
+    entry["relatedIds"] = [r for r in dict.fromkeys(re.findall(r"\bDC-[A-Z]+-\d{2}\b", sec[13])) if r != chip_id and r in names]
 
     if (folder / "handbook.json").exists():
         m = re.search(r"Handbook #(\d+)", meta["source"])
@@ -252,18 +353,18 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]]) -> dict[str, An
     n_ex = len(examples)
     problem: dict[str, Any] = {
         "spec": spec,
-        "statement": sec[4],
+        "statement": name_refs(unwrap(sec[4]), names),
         "examples": [{"args": e["args"], "output": expected[i], "explanation": e.get("explanation", ""),
                       **({"why": e["why"]} if "why" in e else {})} for i, e in enumerate(examples)],
         "constraints": bullets(sec[5]),
         "hints": numbered(sec[8]),
         "tests": [{"args": t["args"], "expected": expected[n_ex + i], **({"why": t["why"]} if "why" in t else {})}
                   for i, t in enumerate(tests)],
-        "solutions": [{"name": s["name"], "description": s["description"], "code": {"python": code},
+        "solutions": [{"name": s["name"], "description": s["description"], "code": {"python": strip_ids(code)},
                        "complexity": {"time": s["time"], "space": s["space"]}, "keyPoints": s.get("keyPoints", []),
                        **({"slow": True} if s.get("slow") else {})} for s, code in zip(sols, codes)],
         "languages": ["python"],
-        "starter": {"python": (folder / "starter.py").read_text()},
+        "starter": {"python": strip_ids(clean_starter((folder / "starter.py").read_text()))},
     }
     if len(problem["hints"]) < 3:
         raise ExportError("README section 8 needs 3 numbered hints")
@@ -284,13 +385,17 @@ def main() -> None:
 
     matrix = master_matrix()
     folders = sorted(p for p in ROOT.glob("0*/DC-*") if p.is_dir())
+    names = {re.match(r"(DC-[A-Z]+-\d+)", f.name).group(1): title_of((f / "README.md").read_text()) for f in folders}
+    slugs = [kebab(n) for n in names.values()]
+    if len(set(slugs)) != len(slugs):
+        sys.exit("two problems share a URL slug")
     if args.only:
         folders = [f for f in folders if any(f.name.startswith(o + "-") for o in args.only)]
     failures = 0
     exported = []
     for folder in folders:
         try:
-            entry = export_chip(folder, matrix)
+            entry = export_chip(folder, matrix, names)
         except (ExportError, KeyError, subprocess.CalledProcessError) as e:
             failures += 1
             print(f"FAIL {folder.name}: {e}")
@@ -303,7 +408,7 @@ def main() -> None:
             (OUT / "chips" / f"{entry['id']}.json").write_text(json.dumps(entry, ensure_ascii=False, indent=1) + "\n")
 
     if not args.check and not args.only and not failures:
-        index = [{k: v for k, v in e.items() if k not in ("devops", "problem")} for e in exported]
+        index = [{k: v for k, v in e.items() if k not in ("devops", "problem", "relatedIds")} for e in exported]
         (OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1) + "\n")
         print(f"wrote {len(index)} chips + index.json to {OUT}")
     if failures:
