@@ -132,6 +132,13 @@ def name_refs(md: str, names: dict[str, str]) -> str:
     return CHIP_ID.sub(rep, md)
 
 
+def plain_labels(md: str) -> str:
+    """A bold line on its own renders as a big section heading in Capra; the
+    Handbook chips' mapping label is a lead-in, not a heading."""
+    return re.sub(r"^\*\*Mapping: DevOps term (?:→|to) handbook name\*\*$",
+                  "How the DevOps terms map to the Handbook's names:", md, flags=re.M)
+
+
 def no_arrows(md: str) -> str:
     """Capra's markdown renderer treats any line with an arrow glyph as an ASCII
     diagram and shows it as a code block, so prose says "to" instead of "→"."""
@@ -305,7 +312,7 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str
     for n, name in ((2, "scenario"), (3, "why"), (11, "talkTrack"), (12, "levelUp"), (13, "related")):
         if n not in sec:
             raise ExportError(f"README section {n} missing")
-    text = lambda md: no_arrows(name_refs(unwrap(md), names))
+    text = lambda md: no_arrows(plain_labels(name_refs(unwrap(md), names)))
     entry["devops"] = {"scenario": text(sec[2]), "why": text(sec[3]), "talkTrack": text(sec[11]),
                        "levelUp": text(sec[12]), "related": text(sec[13])}
     entry["relatedIds"] = [r for r in dict.fromkeys(re.findall(r"\bDC-[A-Z]+-\d{2}\b", sec[13])) if r != chip_id and r in names]
