@@ -10,7 +10,7 @@ Source: New
 | Pattern | Merge intervals / heap |
 | Track | Platform Engineering, Scheduling & Allocation (PLAT) |
 | Classic pattern | LeetCode 759 |
-| Premium | Yes (P). Free alternative: LeetCode 56 Merge Intervals. Merge everyone's shifts; the holes between merged blocks are the gaps. It is also Capra Handbook #61. |
+| Premium | Yes (P). Free alternative: LeetCode 56 Merge Intervals. Merge everyone's shifts; the holes between merged blocks are the gaps. It is also Handbook #61. |
 | Time box | 40 min |
 | Source | New |
 
