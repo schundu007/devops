@@ -11,7 +11,7 @@ For each chip folder this reads:
 
 Expected values are computed by running the case inputs through the SAME
 harness Capra sends to /api/run (built by the copilot repo's
-apps/camora/scripts/devops-harness.ts) with solution.py. Every other solution in
+apps/web/scripts/devops-harness.ts) with solution.py. Every other solution in
 capra.py must agree with them. A case that errors, or a size/time budget that is
 exceeded, fails the export.
 
@@ -45,8 +45,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 COPILOT = Path(os.environ.get("CAPRA_REPO", Path.home() / "copilot"))
-CAMORA = COPILOT / "apps" / "camora"
-OUT = CAMORA / "src" / "data" / "prep" / "devops"
+WEB = COPILOT / "apps" / "web"
+OUT = WEB / "src" / "data" / "prep" / "devops"
 TSX = COPILOT / "node_modules" / ".bin" / "tsx"
 MARK = "\x1eCASE"
 
@@ -236,7 +236,7 @@ def master_matrix() -> dict[str, dict[str, str]]:
 
 def run_harness(code: str, spec: dict[str, Any], cases: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], float]:
     payload = json.dumps({"code": code, "spec": spec, "cases": cases})
-    harness = subprocess.run([str(TSX), "scripts/devops-harness.ts"], cwd=CAMORA, input=payload,
+    harness = subprocess.run([str(TSX), "scripts/devops-harness.ts"], cwd=WEB, input=payload,
                              capture_output=True, text=True, check=True).stdout
     t0 = time.perf_counter()
     proc = subprocess.run([sys.executable, "-"], input=harness, capture_output=True, text=True, timeout=60)
