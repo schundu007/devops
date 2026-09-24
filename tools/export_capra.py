@@ -46,7 +46,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 COPILOT = Path(os.environ.get("CAPRA_REPO", Path.home() / "copilot"))
 CAMORA = COPILOT / "apps" / "camora"
-OUT = CAMORA / "src" / "data" / "capra" / "devops"
+OUT = CAMORA / "src" / "data" / "prep" / "devops"
 TSX = COPILOT / "node_modules" / ".bin" / "tsx"
 MARK = "\x1eCASE"
 
