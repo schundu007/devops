@@ -132,6 +132,12 @@ def name_refs(md: str, names: dict[str, str]) -> str:
     return CHIP_ID.sub(rep, md)
 
 
+def no_arrows(md: str) -> str:
+    """Capra's markdown renderer treats any line with an arrow glyph as an ASCII
+    diagram and shows it as a code block, so prose says "to" instead of "→"."""
+    return re.sub(r"\s*→\s*", " to ", md)
+
+
 def strip_ids(code: str) -> str:
     """Code shown in Capra's editor: drop chip IDs from docstrings and comments."""
     return CHIP_ID.sub("", code)
@@ -299,7 +305,7 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str
     for n, name in ((2, "scenario"), (3, "why"), (11, "talkTrack"), (12, "levelUp"), (13, "related")):
         if n not in sec:
             raise ExportError(f"README section {n} missing")
-    text = lambda md: name_refs(unwrap(md), names)
+    text = lambda md: no_arrows(name_refs(unwrap(md), names))
     entry["devops"] = {"scenario": text(sec[2]), "why": text(sec[3]), "talkTrack": text(sec[11]),
                        "levelUp": text(sec[12]), "related": text(sec[13])}
     entry["relatedIds"] = [r for r in dict.fromkeys(re.findall(r"\bDC-[A-Z]+-\d{2}\b", sec[13])) if r != chip_id and r in names]
@@ -353,11 +359,12 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str
     n_ex = len(examples)
     problem: dict[str, Any] = {
         "spec": spec,
-        "statement": name_refs(unwrap(sec[4]), names),
+        "statement": no_arrows(name_refs(unwrap(sec[4]), names)),
         "examples": [{"args": e["args"], "output": expected[i], "explanation": e.get("explanation", ""),
                       **({"why": e["why"]} if "why" in e else {})} for i, e in enumerate(examples)],
-        "constraints": bullets(sec[5]),
-        "hints": numbered(sec[8]),
+        # Capra shows each constraint as plain text in <code>, so drop markdown marks.
+        "constraints": [re.sub(r"\*\*|`", "", no_arrows(c)) for c in bullets(sec[5])],
+        "hints": [no_arrows(h) for h in numbered(sec[8])],
         "tests": [{"args": t["args"], "expected": expected[n_ex + i], **({"why": t["why"]} if "why" in t else {})}
                   for i, t in enumerate(tests)],
         "solutions": [{"name": s["name"], "description": s["description"], "code": {"python": strip_ids(code)},
