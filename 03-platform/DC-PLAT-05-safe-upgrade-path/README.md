@@ -176,4 +176,4 @@ policy and our conformance runs, and if windows had different risk, I'd switch t
 - **DC-PLAT-01 IaC Apply Order**: ordering changes when the order is forced by dependencies.
 - **DC-NET-04 Network Delay Time**: the weighted version (Dijkstra).
 - **DC-REL-02 Version Comparator**: deciding which version is newer in the first place.
-- Handbook: #97 Word Ladder uses the same BFS with bucketed neighbours (a different problem).
+- Word Ladder uses the same BFS with bucketed neighbors (a different problem).

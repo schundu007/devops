@@ -134,9 +134,14 @@ def name_refs(md: str, names: dict[str, str]) -> str:
 
 def plain_labels(md: str) -> str:
     """A bold line on its own renders as a big section heading in Capra; the
-    Handbook chips' mapping label is a lead-in, not a heading."""
-    return re.sub(r"^\*\*Mapping: DevOps term (?:→|to) handbook name\*\*$",
-                  "How the DevOps terms map to the Handbook's names:", md, flags=re.M)
+    classic chips' mapping label is a lead-in, not a heading. Cariara has no
+    Handbook any more (its problems are the Playground's Problems), so the
+    copy names the classic problem instead: "Handbook #36 Implement Trie" is
+    just "Implement Trie"."""
+    md = re.sub(r"^\*\*Mapping: DevOps term (?:→|to) handbook name\*\*$",
+                "How the DevOps terms map to the classic problem's names:", md, flags=re.M)
+    md = md.replace("| DevOps term | Handbook name |", "| DevOps term | Classic problem's name |")
+    return re.sub(r"\bHandbook #\d+ ", "", md)
 
 
 def no_arrows(md: str) -> str:

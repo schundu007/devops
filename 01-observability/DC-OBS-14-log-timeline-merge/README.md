@@ -235,7 +235,7 @@ ties, so I break ties by node ID to keep the output stable."
 - **DC-OBS-08 Live Latency Percentiles**: heaps over a stream.
 
 ## Review note `DevOps layer`
-- **Hints and solutions don't match.** Handbook hints 2 and 3 describe a min-heap, but the
+- **Hints and solutions don't match.** The classic problem's hints 2 and 3 describe a min-heap, but the
   stored solutions are "Compare All Lists" and "Divide and Conquer". Nothing is wrong with
   either one; all handbook cases pass on both. Suggested fix: add the heap solution
   (as in `solution_heap.py`) to the handbook entry, so the hints lead to a solution the reader can see.
