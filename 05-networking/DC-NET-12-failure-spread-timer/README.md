@@ -17,7 +17,7 @@ Source: Handbook #95 Rotting Oranges — `apps/camora/src/data/capra/top100/95.j
 ## 2. The Scenario `DevOps layer`
 It is a game day in the `dc-east-2` lab. You lay out three racks as a grid: each slot is empty,
 a healthy node, or a node you have just failed. The chaos rule is simple. Every minute, a
-failed node overloads its direct neighbours (up, down, left, right) and they fail too. The
+failed node overloads its direct neighbors (up, down, left, right) and they fail too. The
 exercise lead asks two questions: "How many minutes until every node is down?" and "Is any
 segment safe because empty slots or firewall gaps cut it off?"
 
@@ -33,7 +33,7 @@ segment safe because empty slots or firewall gaps cut it off?"
 
 ## 3. Why This Is DevOps `DevOps layer`
 **Production reality:** Failures spread through dependencies. An overloaded node sheds its
-traffic onto its neighbours, a retry storm hits the next tier, and a worm moves from host to
+traffic onto its neighbors, a retry storm hits the next tier, and a worm moves from host to
 host. When several things fail at once, they all spread at the same time. The question "how
 long until everything is affected?" is the distance from the nearest failure to the farthest
 healthy node. That is multi-source BFS. The answer tells you how much time you have to react,
@@ -187,7 +187,7 @@ isolated column returns `-1`, and 6 minutes once the gap is closed), and 300 ran
 against a minute-by-minute simulation.
 
 ## 11. Interview Talk Track `DevOps layer`
-"This models a cascading failure. Every failed node spreads to its neighbours each minute,
+"This models a cascading failure. Every failed node spreads to its neighbors each minute,
 and all failures spread at the same time. So I don't run a BFS from each failure; I put
 every failed node in the queue at minute zero and run one BFS, level by level. Each level is
 one minute. I count the healthy nodes up front and decrement as each one fails, so at the end,

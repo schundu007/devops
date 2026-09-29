@@ -103,7 +103,7 @@ make try CHIP=05-networking/DC-NET-08-find-the-loop-link
 
 **Brute force:** Remove each link in turn (from the last one backwards), then BFS to check
 whether the rest is a connected tree. That is O(n) checks of O(n) each, so O(n²). Fine for
-1,000 switches, but too slow for a 100,000-link data-centre fabric.
+1,000 switches, but too slow for a 100,000-link data-center fabric.
 
 **Optimal code:** [`solution.py`](solution.py)
 

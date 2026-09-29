@@ -152,5 +152,5 @@ divided by nights, which ignores both the order and the biggest file. In real pl
 
 ## 13. Related Chips
 - **DC-CAP-01 Backlog Drain Rate**: binary search on a rate, where partitions are independent.
-- **DC-CAP-03 Balanced Shard Split**: the same greedy check, but minimising the busiest worker.
+- **DC-CAP-03 Balanced Shard Split**: the same greedy check, but minimizing the busiest worker.
 - **DC-PLAT-03 Minimum CI Runners**: sizing capacity from job overlap instead of volume.

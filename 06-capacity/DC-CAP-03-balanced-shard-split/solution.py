@@ -3,7 +3,7 @@ from __future__ import annotations
 
 
 def min_busiest_worker_load(loads: list[int], workers: int) -> int:
-    """Split ordered shard loads into at most `workers` contiguous runs; minimise the largest run."""
+    """Split ordered shard loads into at most `workers` contiguous runs; minimize the largest run."""
 
     def fits(limit: int) -> bool:
         # Greedy: fill each worker up to `limit`, then start the next one.

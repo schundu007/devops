@@ -195,4 +195,4 @@ permissions and atomic updates. Kubernetes swaps ConfigMap contents with an atom
 ## 13. Related Chips
 - **DC-NET-05 Route Prefix Trie**: the same trie, keyed by characters or path segments, for routing.
 - **DC-SEC-11 Redundant Prefix Grant Cleaner**: prefix relationships between storage paths.
-- **DC-SEC-01 Path Traversal Guard**: normalising paths before walking the tree.
+- **DC-SEC-01 Path Traversal Guard**: normalizing paths before walking the tree.

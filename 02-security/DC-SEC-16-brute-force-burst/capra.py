@@ -80,3 +80,175 @@ WAYS_TO_SOLVE = [
     {"name": "Sort + sliding window of 3", "idea": "Sort each account's minutes; check consecutive triples.",
      "time": "O(n log n)", "space": "O(n)", "use": "Real auth logs."},
 ]
+
+VARIANT_TITLE = "Three uses in an hour"
+VARIANT_APPROACH = "Group, sort, slide 3 · O(n log n) · O(n)"
+
+_THR_FAST = '''from collections import defaultdict
+
+
+def threshold_alerts(events: list[list], k: int, window: int) -> list[str]:
+    by_name: dict[str, list[int]] = defaultdict(list)
+    for name, t in events:
+        by_name[name].append(t)
+    out = []
+    for name, ts in by_name.items():
+        ts.sort()
+        if any(ts[i + k - 1] - ts[i] <= window for i in range(len(ts) - k + 1)):
+            out.append(name)
+    return sorted(out)
+'''
+
+_THR_SLOW = '''def threshold_alerts(events: list[list], k: int, window: int) -> list[str]:
+    alerted = set()
+    for name, t in events:
+        if name in alerted:
+            continue
+        inside = sum(1 for n2, t2 in events if n2 == name and t <= t2 <= t + window)
+        if inside >= k:
+            alerted.add(name)
+    return sorted(alerted)
+'''
+
+_FIRST_FAST = '''from collections import defaultdict, deque
+
+
+def first_alerts(events: list[list], k: int, window: int) -> list[list]:
+    recent: dict[str, deque] = defaultdict(deque)
+    fired = set()
+    out = []
+    for name, t in events:
+        if name in fired:
+            continue
+        q = recent[name]
+        q.append(t)
+        while q[0] < t - window:
+            q.popleft()
+        if len(q) >= k:
+            fired.add(name)
+            out.append([name, t])
+            del recent[name]
+    return out
+'''
+
+_FIRST_SLOW = '''def first_alerts(events: list[list], k: int, window: int) -> list[list]:
+    fired = set()
+    out = []
+    for i, (name, t) in enumerate(events):
+        if name in fired:
+            continue
+        count = sum(1 for n2, t2 in events[:i + 1] if n2 == name and t2 >= t - window)
+        if count >= k:
+            fired.add(name)
+            out.append([name, t])
+    return out
+'''
+
+
+def _th(events, k, window, t, d):
+    return {"args": {"events": [list(e) for e in events], "k": k, "window": window}, "why": {"t": t, "d": d}}
+
+
+def _big_events(seed, n, sort, accounts, span):
+    rng = random.Random(seed)
+    ev = [["acct-%d" % rng.randint(0, accounts - 1), rng.randint(0, span)] for _ in range(n)]
+    return sorted(ev, key=lambda e: e[1]) if sort else ev
+
+
+VARIANTS = [
+    {
+        "key": "k-in-window",
+        "title": "Any threshold, any window",
+        "approach": "Group, sort, slide a window of k · O(n log n) · O(n)",
+        "spec": {"kind": "fn", "fn": "threshold_alerts", "params": ["events", "k", "window"], "cmp": "exact"},
+        "statement": (
+            "Detection rules differ per signal: 5 failed SSH logins in 60 seconds, 20 failed API keys in 10 "
+            "minutes. Generalize the key-card alert.\n\n"
+            "`events[i] = [name, t]` is a failure for account `name` at second `t` (unsorted, duplicates "
+            "allowed). An account alerts when some `k` of its events fit in a span of at most `window` "
+            "seconds (last - first ≤ window).\n\n"
+            "Return the alerted account names sorted ascending."
+        ),
+        "examples": [
+            {"args": {"events": [["root", 0], ["root", 30], ["root", 61], ["root", 90]], "k": 3, "window": 60},
+             "explanation": "30, 61 and 90 span 60 seconds, so root alerts even though 0, 30 and 61 do not fit.",
+             "why": {"t": "Later window", "d": "The burst need not start at the first event."}},
+            {"args": {"events": [["svc", 5], ["svc", 5]], "k": 3, "window": 1000},
+             "explanation": "Only two events: k = 3 is never reached.",
+             "why": {"t": "Too few events", "d": "Fewer than k events can never alert."}},
+        ],
+        "constraints": ["0 ≤ events.length ≤ 5000", "0 ≤ t ≤ 10⁹", "1 ≤ k ≤ 1000", "0 ≤ window ≤ 10⁹"],
+        "hints": [
+            "Group by account and sort each account's times, as in the main problem.",
+            "k events fit in the window exactly when some k consecutive sorted times do: check ts[i+k-1] - ts[i].",
+        ],
+        "tests": [
+            _th([], 3, 60, "Empty", "No events: no alerts."),
+            _th([["a", 10]], 1, 0, "k = 1", "Any single event alerts."),
+            _th([["a", 7], ["a", 7], ["a", 7]], 3, 0, "Zero window, duplicates", "Three events in the same second fit a 0-second window."),
+            _th([["a", 0], ["a", 60], ["b", 0], ["b", 61]], 2, 60, "Window edge", "Exactly `window` apart counts; one second more does not."),
+            _th([["z", 3], ["m", 1], ["z", 1], ["m", 2], ["q", 100]], 2, 5, "Sorted output", "Several alerts come back in name order."),
+            _th([["x", 900], ["x", 100], ["x", 500], ["x", 300], ["x", 700]], 3, 399, "Unsorted, spread out", "Every triple spans at least 400 seconds."),
+            _th(_big_events(1604, 3000, False, 60, 30000), 5, 900, "Large input", "3,000 failures across 60 accounts, 5 in 15 minutes."),
+        ],
+        "solutions": [
+            {"name": "Group, sort, window of k (Optimal)",
+             "description": "Sort each account's times once; the account alerts if any k consecutive times span at most window.",
+             "time": "O(n log n)", "space": "O(n)",
+             "keyPoints": ["Consecutive sorted times are the tightest k-sets", "One pass per account after sorting", "Return names sorted"],
+             "code": _THR_FAST},
+            {"name": "Count forward from every event", "slow": True,
+             "description": "For each event, count the same account's events in [t, t + window] by scanning the whole log.",
+             "time": "O(n²)", "space": "O(n)",
+             "keyPoints": ["No sorting needed", "Rescans the log for every event"],
+             "code": _THR_SLOW},
+        ],
+        "starter": "def threshold_alerts(events: list[list], k: int, window: int) -> list[str]:\n    pass\n",
+    },
+    {
+        "key": "first-alert-stream",
+        "title": "Alert as events stream in",
+        "approach": "Per-account deque of recent times · O(n) · O(n)",
+        "spec": {"kind": "fn", "fn": "first_alerts", "params": ["events", "k", "window"], "cmp": "exact"},
+        "statement": (
+            "In production the detector sees failures live, in time order, and must page **the moment** an "
+            "account crosses the line. `events[i] = [name, t]` arrive with non-decreasing `t`.\n\n"
+            "When an event gives its account `k` events within the last `window` seconds (times in "
+            "`[t - window, t]`, this event included), the account fires once, at time `t`. Later events for "
+            "an account that already fired are ignored.\n\n"
+            "Return `[name, t]` for each firing, in the order they fire."
+        ),
+        "examples": [
+            {"args": {"events": [["bob", 0], ["amy", 10], ["bob", 20], ["amy", 30], ["bob", 40], ["amy", 41]], "k": 3, "window": 40},
+             "explanation": "bob's third event at 40 has 0 and 20 inside [0, 40]: fire at 40. amy's third at 41 finds 10 and 30 inside [1, 41]: fire at 41.",
+             "why": {"t": "Two accounts", "d": "Each account fires on the event that completes its burst."}},
+        ],
+        "constraints": ["0 ≤ events.length ≤ 5000", "t non-decreasing, 0 ≤ t ≤ 10⁹", "1 ≤ k ≤ 1000", "0 ≤ window ≤ 10⁹"],
+        "hints": [
+            "Keep a queue of each account's recent times; drop times older than t - window before counting.",
+            "Once an account fires, forget its queue and skip its later events.",
+        ],
+        "tests": [
+            _th([], 2, 10, "Empty", "No events: no firings."),
+            _th([["a", 0]], 1, 0, "k = 1", "The first event fires immediately."),
+            _th([["a", 0], ["a", 11], ["a", 22]], 2, 10, "Never close enough", "Every gap is 11 seconds, above a 10-second window."),
+            _th([["a", 0], ["a", 10]], 2, 10, "Window edge", "An event exactly `window` earlier is still inside."),
+            _th([["a", 5], ["b", 5], ["a", 5], ["b", 5], ["a", 5]], 2, 0, "Ties in one second", "Firing order follows input order."),
+            _th([["a", 0], ["a", 1], ["a", 2], ["a", 3]], 2, 5, "Fires once", "Later events for a fired account are ignored."),
+            _th(_big_events(2034, 4000, True, 80, 40000), 4, 600, "Large input", "4,000 time-ordered failures across 80 accounts, 4 in 10 minutes."),
+        ],
+        "solutions": [
+            {"name": "Per-account deque (Optimal)",
+             "description": "Append each event's time to its account's deque, pop times older than t - window, and fire when the deque holds k.",
+             "time": "O(n)", "space": "O(n)",
+             "keyPoints": ["Each time is pushed and popped at most once", "Time order means no sorting", "Fire once, then drop the account's state"],
+             "code": _FIRST_FAST},
+            {"name": "Rescan the history", "slow": True,
+             "description": "For every event, count the account's earlier events inside the window by scanning everything seen so far.",
+             "time": "O(n²)", "space": "O(1) extra",
+             "keyPoints": ["Stateless and simple", "Quadratic in the log length"],
+             "code": _FIRST_SLOW},
+        ],
+        "starter": "def first_alerts(events: list[list], k: int, window: int) -> list[list]:\n    pass\n",
+    },
+]

@@ -91,3 +91,240 @@ WAYS_TO_SOLVE = [
     {"name": "Weighted union-find", "idea": "Store each unit's ratio to its root; x/y = w(x)/w(y) when roots match.",
      "time": "O((E + Q) α(V))", "space": "O(V)", "use": "Large graphs with many queries."},
 ]
+
+VARIANT_TITLE = "Ratio queries"
+VARIANT_APPROACH = "Weighted graph + BFS per query · O(Q · (V + E)) · O(V + E)"
+
+
+def _cfacts():
+    names = [f"n{i}" for i in range(50)]
+    facts = [[names[i], names[i + 1]] for i in range(49)]
+    values = [2.0 if i % 2 else 0.5 for i in range(49)]
+    facts += [["n0", "n10"], ["n5", "n45"], ["n0", "n49"]]
+    values += [1.0, 1.0, 4.0]
+    return {"facts": facts, "values": values}
+
+
+def _qfacts():
+    names = [f"u{i}" for i in range(40)]
+    facts = [[names[i], names[i + 1]] for i in range(39)]
+    values = [2.0 if i % 3 else 0.5 for i in range(39)]
+    amounts = [[names[i], float(i % 5 + 1)] for i in range(0, 40, 3)]
+    return {"facts": facts, "values": values, "base": "u20", "amounts": amounts}
+
+
+VARIANTS = [
+    {
+        "key": "first-contradiction",
+        "title": "Contradicting capacity facts",
+        "approach": "Weighted union-find · O(E · α(V)) · O(V)",
+        "spec": {"kind": "fn", "fn": "first_contradiction", "params": ["facts", "values"], "cmp": "exact"},
+        "statement": (
+            "A capacity sheet is assembled from many teams. Fact `i` says one `facts[i][0]` holds `values[i]` "
+            "of `facts[i][1]`, and like the main problem it also holds backwards with `1/v`.\n\n"
+            "This time the facts are **not** guaranteed to agree. Read them in order and return the index of the "
+            "**first** fact whose ratio disagrees with what the earlier facts already imply. Two ratios agree when "
+            "they differ by at most `1e-6 · v` (relative).\n\n"
+            "- A fact that links units not yet connected can never contradict.\n"
+            "- `(a, a, v)` contradicts unless `v` is 1.\n\n"
+            "Return `-1` if every fact is consistent."
+        ),
+        "examples": [
+            {"args": {"facts": [["cluster", "node"], ["node", "pod"], ["cluster", "pod"]], "values": [20.0, 30.0, 500.0]},
+             "explanation": "The first two facts imply 600 pods per cluster, so the third fact (500) is the first contradiction.",
+             "why": {"t": "Closing a cycle", "d": "A fact joining two already-connected units is checked against the implied ratio."}},
+            {"args": {"facts": [["a", "b"], ["b", "c"], ["c", "a"]], "values": [2.0, 3.0, 1.0 / 6.0]},
+             "explanation": "a = 2b, b = 3c, so c = a/6: the third fact agrees.",
+             "why": {"t": "Consistent cycle", "d": "A cycle whose product is 1 contradicts nothing."}},
+        ],
+        "constraints": ["0 ≤ len(facts) ≤ 2000, len(values) == len(facts)", "0 < values[i] ≤ 10^6",
+                        "Names are non-empty strings of up to 30 characters"],
+        "hints": [
+            "Give every unit a weight relative to a group root: `w[x]` = size of x divided by size of its root.",
+            "Two units in the same group have ratio `w[a] / w[b]`. Compare that with the fact's value.",
+            "When the fact joins two groups, hang one root under the other with the weight that makes the new fact true.",
+        ],
+        "tests": [
+            {"args": {"facts": [], "values": []}, "why": {"t": "No facts", "d": "Nothing to contradict: -1."}},
+            {"args": {"facts": [["x", "x"]], "values": [2.0]}, "why": {"t": "Self fact", "d": "A unit holding 2 of itself is contradictory at once."}},
+            {"args": {"facts": [["x", "x"], ["x", "y"]], "values": [1.0, 3.0]}, "why": {"t": "Self fact of 1", "d": "One x holds one x: consistent."}},
+            {"args": {"facts": [["a", "b"], ["a", "b"], ["b", "a"]], "values": [4.0, 4.0, 0.5]},
+             "why": {"t": "Duplicates", "d": "A repeated fact agrees; the reversed one with the wrong inverse does not."}},
+            {"args": {"facts": [["a", "b"], ["c", "d"], ["b", "c"], ["a", "d"]], "values": [2.0, 3.0, 5.0, 30.0]},
+             "why": {"t": "Groups joined later", "d": "Two groups merge, then a fact across them is consistent."}},
+            {"args": {"facts": [["a", "b"], ["c", "d"], ["b", "c"], ["d", "a"]], "values": [2.0, 3.0, 5.0, 30.0]},
+             "why": {"t": "Wrong direction", "d": "The same number read the wrong way round contradicts."}},
+            {"args": _cfacts(), "why": {"t": "Large input", "d": "A 50-unit chain plus shortcut facts; only the last shortcut disagrees."}},
+        ],
+        "solutions": [
+            {"name": "Weighted union-find (Optimal)",
+             "description": "Each unit stores its parent and its size relative to that parent. find() compresses paths while multiplying weights. A fact inside one group is checked; a fact across groups links the two roots.",
+             "time": "O(E · α(V))", "space": "O(V)",
+             "keyPoints": ["w[x] is x's size over its root's size", "Same root: compare w[a] / w[b] with v", "Different roots: set w[ra] = v · w[b] / w[a]"],
+             "code": '''def first_contradiction(facts, values):
+    parent, w = {}, {}
+
+    def find(x):
+        if parent[x] == x:
+            return x
+        root = find(parent[x])
+        w[x] *= w[parent[x]]
+        parent[x] = root
+        return root
+
+    for i, ((a, b), v) in enumerate(zip(facts, values)):
+        for u in (a, b):
+            if u not in parent:
+                parent[u], w[u] = u, 1.0
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            if abs(w[a] / w[b] - v) > 1e-6 * v:
+                return i
+        else:
+            parent[ra] = rb
+            w[ra] = v * w[b] / w[a]
+    return -1
+'''},
+            {"name": "BFS before every fact", "slow": True,
+             "description": "Keep the graph of accepted facts. For each new fact, BFS from a; if b is reached, compare the product along the path with the fact.",
+             "time": "O(E · (V + E))", "space": "O(V + E)",
+             "keyPoints": ["Reuses the main problem's BFS", "Every fact pays for a full walk"],
+             "code": '''from collections import defaultdict, deque
+
+
+def first_contradiction(facts, values):
+    graph = defaultdict(list)
+    for i, ((a, b), v) in enumerate(zip(facts, values)):
+        seen, q, got = {a}, deque([(a, 1.0)]), None
+        while q:
+            node, acc = q.popleft()
+            if node == b:
+                got = acc
+                break
+            for nxt, wt in graph[node]:
+                if nxt not in seen:
+                    seen.add(nxt)
+                    q.append((nxt, acc * wt))
+        if got is not None and abs(got - v) > 1e-6 * v:
+            return i
+        graph[a].append((b, v))
+        graph[b].append((a, 1.0 / v))
+    return -1
+'''},
+        ],
+        "starter": '''def first_contradiction(facts: list[list[str]], values: list[float]) -> int:
+    pass
+''',
+    },
+    {
+        "key": "quota-in-base-units",
+        "title": "Quota in base units",
+        "approach": "One BFS from the base unit · O(V + E + A) · O(V + E)",
+        "spec": {"kind": "fn", "fn": "total_in_base", "params": ["facts", "values", "base", "amounts"], "cmp": "float"},
+        "statement": (
+            "A team's quota request lists amounts in mixed units: `amounts[i] = [unit, qty]`, such as 2 clusters, "
+            "3 nodes and 5 vCPUs. The facts are the same as the main problem: one `facts[i][0]` holds `values[i]` "
+            "of `facts[i][1]`.\n\n"
+            "Return the total request expressed in `base` units: the sum of `qty` times how many `base` one `unit` holds.\n\n"
+            "- A unit equal to `base` converts at 1, even when it appears in no fact.\n"
+            "- If any unit cannot be converted to `base`, return `-1.0`.\n"
+            "- No amounts gives `0.0`."
+        ),
+        "examples": [
+            {"args": {"facts": [["cluster", "node"], ["node", "vcpu"]], "values": [10.0, 8.0], "base": "vcpu",
+                      "amounts": [["cluster", 2.0], ["node", 3.0], ["vcpu", 5.0]]},
+             "explanation": "2 clusters = 160 vCPUs, 3 nodes = 24 vCPUs, plus 5: 189.",
+             "why": {"t": "Mixed units", "d": "Each amount is converted along its own chain, then summed."}},
+            {"args": {"facts": [["node", "vcpu"]], "values": [8.0], "base": "node", "amounts": [["vcpu", 4.0], ["gpu", 1.0]]},
+             "explanation": "4 vCPUs are half a node, but gpu is unknown, so the whole request is -1.",
+             "why": {"t": "Unknown unit", "d": "One unconvertible amount spoils the total."}},
+        ],
+        "constraints": ["0 ≤ len(facts) ≤ 2000", "0 ≤ len(amounts) ≤ 2000", "0 < values[i] ≤ 10^6, 0 ≤ qty ≤ 10^6",
+                        "The facts never contradict each other"],
+        "hints": [
+            "Every amount is converted to the same unit, so one walk from `base` answers them all.",
+            "BFS from base computing `g[u]` = how many u one base holds; then one u holds `1 / g[u]` base.",
+        ],
+        "tests": [
+            {"args": {"facts": [], "values": [], "base": "vcpu", "amounts": []}, "why": {"t": "Empty request", "d": "No amounts: 0.0."}},
+            {"args": {"facts": [], "values": [], "base": "vcpu", "amounts": [["vcpu", 7.0]]},
+             "why": {"t": "Base only", "d": "The base unit converts at 1 even with no facts."}},
+            {"args": {"facts": [["a", "b"]], "values": [2.0], "base": "b", "amounts": [["c", 1.0]]},
+             "why": {"t": "Unknown unit", "d": "c appears in no fact: -1.0."}},
+            {"args": {"facts": [["a", "b"], ["c", "d"]], "values": [2.0, 3.0], "base": "a", "amounts": [["b", 4.0], ["d", 1.0]]},
+             "why": {"t": "Other group", "d": "d is known but not connected to a: -1.0."}},
+            {"args": {"facts": [["gb", "mb"], ["tb", "gb"]], "values": [1024.0, 1024.0], "base": "gb",
+                      "amounts": [["tb", 2.0], ["mb", 512.0], ["mb", 512.0], ["gb", 0.0]]},
+             "why": {"t": "Duplicates and zero", "d": "Repeated units add up; a zero quantity adds nothing."}},
+            {"args": {"facts": [["region", "az"], ["az", "node"]], "values": [3.0, 50.0], "base": "region",
+                      "amounts": [["node", 75.0], ["az", 1.5]]},
+             "why": {"t": "Fractions of the base", "d": "Smaller units convert to fractions of a region."}},
+            {"args": _qfacts(), "why": {"t": "Large input", "d": "A 40-unit chain with 14 amounts, base in the middle."}},
+        ],
+        "solutions": [
+            {"name": "One BFS from the base (Optimal)",
+             "description": "Walk the ratio graph once from base, recording how many of each unit one base holds. Each amount then converts with one lookup.",
+             "time": "O(V + E + A)", "space": "O(V + E)",
+             "keyPoints": ["All amounts share the same destination unit", "One base holds g[u] of u, so one u is 1 / g[u] base", "A missing g[u] means -1.0"],
+             "code": '''from collections import defaultdict, deque
+
+
+def total_in_base(facts, values, base, amounts):
+    graph = defaultdict(list)
+    for (a, b), v in zip(facts, values):
+        graph[a].append((b, v))
+        graph[b].append((a, 1.0 / v))
+    g = {base: 1.0}
+    q = deque([base])
+    while q:
+        node = q.popleft()
+        for nxt, wt in graph[node]:
+            if nxt not in g:
+                g[nxt] = g[node] * wt
+                q.append(nxt)
+    total = 0.0
+    for unit, qty in amounts:
+        if unit not in g:
+            return -1.0
+        total += qty / g[unit]
+    return total
+'''},
+            {"name": "BFS per amount", "slow": True,
+             "description": "Answer each amount as its own ratio query from unit to base, exactly as the main problem does.",
+             "time": "O(A · (V + E))", "space": "O(V + E)",
+             "keyPoints": ["Straight reuse of calc_ratios", "Repeats the same walk for every amount"],
+             "code": '''from collections import defaultdict, deque
+
+
+def total_in_base(facts, values, base, amounts):
+    graph = defaultdict(list)
+    for (a, b), v in zip(facts, values):
+        graph[a].append((b, v))
+        graph[b].append((a, 1.0 / v))
+
+    def ratio(x, y):
+        seen, q = {x}, deque([(x, 1.0)])
+        while q:
+            node, acc = q.popleft()
+            if node == y:
+                return acc
+            for nxt, wt in graph[node]:
+                if nxt not in seen:
+                    seen.add(nxt)
+                    q.append((nxt, acc * wt))
+        return None
+
+    total = 0.0
+    for unit, qty in amounts:
+        r = ratio(unit, base)
+        if r is None:
+            return -1.0
+        total += qty * r
+    return total
+'''},
+        ],
+        "starter": '''def total_in_base(facts: list[list[str]], values: list[float], base: str, amounts: list[list]) -> float:
+    pass
+''',
+    },
+]

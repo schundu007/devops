@@ -24,7 +24,7 @@ is always higher than the rest. Replay the request log and find which backends a
 ## 3. Why This Is DevOps
 **Production reality:** Plain round robin assumes every request costs the same. Once some
 requests are long, the backend that happens to get them is busy on its next turn, and the
-skip-to-next-idle rule shifts its traffic onto its neighbours in a fixed pattern. Replaying real
+skip-to-next-idle rule shifts its traffic onto its neighbors in a fixed pattern. Replaying real
 arrival times and durations through the exact balancing rule shows which backends run hot, and
 whether you are dropping requests, before you add capacity or change the algorithm.
 
@@ -37,7 +37,7 @@ AWS ALB round-robin routing.
 queue a request briefly instead of dropping it immediately. They also offer
 `least_conn` / `leastconn` / least-request modes precisely because round robin behaves badly with
 uneven request costs. The "skip busy, drop if all busy" rule here is a simplified, exact model of
-that behaviour.
+that behavior.
 
 **What breaks if you get it wrong:** You scale out because "the pool is overloaded", while the
 real issue is one hot backend. Or you miss that some requests are dropped with 503s even though

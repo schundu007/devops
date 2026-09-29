@@ -146,7 +146,7 @@ trusting its result."
    the range by 8 instead of 2. That is about log₈ n rounds of wall-clock time.
 3. **"The test is flaky: it fails 5% of the time on good commits."** One false "bad" sends the
    search into the wrong half for good. Rerun each result a few times and take the majority, or
-   rerun whenever a result disagrees with its neighbours. The goal is to make each answer
+   rerun whenever a result disagrees with its neighbors. The goal is to make each answer
    reliable before you narrow the range.
 
 ## 13. Related Chips

@@ -141,7 +141,7 @@ class SampleTracker:
 
 **Complexity**
 - Time: `update` is O(log n), for two heap pushes. `maximum` and `minimum` are O(log n)
-  amortised, because each pushed pair is popped at most once. `current` is O(1).
+  amortized, because each pushed pair is popped at most once. `current` is O(1).
 - Space: O(number of updates), because stale pairs stay in the heaps until they surface.
 
 ## 10. Tests
@@ -156,7 +156,7 @@ truth is a dict from timestamp to its latest value, plus the newest timestamp se
 makes `current` O(1). For the max and min I keep two heaps of value and timestamp pairs.
 The trick is lazy deletion: on a correction I don't search the heap. I push the new pair and
 leave the old one. When I read the max, I pop any top whose value no longer matches the dict,
-because it's stale, and each pair is popped at most once, so it's O(log n) amortised. The
+because it's stale, and each pair is popped at most once, so it's O(log n) amortized. The
 cost is memory for stale pairs. If corrections are frequent, I'd switch to a sorted
 container with real deletes, or rebuild the heaps when stale entries pass half the size.
 Real TSDBs avoid most of this by capping how late a sample may arrive."

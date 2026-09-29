@@ -91,11 +91,11 @@ make try CHIP=05-networking/DC-NET-06-spof-links
 
 ## 9. Solution
 **Approach**
-1. Build an adjacency list that stores `(neighbour, link id)`.
+1. Build an adjacency list that stores `(neighbor, link id)`.
 2. Run DFS from every unvisited device, giving each device a discovery time `disc` and setting `low = disc`.
 3. Seeing an already-visited device through a link other than the one you entered by is a back link: `low[u] = min(low[u], disc[v])`.
 4. When a child finishes, pass its `low` up to its parent. If `low[child] > disc[parent]`, nothing under the child can get around the parent link, so it is a bridge.
-5. Use an explicit stack of `(device, entry link, neighbour iterator)` instead of recursion, so
+5. Use an explicit stack of `(device, entry link, neighbor iterator)` instead of recursion, so
    deep networks don't overflow the call stack.
 
 **Brute force:** Remove each link in turn and count the connected components with BFS: O(E · (V + E)).
@@ -118,9 +118,9 @@ def critical_links(n, links):
         timer += 1
         stack = [(root, -1, iter(adj[root]))]          # no recursion
         while stack:
-            u, parent_link, neighbours = stack[-1]
+            u, parent_link, neighbors = stack[-1]
             descended = False
-            for v, eid in neighbours:
+            for v, eid in neighbors:
                 if eid == parent_link:
                     continue                            # skip only the link we came in on
                 if disc[v] == -1:                       # tree link: go deeper

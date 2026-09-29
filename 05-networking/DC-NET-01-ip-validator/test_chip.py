@@ -68,7 +68,7 @@ def test_empty_and_single_characters():
 def test_allow_list_input_filter():
     # Production flavour: an ingress reads X-Forwarded-For and only lets
     # well-formed addresses reach the allow-list check. The octal-looking and
-    # decimal-integer forms must be rejected, not "normalised".
+    # decimal-integer forms must be rejected, not "normalized".
     header = "10.0.3.17, 0177.0.0.1, 2130706433, 192.0.2.44, 10.0.0.1:8080"
     kept = [a.strip() for a in header.split(",") if classify(a.strip()) != "Neither"]
     assert kept == ["10.0.3.17", "192.0.2.44"]

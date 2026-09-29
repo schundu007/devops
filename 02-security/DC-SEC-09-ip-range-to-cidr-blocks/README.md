@@ -10,7 +10,7 @@ Source: New
 | Pattern | Bit manipulation |
 | Track | Cloud Security & IAM (SEC) |
 | Classic pattern | LeetCode 751 |
-| Premium | Yes (P). Free alternative: LeetCode 231 Power of Two (Easy), which practises the same lowest-set-bit trick (`x & -x`, `x & (x - 1)`). |
+| Premium | Yes (P). Free alternative: LeetCode 231 Power of Two (Easy), which practices the same lowest-set-bit trick (`x & -x`, `x & (x - 1)`). |
 | Time box | 25 min |
 | Source | New |
 

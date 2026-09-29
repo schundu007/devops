@@ -95,3 +95,253 @@ WAYS_TO_SOLVE = [
     {"name": "Sorted disjoint ranges", "idea": "Binary search a sorted list of merged, half-open ranges.",
      "time": "O(log n) query", "space": "O(ranges)", "use": "IP allow-lists and any large space."},
 ]
+
+VARIANT_TITLE = "Allow-list ranges"
+VARIANT_APPROACH = "Sorted disjoint ranges + binary search · O(log n) covers · O(n)"
+
+
+def cops(*calls):
+    return {"ops": ["AllowCount"] + [c[0] for c in calls], "vals": [[]] + [list(c[1:]) for c in calls]}
+
+
+def pops(*calls):
+    return {"ops": ["PortAllocator"] + [c[0] for c in calls], "vals": [[]] + [list(c[1:]) for c in calls]}
+
+
+def _count_large():
+    rng = random.Random(2276)
+    calls = []
+    for _ in range(300):
+        lo = rng.randint(0, 3000)
+        calls.append(("add", lo, lo + rng.randint(1, 80)))
+        if rng.random() < 0.4:
+            calls.append(("count",))
+    return cops(*calls)
+
+
+def _port_large():
+    rng = random.Random(49152)
+    calls = []
+    for _ in range(250):
+        lo = rng.randint(0, 1500)
+        calls.append((rng.choice(["reserve", "reserve", "release"]), lo, lo + rng.randint(1, 50)))
+        if rng.random() < 0.5:
+            calls.append(("first_free", rng.randint(0, 1600)))
+    return pops(*calls)
+
+
+RANGES_CORE = '''    def __init__(self):
+        self.starts = []
+        self.ends = []
+
+    def _add(self, lo, hi):
+        i = bisect_left(self.ends, lo)
+        j = bisect_right(self.starts, hi)
+        if i < j:
+            lo = min(lo, self.starts[i])
+            hi = max(hi, self.ends[j - 1])
+        self.starts[i:j] = [lo]
+        self.ends[i:j] = [hi]
+'''
+
+VARIANTS = [
+    {
+        "key": "count-allowed",
+        "title": "How many addresses are allowed",
+        "approach": "Sorted disjoint ranges + running total · O(log n + k) add, O(1) count · O(n)",
+        "spec": {"kind": "design", "fn": "AllowCount", "params": []},
+        "statement": (
+            "A security review wants the blast radius of an allow-list: how many addresses it opens up in total, "
+            "after every change.\n\n"
+            "Implement `AllowCount`:\n\n"
+            "- `add(lo, hi)`: allow every value in the half-open range `[lo, hi)`. Ranges may overlap earlier ones.\n"
+            "- `count()`: how many distinct values are allowed right now.\n\n"
+            "`count` is called often, so it should not walk every range."
+        ),
+        "examples": [
+            {"args": cops(("add", 10, 20), ("count",), ("add", 15, 30), ("count",), ("add", 0, 5), ("count",)),
+             "explanation": "10 values, then the overlap 15-19 is counted once (20 values), then 5 more.",
+             "why": {"t": "Overlap counted once", "d": "Merging must not double-count shared values."}},
+        ],
+        "constraints": ["0 ≤ lo < hi ≤ 2³²", "At most 2000 calls"],
+        "hints": [
+            "Keep the ranges merged, sorted and non-touching, exactly as in the main problem.",
+            "Keep a running total. When add replaces a block of ranges with one, subtract their lengths and add the new one.",
+            "The block to replace is found with two binary searches; each range is merged away at most once.",
+        ],
+        "tests": [
+            {"args": cops(("count",)), "why": {"t": "Empty", "d": "Nothing allowed yet."}},
+            {"args": cops(("add", 7, 8), ("count",)), "why": {"t": "Single value", "d": "A one-value range counts 1."}},
+            {"args": cops(("add", 0, 10), ("add", 10, 20), ("count",)), "why": {"t": "Touching ranges", "d": "Adjacent ranges share no values: 20."}},
+            {"args": cops(("add", 0, 100), ("add", 20, 30), ("add", 0, 100), ("count",)), "why": {"t": "Duplicate and nested", "d": "Adding a covered range changes nothing."}},
+            {"args": cops(("add", 0, 5), ("add", 10, 15), ("add", 20, 25), ("add", 3, 22), ("count",)), "why": {"t": "Bridge several", "d": "One add swallows three ranges and the gaps."}},
+            {"args": cops(("add", 0, 4294967296), ("count",)), "why": {"t": "All of IPv4", "d": "2^32 values: a set of values is hopeless here."}},
+            {"args": _count_large(), "why": {"t": "Large input", "d": "300 random adds with interleaved counts."}},
+        ],
+        "solutions": [
+            {"name": "Merged ranges + running total (Optimal)",
+             "description": "Maintain sorted disjoint ranges. On add, find the block that overlaps or touches, subtract its total length, replace it with the merged range and add that length.",
+             "time": "O(log n + k) add, O(1) count", "space": "O(n)",
+             "keyPoints": ["Update the total only for the replaced block", "Half-open lengths are hi - lo", "Touching ranges merge"],
+             "code": '''from bisect import bisect_left, bisect_right
+
+
+class AllowCount:
+    def __init__(self):
+        self.starts = []
+        self.ends = []
+        self.total = 0
+
+    def add(self, lo, hi):
+        i = bisect_left(self.ends, lo)
+        j = bisect_right(self.starts, hi)
+        if i < j:
+            lo = min(lo, self.starts[i])
+            hi = max(hi, self.ends[j - 1])
+            self.total -= sum(e - s for s, e in zip(self.starts[i:j], self.ends[i:j]))
+        self.starts[i:j] = [lo]
+        self.ends[i:j] = [hi]
+        self.total += hi - lo
+
+    def count(self):
+        return self.total
+'''},
+            {"name": "Recount every range", "slow": True,
+             "description": "Keep all added ranges; on count, sort them and sweep to sum the union length.",
+             "time": "O(1) add, O(n log n) count", "space": "O(adds)",
+             "keyPoints": ["Handles huge ranges, unlike a set of values", "Re-sorts on every count"],
+             "code": '''class AllowCount:
+    def __init__(self):
+        self.ranges = []
+
+    def add(self, lo, hi):
+        self.ranges.append((lo, hi))
+
+    def count(self):
+        total, reach = 0, None
+        for lo, hi in sorted(self.ranges):
+            if reach is None or lo > reach:
+                total += hi - lo
+                reach = hi
+            elif hi > reach:
+                total += hi - reach
+                reach = hi
+        return total
+'''},
+        ],
+        "starter": '''class AllowCount:
+    def __init__(self):
+        pass
+
+    def add(self, lo, hi):
+        pass
+
+    def count(self):
+        pass
+''',
+    },
+    {
+        "key": "port-allocator",
+        "title": "Next free port",
+        "approach": "Sorted disjoint reserved ranges + binary search · O(log n) first_free · O(n)",
+        "spec": {"kind": "design", "fn": "PortAllocator", "params": []},
+        "statement": (
+            "A node agent hands out host ports to containers. Blocks of ports get reserved and released, and a new container "
+            "asks for the first free port at or above some base.\n\n"
+            "Implement `PortAllocator`:\n\n"
+            "- `reserve(lo, hi)`: mark every port in `[lo, hi)` as reserved (overlaps are fine).\n"
+            "- `release(lo, hi)`: mark every port in `[lo, hi)` as free again; this can split a reserved block.\n"
+            "- `first_free(port)`: the smallest port `>= port` that is not reserved. Ports are unbounded above, so one always exists."
+        ),
+        "examples": [
+            {"args": pops(("reserve", 8000, 8100), ("first_free", 8000), ("first_free", 7999), ("release", 8050, 8060), ("first_free", 8000)),
+             "explanation": "8000-8099 are taken, so the answer is 8100. 7999 is free itself. Releasing 8050-8059 opens a hole at 8050.",
+             "why": {"t": "Skip a block · Hole", "d": "The answer is the end of the block that contains the port, or the port itself."}},
+        ],
+        "constraints": ["0 ≤ lo < hi ≤ 10⁶", "0 ≤ port ≤ 10⁶", "At most 2000 calls"],
+        "hints": [
+            "Store reserved ports as sorted, merged, non-touching half-open ranges.",
+            "Find the one range that starts at or before `port`. If it contains `port`, the answer is its end, which is free because ranges never touch.",
+            "Otherwise `port` itself is free.",
+        ],
+        "tests": [
+            {"args": pops(("first_free", 0)), "why": {"t": "Nothing reserved", "d": "Every port is free."}},
+            {"args": pops(("reserve", 0, 1), ("first_free", 0), ("first_free", 1)), "why": {"t": "Single port", "d": "Port 0 taken: 1 is next."}},
+            {"args": pops(("reserve", 10, 20), ("reserve", 20, 30), ("first_free", 15)), "why": {"t": "Touching blocks", "d": "Adjacent blocks merge, so the answer is 30, not 20."}},
+            {"args": pops(("reserve", 10, 20), ("first_free", 20), ("first_free", 9)), "why": {"t": "Half-open end", "d": "hi itself is free."}},
+            {"args": pops(("reserve", 0, 100), ("release", 0, 100), ("first_free", 50)), "why": {"t": "Release everything", "d": "A full release frees the whole block."}},
+            {"args": pops(("reserve", 0, 10), ("reserve", 20, 30), ("reserve", 40, 50), ("release", 5, 45), ("first_free", 3), ("first_free", 46)),
+             "why": {"t": "Release across blocks", "d": "Keeps the left piece of the first and right piece of the last."}},
+            {"args": pops(("release", 5, 9), ("reserve", 1, 3), ("release", 1, 2), ("first_free", 1), ("first_free", 2)),
+             "why": {"t": "Release unreserved · Split at start", "d": "Releasing free ports is harmless; a split can free the first port."}},
+            {"args": _port_large(), "why": {"t": "Large input", "d": "250 reserves and releases with interleaved lookups."}},
+        ],
+        "solutions": [
+            {"name": "Sorted disjoint ranges (Optimal)",
+             "description": "Reserve merges the overlapping or touching block into one range; release trims the block to its outer pieces. first_free checks the single range starting at or before the port.",
+             "time": "O(log n) first_free, O(log n + k) reserve/release", "space": "O(n)",
+             "keyPoints": ["Merged, non-touching ranges make the end of a range free", "Release can split one range", "One bisect answers a lookup"],
+             "code": '''from bisect import bisect_left, bisect_right
+
+
+class PortAllocator:
+''' + RANGES_CORE + '''
+    def reserve(self, lo, hi):
+        self._add(lo, hi)
+
+    def release(self, lo, hi):
+        i = bisect_right(self.ends, lo)
+        j = bisect_left(self.starts, hi)
+        if i >= j:
+            return
+        ns, ne = [], []
+        if self.starts[i] < lo:
+            ns.append(self.starts[i])
+            ne.append(lo)
+        if self.ends[j - 1] > hi:
+            ns.append(hi)
+            ne.append(self.ends[j - 1])
+        self.starts[i:j] = ns
+        self.ends[i:j] = ne
+
+    def first_free(self, port):
+        k = bisect_right(self.starts, port) - 1
+        if k >= 0 and self.ends[k] > port:
+            return self.ends[k]
+        return port
+'''},
+            {"name": "Set of reserved ports", "slow": True,
+             "description": "Track every reserved port in a set and walk upward from the base until a free one appears.",
+             "time": "O(hi - lo) reserve/release, O(block size) first_free", "space": "O(reserved ports)",
+             "keyPoints": ["Fine for 65,536 ports", "Walks the whole block on each lookup"],
+             "code": '''class PortAllocator:
+    def __init__(self):
+        self.taken = set()
+
+    def reserve(self, lo, hi):
+        self.taken.update(range(lo, hi))
+
+    def release(self, lo, hi):
+        self.taken.difference_update(range(lo, hi))
+
+    def first_free(self, port):
+        while port in self.taken:
+            port += 1
+        return port
+'''},
+        ],
+        "starter": '''class PortAllocator:
+    def __init__(self):
+        pass
+
+    def reserve(self, lo, hi):
+        pass
+
+    def release(self, lo, hi):
+        pass
+
+    def first_free(self, port):
+        pass
+''',
+    },
+]

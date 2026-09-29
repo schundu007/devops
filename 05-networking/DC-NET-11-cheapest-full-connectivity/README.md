@@ -22,13 +22,13 @@ line is "metres of fibre". Find the least total length that connects everything.
 redundancy comes later, and is a separate decision.)
 
 ## 3. Why This Is DevOps
-**Production reality:** Connecting every site, VPC or data centre at the lowest total link
+**Production reality:** Connecting every site, VPC or data center at the lowest total link
 cost is a minimum spanning tree. Any connected network with no loops uses exactly n − 1 links,
 and the MST is the cheapest such network. Kruskal adds the cheapest links that don't form a loop;
 Prim grows one connected area outward. Network and cloud architects use the result as the
 cheapest baseline, then add redundant links where a single failure would hurt most.
 
-**Where you see it:** campus and data-centre fibre planning, choosing peering links between VPCs
+**Where you see it:** campus and data-center fibre planning, choosing peering links between VPCs
 (a similar idea), STP building a loop-free tree at layer 2 (which picks the tree by bridge
 priority and path cost, not total cost), clustering in network design tools.
 
@@ -36,7 +36,7 @@ priority and path cost, not total cost), clustering in network design tools.
 single point of failure (see DC-NET-06), so production designs add redundant links. Real
 costs also include equipment, leases and right-of-way, not just distance.
 
-**What breaks if you get it wrong:** Connect each new site to its nearest neighbour and you can
+**What breaks if you get it wrong:** Connect each new site to its nearest neighbor and you can
 leave the network in separate islands, with two buildings unable to reach each other. Or you
 overspend by laying a loop where a tree was enough.
 

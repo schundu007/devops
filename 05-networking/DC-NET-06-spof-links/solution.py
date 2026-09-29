@@ -10,7 +10,7 @@ def critical_links(n: int, links: list[tuple[int, int]]) -> list[tuple[int, int]
     Devices are 0..n-1; links are undirected. Two parallel links between the same
     pair back each other up, so neither is critical.
     """
-    # Store the link id with each neighbour, so we skip only the exact link we came
+    # Store the link id with each neighbor, so we skip only the exact link we came
     # in on (not every link to the parent). That keeps parallel links correct.
     adj: list[list[tuple[int, int]]] = [[] for _ in range(n)]
     for eid, (a, b) in enumerate(links):
@@ -27,13 +27,13 @@ def critical_links(n: int, links: list[tuple[int, int]]) -> list[tuple[int, int]
             continue
         disc[root] = low[root] = timer
         timer += 1
-        # Explicit stack of (device, link id used to enter it, neighbour iterator):
+        # Explicit stack of (device, link id used to enter it, neighbor iterator):
         # no recursion, so a 100,000-device chain cannot hit Python's recursion limit.
         stack: list[tuple[int, int, Iterator[tuple[int, int]]]] = [(root, -1, iter(adj[root]))]
         while stack:
-            u, parent_link, neighbours = stack[-1]
+            u, parent_link, neighbors = stack[-1]
             descended = False
-            for v, eid in neighbours:
+            for v, eid in neighbors:
                 if eid == parent_link:
                     continue
                 if disc[v] == -1:            # tree link: go deeper

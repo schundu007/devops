@@ -54,7 +54,7 @@ TESTS = [
 SOLUTIONS = [
     {"file": "solution.py", "name": "Hash map + two heaps, lazy deletion (Optimal)",
      "description": "A dict holds each timestamp's current value. Push every (value, timestamp) into a max-heap and a min-heap; when asked, pop tops whose value no longer matches the dict.",
-     "time": "O(log n) update, O(log n) amortised max/min", "space": "O(updates)",
+     "time": "O(log n) update, O(log n) amortized max/min", "space": "O(updates)",
      "keyPoints": ["Never search a heap to delete", "A heap top is stale if the dict disagrees", "current is the value at the largest timestamp"]},
     {"name": "Scan the map", "slow": True,
      "description": "Keep only the dict and scan all current values for the max and min on every query.",
@@ -87,5 +87,206 @@ WAYS_TO_SOLVE = [
     {"name": "Scan the map", "idea": "Recompute max and min from every current value.",
      "time": "O(n) per query", "space": "O(n)", "use": "Few samples or rare queries."},
     {"name": "Heaps + lazy deletion", "idea": "Push every update; discard stale tops only when they surface.",
-     "time": "O(log n) amortised", "space": "O(updates)", "use": "Frequent queries on long, corrected series."},
+     "time": "O(log n) amortized", "space": "O(updates)", "use": "Frequent queries on long, corrected series."},
+]
+
+VARIANT_TITLE = "Current, max and min"
+VARIANT_APPROACH = "Hash map + two heaps, lazy deletion · O(log n) amortized · O(updates)"
+
+
+def hops(*calls):
+    return {"ops": ["HostLoad"] + [c[0] for c in calls], "vals": [[]] + [list(c[1:]) for c in calls]}
+
+
+def _hosts_large():
+    rng = random.Random(12)
+    hosts = [f"node-{i:02d}" for i in range(40)]
+    calls = []
+    for _ in range(1200):
+        r = rng.random()
+        if r < 0.6:
+            calls.append(("report", rng.choice(hosts), rng.randint(0, 100)))
+        elif r < 0.75:
+            calls.append(("retire", rng.choice(hosts)))
+        else:
+            calls.append(("hottest",))
+    return hops(*calls)
+
+
+def _spread_large():
+    rng = random.Random(2034)
+    return {"updates": [[rng.randint(1, 150), rng.randint(-1000, 1000)] for _ in range(1500)]}
+
+
+VARIANTS = [
+    {
+        "key": "hottest-host",
+        "title": "Hottest host in the fleet",
+        "approach": "Hash map + max-heap, lazy deletion · O(log n) amortized · O(reports)",
+        "spec": {"kind": "design", "fn": "HostLoad", "params": []},
+        "statement": (
+            "A scheduler places the next batch job away from the busiest machine, so it keeps asking which host is hottest. "
+            "Hosts report their CPU percent repeatedly, and hosts are decommissioned.\n\n"
+            "Implement `HostLoad`:\n\n"
+            "- `report(host, cpu)`: the host's CPU is now `cpu`, replacing any earlier report. A retired host that reports again is back.\n"
+            "- `retire(host)`: forget the host. Retiring an unknown host does nothing.\n"
+            "- `hottest()`: the host with the highest current CPU, the alphabetically smallest on a tie, or `None` if no host is known."
+        ),
+        "examples": [
+            {"args": hops(("report", "web-1", 90), ("report", "web-2", 40), ("hottest",), ("report", "web-1", 10), ("hottest",)),
+             "explanation": "web-1 is hottest at 90. Its next report drops it to 10, so web-2 takes over.",
+             "why": {"t": "Report lowers the peak", "d": "A replaced reading must not keep a host on top."}},
+            {"args": hops(("report", "db-2", 70), ("report", "db-1", 70), ("hottest",), ("retire", "db-1"), ("hottest",)),
+             "explanation": "Both run at 70, so db-1 wins alphabetically. After it is retired, db-2 is the hottest.",
+             "why": {"t": "Tie · Retire", "d": "Ties break by name; retired hosts vanish."}},
+        ],
+        "constraints": ["0 ≤ cpu ≤ 100 (integer)", "Host names are non-empty strings", "At most 2000 calls"],
+        "hints": [
+            "Push (-cpu, host) on every report and never search the heap to delete.",
+            "When asked, pop heap tops that no longer match the dict: the host was retired or re-reported with another value.",
+            "An entry that matches the current value is valid, even if it was pushed long ago.",
+        ],
+        "tests": [
+            {"args": hops(("hottest",)), "why": {"t": "Empty fleet", "d": "Nothing reported yet: None."}},
+            {"args": hops(("report", "a", 0), ("hottest",), ("retire", "a"), ("hottest",)), "why": {"t": "Single host, zero CPU", "d": "0 is a real reading; after retire the fleet is empty."}},
+            {"args": hops(("retire", "ghost"), ("report", "a", 5), ("hottest",)), "why": {"t": "Retire unknown", "d": "Retiring a host that never reported is a no-op."}},
+            {"args": hops(("report", "a", 50), ("retire", "a"), ("report", "a", 50), ("hottest",)), "why": {"t": "Retire then return", "d": "A host that comes back with the same value is hottest again."}},
+            {"args": hops(("report", "a", 90), ("report", "b", 80), ("report", "a", 80), ("hottest",), ("report", "b", 79), ("hottest",)),
+             "why": {"t": "Ties after updates", "d": "Both drop to 80: a wins by name, then b falls behind."}},
+            {"args": hops(("report", "x", 30), ("report", "x", 30), ("report", "x", 30), ("retire", "x"), ("hottest",)),
+             "why": {"t": "Duplicate reports", "d": "Several heap entries for one host all go stale on retire."}},
+            {"args": _hosts_large(), "why": {"t": "Large input", "d": "1,200 mixed calls over 40 hosts."}},
+        ],
+        "solutions": [
+            {"name": "Dict + max-heap with lazy deletion (Optimal)",
+             "description": "The dict holds each host's current CPU. Push (-cpu, host) on every report; hottest pops tops that the dict no longer agrees with.",
+             "time": "O(log n) report, O(log n) amortized hottest", "space": "O(reports)",
+             "keyPoints": ["(-cpu, host) orders by CPU, then name", "Stale if retired or re-reported", "Each pushed entry is popped at most once"],
+             "code": '''import heapq
+
+
+class HostLoad:
+    def __init__(self):
+        self.cpu = {}
+        self.heap = []
+
+    def report(self, host, cpu):
+        self.cpu[host] = cpu
+        heapq.heappush(self.heap, (-cpu, host))
+
+    def retire(self, host):
+        self.cpu.pop(host, None)
+
+    def hottest(self):
+        while self.heap and self.cpu.get(self.heap[0][1]) != -self.heap[0][0]:
+            heapq.heappop(self.heap)
+        return self.heap[0][1] if self.heap else None
+'''},
+            {"name": "Scan the dict", "slow": True,
+             "description": "Keep only the dict and scan every host on each hottest call.",
+             "time": "O(1) report, O(n) hottest", "space": "O(hosts)",
+             "keyPoints": ["Nothing stale to reason about", "Full fleet scan per placement decision"],
+             "code": '''class HostLoad:
+    def __init__(self):
+        self.cpu = {}
+
+    def report(self, host, cpu):
+        self.cpu[host] = cpu
+
+    def retire(self, host):
+        self.cpu.pop(host, None)
+
+    def hottest(self):
+        if not self.cpu:
+            return None
+        return min(self.cpu, key=lambda h: (-self.cpu[h], h))
+'''},
+        ],
+        "starter": '''class HostLoad:
+    def __init__(self):
+        pass
+
+    def report(self, host, cpu):
+        pass
+
+    def retire(self, host):
+        pass
+
+    def hottest(self):
+        pass
+''',
+    },
+    {
+        "key": "spread",
+        "title": "Spread after every correction",
+        "approach": "Two heaps with lazy deletion · O(n log n) · O(n)",
+        "spec": {"kind": "fn", "fn": "spread_after_each", "params": ["updates"]},
+        "statement": (
+            "A flapping-sensor alert fires when the spread of a series, its maximum minus its minimum, gets too wide. "
+            "Samples can arrive late, and a repeated timestamp is a correction that replaces the old value.\n\n"
+            "`updates[i] = [timestamp, value]`, in arrival order. After applying each update, record "
+            "`max - min` over the current value of every timestamp seen so far.\n\n"
+            "Return the list of spreads, one per update."
+        ),
+        "examples": [
+            {"args": {"updates": [[1, 10], [2, 4], [3, 7], [1, 5]]},
+             "explanation": "Spreads: 0, then 10 - 4 = 6, still 6, then correcting t=1 to 5 leaves {5, 4, 7}: 3.",
+             "why": {"t": "Correction narrows", "d": "Replacing the old maximum must shrink the spread."}},
+        ],
+        "constraints": ["1 ≤ updates.length ≤ 2000", "0 ≤ timestamp ≤ 10⁹", "-10⁶ ≤ value ≤ 10⁶ (integer)"],
+        "hints": [
+            "You need the current max and min after every update, with values that can be replaced.",
+            "Push into a max-heap and a min-heap; before reading a top, pop it while the dict says that timestamp now holds another value.",
+        ],
+        "tests": [
+            {"args": {"updates": [[5, 3]]}, "why": {"t": "Single sample", "d": "One value: spread 0."}},
+            {"args": {"updates": [[1, 2], [1, 2], [1, 2]]}, "why": {"t": "Same correction repeated", "d": "Re-sending one value never changes anything."}},
+            {"args": {"updates": [[1, -5], [2, 5], [2, -5]]}, "why": {"t": "Negative values", "d": "Spread across zero, then collapsing to 0."}},
+            {"args": {"updates": [[1, 8], [2, 8], [1, 0]]}, "why": {"t": "Duplicate values", "d": "Two timestamps share the max; correcting one keeps the other."}},
+            {"args": {"updates": [[10, 1], [5, 100], [20, 2], [5, 1]]}, "why": {"t": "Late spike corrected", "d": "A late sample widens the spread until it is fixed."}},
+            {"args": {"updates": [[1, 1], [2, 2], [3, 3], [4, 4], [1, 4], [2, 4], [3, 4]]}, "why": {"t": "Converging", "d": "Corrections pull every value to 4: spread falls to 0."}},
+            {"args": _spread_large(), "why": {"t": "Large input", "d": "1,500 updates over 150 timestamps."}},
+        ],
+        "solutions": [
+            {"name": "Two heaps, lazy deletion (Optimal)",
+             "description": "Keep timestamp to value in a dict; push each update into a min-heap and a max-heap. Before reading each top, discard entries the dict no longer agrees with.",
+             "time": "O(n log n)", "space": "O(n)",
+             "keyPoints": ["A top is stale if its timestamp now holds another value", "Every entry is popped at most once", "Only read tops after cleaning them"],
+             "code": '''import heapq
+
+
+def spread_after_each(updates):
+    cur = {}
+    hi, lo = [], []
+    out = []
+    for t, v in updates:
+        cur[t] = v
+        heapq.heappush(hi, (-v, t))
+        heapq.heappush(lo, (v, t))
+        while cur[hi[0][1]] != -hi[0][0]:
+            heapq.heappop(hi)
+        while cur[lo[0][1]] != lo[0][0]:
+            heapq.heappop(lo)
+        out.append(-hi[0][0] - lo[0][0])
+    return out
+'''},
+            {"name": "Recompute every time", "slow": True,
+             "description": "Apply the update to the dict, then scan all current values for max and min.",
+             "time": "O(n · distinct timestamps)", "space": "O(distinct timestamps)",
+             "keyPoints": ["Trivially correct", "A full scan per update"],
+             "code": '''def spread_after_each(updates):
+    cur = {}
+    out = []
+    for t, v in updates:
+        cur[t] = v
+        vals = cur.values()
+        out.append(max(vals) - min(vals))
+    return out
+'''},
+        ],
+        "starter": '''def spread_after_each(updates):
+    """max - min of the current values after each update."""
+    pass
+''',
+    },
 ]

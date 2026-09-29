@@ -34,7 +34,7 @@ a similar idea for de-duplication).
 
 **Reality check:** Sentry fingerprints a single trace, which is a list of frames. A list is a
 tree where every node has one child, so it is a special case of this chip. Real grouping also
-normalises frames first, for example by dropping frames that are not your own code, so
+normalizes frames first, for example by dropping frames that are not your own code, so
 unrelated noise does not split one issue into many.
 
 **What breaks if you get it wrong:** If the canonical form is ambiguous (for example
@@ -163,16 +163,16 @@ hash map, but on a deep trace those strings are O(n) each, so it's O(n²). Inste
 shapes: each distinct `(name, child IDs)` tuple gets a small integer. Equal tuples mean equal
 shapes, so the whole thing is O(n). I use an explicit stack, because the traces you most need
 to group, like runaway recursion, are exactly the ones that are deep enough to blow Python's
-recursion limit. In production you'd hash the canonical form into a fingerprint and normalise frames first."
+recursion limit. In production you'd hash the canonical form into a fingerprint and normalize frames first."
 
 ## 12. Level Up
 1. **"Group events across 200 ingest servers."** Each server cannot share integer IDs, because they
    are only local. Hash the canonical form into a stable fingerprint (for example SHA-1 of the
-   normalised frames), and use that hash as the grouping key in a shared store. Build the hash
+   normalized frames), and use that hash as the grouping key in a shared store. Build the hash
    bottom-up, hashing each child's hash rather than its text, which works like a Merkle tree.
-2. **"Line numbers change on every deploy and split the same bug into new issues."** Normalise
+2. **"Line numbers change on every deploy and split the same bug into new issues."** Normalize
    before hashing: keep module and function name, drop line numbers and memory addresses, and
-   collapse frames from third-party libraries. The grouping key is only as good as its normalisation.
+   collapse frames from third-party libraries. The grouping key is only as good as its normalization.
 3. **"Memory cap: 10 million events per hour."** Don't keep the trees. Keep `fingerprint ->
    (count, first_seen, last_seen, one sample event)`. The sample is enough to debug; the rest is just a counter.
 

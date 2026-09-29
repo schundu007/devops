@@ -53,7 +53,7 @@ def test_wraparound_to_lower_ids():
 
 def test_hot_backend_under_long_requests():
     # Production flavour: backend b1 keeps getting the long uploads, so it is busy when
-    # its turn comes and its neighbours absorb the extra traffic.
+    # its turn comes and its neighbors absorb the extra traffic.
     arrival = list(range(0, 60))
     load = [30 if i % 4 == 1 else 1 for i in range(60)]
     assert busiest(4, arrival, load) == brute_force(4, arrival, load)

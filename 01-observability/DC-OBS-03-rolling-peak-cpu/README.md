@@ -158,7 +158,7 @@ them, but the same idea matters for an hourly peak over per-second samples."
    Store `(timestamp, value)` in the deque and expire from the front by time
    (`front.ts <= now - 300`) instead of by index. This is how the HPA's own window is defined.
 2. **"You need this for 50,000 pods at once."** Keep one deque per series: memory is
-   O(k) per series and every update is O(1) amortised. Shard series across workers by a
+   O(k) per series and every update is O(1) amortized. Shard series across workers by a
    hash of the series ID, because windows never cross series.
 3. **"Scale-up should use the lowest value in its window, scale-down the highest."** Keep two
    deques: one decreasing (max) and one increasing (min). DC-OBS-06 uses exactly this pair

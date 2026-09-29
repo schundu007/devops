@@ -145,7 +145,7 @@ after overrides, and in UTC so daylight-saving changes don't hide a gap."
 1. **"We need two people on call at all times (primary and secondary)."** Turn the shifts into
    events: `+1` at each start and `-1` at each end. Sort them with ends before starts at the
    same time, and sweep, reporting every stretch where the count is below 2. The sweep
-   generalises "anyone" to "at least k".
+   generalizes "anyone" to "at least k".
 2. **"Check the next 90 days as the schedule is edited, on every save."** Keep the merged
    coverage in a balanced interval tree or a sorted list of blocks. An edit only changes the
    blocks around the edited shift, so update those and re-check locally instead of rebuilding.

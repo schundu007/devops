@@ -164,7 +164,7 @@ def test_harness_catches_the_naive_left_first_order():
         _, _, stuck = run_ring(NaiveTable(n), n, 1, everyone_grabs_left_at_once(n, 2.0))
     finally:
         JOIN_TIMEOUT = saved
-    assert stuck == n  # every worker holds its left lock and waits for its neighbour's
+    assert stuck == n  # every worker holds its left lock and waits for its neighbor's
 
 
 def test_many_rounds_stress():

@@ -103,7 +103,7 @@ use 300 buckets indexed by `t % 300` that each store `(second, count)`.
 
 | Way | Idea | Time | Space | Use when |
 |---|---|---|---|---|
-| Queue of timestamps | Append each hit; on getHits drop timestamps at or before t − 300 from the front, then return the size. | O(1) amortised | O(hits in window) | Low or moderate traffic; simplest to explain. |
+| Queue of timestamps | Append each hit; on getHits drop timestamps at or before t − 300 from the front, then return the size. | O(1) amortized | O(hits in window) | Low or moderate traffic; simplest to explain. |
 | 300 per-second buckets | Bucket t % 300 stores the second it holds and its count; reset it when a newer second lands there, and sum the buckets still inside the window. | O(1) hit, O(300) getHits | O(300) | Heavy traffic: memory stays fixed however many hits arrive. |
 
 #### Queue of Timestamps
@@ -113,7 +113,7 @@ Keep every hit's timestamp in arrival order. Timestamps never go backwards, so e
 - Each hit is removed at most once
 - Memory grows with traffic
 
-Time: O(1) amortised · Space: O(hits in the last 300 s)
+Time: O(1) amortized · Space: O(hits in the last 300 s)
 
 ```python
 from collections import deque
@@ -178,7 +178,7 @@ and +359 s, and the alert resolving), and a 5,000-operation random cross-check a
 "This is the counter behind an error-rate alert: how many 5xx in the last five minutes.
 Timestamps only move forward, so expired events are always at the front. I keep a queue,
 append on every error, and on each query pop from the front anything at or before now minus
-300, then return the size. Each event is added once and removed once, so it's O(1) amortised.
+300, then return the size. Each event is added once and removed once, so it's O(1) amortized.
 The catch is memory: at 10,000 errors a second the queue holds 3 million entries. So the
 production version uses 300 per-second buckets in a ring: fixed memory, O(1) writes, and a
 300-step sum on read. That is close to what Prometheus does: it doesn't store events, it
@@ -187,7 +187,7 @@ stores a counter and takes the difference over the window with `increase()`."
 ## 12. Level Up `DevOps layer`
 1. **"1 million errors per second?"** The queue now needs 300 million entries. Use the
    300-bucket ring instead: memory is fixed at 300 counters whatever the traffic. To make `getHits`
-   O(1) amortised too, keep a running total and a cursor at the last second seen. On each
+   O(1) amortized too, keep a running total and a cursor at the last second seen. On each
    call, advance the cursor to now and subtract and zero every bucket it passes.
 2. **"The service runs on 40 pods. How do you count across all of them?"** Don't ship raw
    events. Each pod exposes a monotonic counter, and the alert query sums the per-pod
@@ -201,4 +201,4 @@ stores a counter and takes the difference over the window with `increase()`."
 ## 13. Related Chips `DevOps layer`
 - **DC-OBS-09 Log Flood Suppressor**: the same timestamp-window check, per message.
 - **DC-SEC-16 Brute-Force Burst Alert**: a sliding window per user or key instead of one global counter.
-- **DC-OBS-11 Metric Bucket Counter**: buckets per minute, hour or day, the ring idea generalised.
+- **DC-OBS-11 Metric Bucket Counter**: buckets per minute, hour or day, the ring idea generalized.

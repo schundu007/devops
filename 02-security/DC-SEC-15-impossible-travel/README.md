@@ -27,10 +27,10 @@ leave the thousands of normal sign-ins alone.
 Two events from different cities too close together in time cannot both be the real person,
 so one is probably a stolen session or credential. That is an "impossible travel" alert. Events
 whose own risk score is over a limit are flagged on their own. The engine groups events by user,
-orders them by time, and checks each event against its neighbours inside the time window.
+orders them by time, and checks each event against its neighbors inside the time window.
 
 **Where you see it:** Microsoft Entra ID Protection ("atypical travel"), Okta ThreatInsight
-and behaviour detection, Google Workspace suspicious-login alerts, AWS GuardDuty findings for
+and behavior detection, Google Workspace suspicious-login alerts, AWS GuardDuty findings for
 unusual console sign-ins, SIEM correlation rules.
 
 **Reality check:** Real tools compute the distance between geo-located IPs and the speed needed
@@ -83,7 +83,7 @@ make try CHIP=02-security/DC-SEC-15-impossible-travel
 
 ## 8. Hints
 1. **Nudge:** An event can only be affected by events of the same user. How should you split the input?
-2. **Pattern:** Group by user and sort each group by minute. Then every event's "neighbours
+2. **Pattern:** Group by user and sort each group by minute. Then every event's "neighbors
    within 60 minutes" form a contiguous run that you can track with two pointers.
 3. **Near-solution:** For each event at time t, move the right pointer while `minute <= t + 60`
    and the left pointer while `minute < t - 60`, keeping a city `Counter` of the window. If the
@@ -137,7 +137,7 @@ and windowing are the same."
 
 ## 12. Level Up
 1. **"Use real speed, not 'different city'."** Store each event's latitude and longitude. For
-   neighbouring events, compute the distance divided by the time and flag anything faster than
+   neighboring events, compute the distance divided by the time and flag anything faster than
    about 1,000 km/h. Only nearby events in time matter, so the same window logic still applies.
 2. **"Events arrive as a stream, possibly a few minutes late."** Keep per-user events for the
    last 60 minutes plus the allowed lateness. When an event arrives, check it against that buffer.

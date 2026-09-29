@@ -129,7 +129,7 @@ def safe_services(waits_on):
     return [s for s in range(n) if safe[s]]
 ```
 
-A DFS with three colours (unvisited, in progress, done) solves it too: any service that
+A DFS with three colors (unvisited, in progress, done) solves it too: any service that
 reaches an "in progress" service is unsafe.
 
 **Complexity**

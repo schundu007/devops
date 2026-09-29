@@ -133,7 +133,7 @@ that. That's O(k times routes). An alternative is Dijkstra over (region, hops us
 In a real cloud plan, I'd also weigh latency and the extra failure point each relay adds."
 
 ## 12. Level Up
-1. **"Minimise cost, but break ties on fewer hops."** Store `(cost, hops)` pairs and compare them
+1. **"Minimize cost, but break ties on fewer hops."** Store `(cost, hops)` pairs and compare them
    as tuples. Or run the rounds and remember the first round in which `dst` reaches its final cost.
 2. **"10,000 regions and 1 million routes, with k = 3."** Bellman-Ford does 4 × 1M relaxations,
    which is fine. If k is large, run Dijkstra on states `(region, hops)`, pruning any state whose

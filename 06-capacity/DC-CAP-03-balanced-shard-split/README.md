@@ -21,9 +21,9 @@ scans and ordering simple, each worker must own one **contiguous** block of key 
 you split the ranges so that the busiest worker carries the least load, and what is that load?
 
 ## 3. Why This Is DevOps
-**Production reality:** Range-partitioned systems keep neighbouring keys together, so that range
+**Production reality:** Range-partitioned systems keep neighboring keys together, so that range
 scans hit one node. When you assign ranges to nodes, the busiest node sets the latency and
-the size you need, so you want to minimise the maximum. The shape is the same as DC-CAP-02: "can
+the size you need, so you want to minimize the maximum. The shape is the same as DC-CAP-02: "can
 every worker stay under load L?" is a greedy pass, and it gets easier as L grows, so you binary
 search L. Rebalancers answer this question whenever load shifts.
 
@@ -36,7 +36,7 @@ at once, and use load measured over time, not a single number. They also split h
 two, which this chip does not allow. Here the hot range (1,400) sets the floor.
 
 **What breaks if you get it wrong:** Give each worker the same *number* of ranges instead of the
-same *load*. One worker gets the 1,400 hot range plus neighbours, hits its limit and lags, while
+same *load*. One worker gets the 1,400 hot range plus neighbors, hits its limit and lags, while
 the others sit idle. Consumer lag grows only on that worker's keys, which is hard to diagnose.
 
 ## 4. Problem Statement
@@ -150,8 +150,8 @@ why real systems like CockroachDB split hot ranges before they rebalance."
 2. **"Hot ranges can be split in two."** Now the floor disappears. With fully divisible load the
    answer tends toward `ceil(sum / k)`. In practice, split any range above `sum / k`, then run
    the same search again. Rebalancers use a similar split-then-place loop.
-3. **"Moving a range is expensive: minimise moves while staying under L."** This becomes a
-   different optimisation: keep today's boundaries where possible and shift only the ones next
+3. **"Moving a range is expensive: minimize moves while staying under L."** This becomes a
+   different optimization: keep today's boundaries where possible and shift only the ones next
    to overloaded workers. Many production rebalancers use greedy moves, one range at a time,
    rather than a global re-split, because each move has a cost.
 

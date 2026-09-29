@@ -151,5 +151,5 @@ data can contain digits, so a real format needs a length byte or an escape chara
 
 ## 13. Related Chips
 - **DC-SEC-19 Config Comment Stripper**: another single pass that rewrites a text buffer.
-- **DC-OBS-11 Metric Bucket Counter**: summarising repeated events instead of storing each one.
+- **DC-OBS-11 Metric Bucket Counter**: summarizing repeated events instead of storing each one.
 - **DC-SEC-05 Firewall Range Merger**: the same "grow the current group, or start a new one" loop.

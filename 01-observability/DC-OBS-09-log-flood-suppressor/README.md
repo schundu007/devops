@@ -145,7 +145,7 @@ emit a 'suppressed N lines' summary so we don't lose the fact that it was floodi
    older than the window are useless. Also keep a queue of `(next_allowed, message)` in time
    order, and on each call pop and delete the expired entries from the front. Memory is now
    bounded by the messages seen in the last `window` seconds.
-2. **"Messages differ only by a request ID, so nothing is ever suppressed."** Normalise before
+2. **"Messages differ only by a request ID, so nothing is ever suppressed."** Normalize before
    keying: replace numbers, UUIDs and IPs with placeholders (`connect to <ip>:<port> refused`).
    Log pattern tools such as Loki's pattern detection group lines in a similar way.
 3. **"Allow 5 per window, not 1, and report how many were dropped."** Store `(window_start,

@@ -29,7 +29,7 @@ diffing or hashing a config, so that a comment-only change does not look like a 
 this correctly means reading character by character and remembering whether you are inside a comment.
 
 **Where you see it:** VS Code and TypeScript reading JSONC, Terraform's HCL parser, config
-linters in CI, drift detection that hashes a normalised config.
+linters in CI, drift detection that hashes a normalized config.
 
 **Reality check:** This chip's input has **no string literals**. Real configs do:
 `"url": "https://api.example.com"` contains `//` inside quotes, and a naive stripper would cut the

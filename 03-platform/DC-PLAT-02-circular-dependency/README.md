@@ -90,7 +90,7 @@ make try CHIP=03-platform/DC-PLAT-02-circular-dependency
 
 ## 8. Hints `From handbook`
 1. Model the courses as a directed graph; the courses can all be finished exactly when that graph has no cycle.
-2. Use Kahn's topological sort (BFS on in-degrees) or a DFS with three colours (unvisited / in progress / done).
+2. Use Kahn's topological sort (BFS on in-degrees) or a DFS with three colors (unvisited / in progress / done).
 3. With Kahn's algorithm, start from all courses with in-degree 0, repeatedly remove one and decrement its dependants' in-degrees, and check whether the number of removed courses equals numCourses.
 
 ## 9. Solution `From handbook`
@@ -178,12 +178,12 @@ and a 2,000-node DAG that turns cyclic when one edge is reversed.
 cycle? I use Kahn's algorithm. Count each step's unfinished dependencies, queue the ones at
 zero, and keep removing them and decrementing their dependents. If every step gets removed,
 the graph is a DAG. If some never reach zero, they're in a cycle or waiting behind one. It's
-O(V + E), so it's cheap enough to run on every commit. The DFS version, with three colours,
+O(V + E), so it's cheap enough to run on every commit. The DFS version, with three colors,
 finds a back edge instead, and has the bonus that it can print the exact loop, which is what you
 want in the CI error message."
 
 ## 12. Level Up `DevOps layer`
-1. **"Tell the author which steps form the cycle."** Run DFS with colours
+1. **"Tell the author which steps form the cycle."** Run DFS with colors
    (unvisited / on the stack / done) and keep the current path. When you meet an "on the
    stack" node, the path from that node to the current one is the cycle. Print it the way
    Terraform does: `Cycle: build, image-push, deploy-staging, smoke-test`.

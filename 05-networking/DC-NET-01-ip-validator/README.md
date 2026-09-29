@@ -177,4 +177,4 @@ parsed value is used for both the check and the connection."
 ## 13. Related Chips
 - **DC-NET-02 Rebuild IPs from Broken Logs**: the same octet rules, used to generate candidates instead of checking one.
 - **DC-SEC-09 IP Range to CIDR Blocks**: once an address is valid, turn ranges of addresses into CIDR rules.
-- **DC-SEC-01 Path Traversal Guard**: another "normalise, then check" input guard where a parser mismatch leads to bypasses.
+- **DC-SEC-01 Path Traversal Guard**: another "normalize, then check" input guard where a parser mismatch leads to bypasses.

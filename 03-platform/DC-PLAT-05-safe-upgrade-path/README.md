@@ -90,10 +90,10 @@ make try CHIP=03-platform/DC-PLAT-05-safe-upgrade-path
 
 ## 8. Hints
 1. **Nudge:** Every step costs one maintenance window. What search finds the fewest equal-cost steps?
-2. **Pattern:** Breadth-first search over states. The hard part is finding a state's neighbours
+2. **Pattern:** Breadth-first search over states. The hard part is finding a state's neighbors
    quickly: the approved states that differ from it in exactly one position.
 3. **Near-solution:** For each approved state and each position `i`, put the state in a bucket
-   keyed by `(i, state with position i removed)`. Two states are neighbours exactly when they share a
+   keyed by `(i, state with position i removed)`. Two states are neighbors exactly when they share a
    bucket. BFS from `start`, and after a bucket has been expanded, delete it so it is never scanned again.
 
 ## 9. Solution
@@ -156,8 +156,8 @@ start state outside policy, 20 random graphs checked against a separate pairwise
 "Every maintenance window changes one component, and every window costs the same, so the
 fewest windows is a shortest path in an unweighted graph, which means BFS. The nodes are the
 approved version combinations, and two nodes are connected when they differ in exactly one
-component. The trick is finding neighbours without comparing every pair. I bucket each state
-by 'this position blanked out', so neighbours share a bucket, and I delete a bucket after using
+component. The trick is finding neighbors without comparing every pair. I bucket each state
+by 'this position blanked out', so neighbors share a bucket, and I delete a bucket after using
 it, so the whole BFS is linear in the number of states times the key cost. If the target isn't
 approved, I return -1 right away. In practice the approved list comes from the Kubernetes skew
 policy and our conformance runs, and if windows had different risk, I'd switch to Dijkstra."
@@ -169,7 +169,7 @@ policy and our conformance runs, and if windows had different risk, I'd switch t
    minor upgrade might cost 3 and a kubelet change 1) and run Dijkstra (DC-NET-04). BFS is
    only correct when every step costs the same.
 3. **"The state space is huge: 30 components with 5 versions each."** Don't list states up front.
-   Generate neighbours lazily from rules (skew limits, one-minor steps), and search from both ends
+   Generate neighbors lazily from rules (skew limits, one-minor steps), and search from both ends
    at once (bidirectional BFS), which explores roughly the square root of the states.
 
 ## 13. Related Chips

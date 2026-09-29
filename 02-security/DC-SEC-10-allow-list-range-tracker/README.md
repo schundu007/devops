@@ -27,7 +27,7 @@ the whole thing and not leave the debug ports open.
 the time: rules are added, revoked and queried. Keeping them as sorted, merged ranges gives fast
 answers to "is this whole range allowed?", and makes the stored state readable for audits.
 The tricky part is removal: taking a range out of the middle of a bigger one must leave two
-pieces. Binary search finds the few ranges affected, so each update touches only its neighbours.
+pieces. Binary search finds the few ranges affected, so each update touches only its neighbors.
 
 **Where you see it:** Linux `ipset` (`hash:net` and `bitmap:port` sets updated at runtime),
 nftables interval sets, Envoy and cloud firewall rule APIs, and IPAM tools that track free and

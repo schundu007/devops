@@ -142,7 +142,7 @@ finishes, so earliest start equals the max finish time among its dependencies. T
 and I need to evaluate it in dependency order, which a topological sort gives me. I run
 Kahn's algorithm, and when a stage comes off the queue I compute its finish time and push it
 to its children. The answer is the largest finish time. It's O(V + E). In practice this is how
-I'd decide where to spend optimisation effort: only critical-path stages matter. Cutting unit
+I'd decide where to spend optimization effort: only critical-path stages matter. Cutting unit
 tests from four minutes to one changed nothing here, while cutting integration tests saved six minutes."
 
 ## 12. Level Up

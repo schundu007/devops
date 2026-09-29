@@ -83,7 +83,7 @@ make try CHIP=05-networking/DC-NET-09-most-reliable-path
 ## 8. Hints
 1. **Nudge:** Adding a link to a path can only keep its probability the same or lower it. Which
    shortest-path algorithm relies on that kind of rule?
-2. **Pattern:** Dijkstra, but maximise a product instead of minimising a sum. Use a max-heap
+2. **Pattern:** Dijkstra, but maximize a product instead of minimizing a sum. Use a max-heap
    (push negated probabilities onto `heapq`).
 3. **Near-solution:** `best[src] = 1.0`. Pop the highest probability `p` at `node`, and skip it
    if it is stale. For each link, `cand = p * link_p`, and push it if `cand > best[next]`.
@@ -95,7 +95,7 @@ make try CHIP=05-networking/DC-NET-09-most-reliable-path
 2. `best[v]` = the best probability found so far to reach `v`, starting with `best[src] = 1`.
 3. Pop the node with the highest probability from a max-heap. Its value is final, because every
    other path to it is already worse and can only get worse.
-4. Relax neighbours by multiplying. Return `best` when `dst` is popped, or `0.0` if the heap empties.
+4. Relax neighbors by multiplying. Return `best` when `dst` is popped, or `0.0` if the heap empties.
 
 **Brute force:** Try every simple path from `src` to `dst`, which is exponential. A safer
 middle ground is Bellman-Ford (relax every link `n - 1` times), which is O(n · links).
@@ -140,8 +140,8 @@ one link, a direct link winning, unreachable, no links, boundary probabilities o
 the three-nines regions case, 200 random graphs checked against Bellman-Ford, and a 10,000-node chain.
 
 ## 11. Interview Talk Track
-"Availability multiplies across hops, so the most reliable path maximises a product. Dijkstra
-normally minimises a sum, and it's correct because extending a path never makes it shorter.
+"Availability multiplies across hops, so the most reliable path maximizes a product. Dijkstra
+normally minimizes a sum, and it's correct because extending a path never makes it shorter.
 Here, multiplying by a probability never makes a path more reliable, so the same greedy rule
 holds: the node with the highest probability in the heap is final. I use a max-heap of
 negated probabilities, relax by multiplication, skip stale entries, and stop when I pop the

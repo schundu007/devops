@@ -19,7 +19,7 @@ A rebalancing job runs 5 migration workers over a ring of 5 database shards, `sh
 `shard-4`. Worker `i` moves rows between shard `i` and shard `i+1`, and the last worker moves
 rows between `shard-4` and `shard-0`. Each worker must lock both of its shards while it copies.
 Last Tuesday at 03:12 the whole job froze: every worker held one shard lock and waited forever
-for its neighbour's. Nothing crashed and nothing alerted. Throughput simply went to zero.
+for its neighbor's. Nothing crashed and nothing alerted. Throughput simply went to zero.
 
 ## 3. Why This Is DevOps
 **Production reality:** Any time one task needs two shared resources, such as two database rows,
@@ -172,13 +172,13 @@ adjacent shard locks. The deadlock is a cycle where everyone holds their left lo
 for their right. I break it with a global lock order: always take the lower-numbered lock
 first. For every worker except the last, that's left then right. For the last worker, whose
 right lock wraps to 0, it's right then left. Now waiting only goes from lower to higher locks,
-and that can't form a cycle. Each worker still runs in parallel with its non-neighbours, so we
+and that can't form a cycle. Each worker still runs in parallel with its non-neighbors, so we
 keep the throughput a global lock would lose. It's the same advice PostgreSQL gives: update rows
 in primary-key order. And I test it by forcing the bad interleaving with a barrier, then
 proving the naive version really deadlocks under the same harness."
 
 ## 12. Level Up
-1. **"Workers need an arbitrary set of locks, not two neighbours."** Sort the set by a global
+1. **"Workers need an arbitrary set of locks, not two neighbors."** Sort the set by a global
    key (shard ID, row primary key, or the lock's name) and acquire in that order. Release in
    reverse. The rule scales to any number of locks as long as every code path uses the same order.
 2. **"The locks are distributed (etcd or Redis) and a worker can die while holding one."**

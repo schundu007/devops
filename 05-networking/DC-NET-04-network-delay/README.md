@@ -91,7 +91,7 @@ make try CHIP=05-networking/DC-NET-04-network-delay
 1. Build an adjacency list of outgoing links.
 2. Keep a min-heap of `(arrival time, router)`, starting with `(0, source)`.
 3. Pop the earliest entry. If the router already has a final time, skip it (a stale entry). Otherwise, that time is final.
-4. Push each neighbour with `time + delay`.
+4. Push each neighbor with `time + delay`.
 5. If every router got a final time, return the largest one. Otherwise, return `-1`.
 
 **Brute force:** Bellman-Ford relaxes every link up to `n - 1` times: O(V·E), which is 10⁹

@@ -20,7 +20,7 @@ def min_upgrade_steps(start: Sequence[str], target: Sequence[str], approved: lis
         return -1
 
     # Bucket states by "pattern with one position blanked out". Two states are one
-    # change apart exactly when they share such a pattern, so neighbours are found
+    # change apart exactly when they share such a pattern, so neighbors are found
     # without comparing every pair of states.
     buckets: dict[tuple[int, State], list[State]] = defaultdict(list)
     for s in allowed:

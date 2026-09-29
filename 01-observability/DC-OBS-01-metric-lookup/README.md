@@ -130,7 +130,7 @@ class MetricStore:
 ```
 
 **Complexity**
-- Time: `record` is O(1) amortised, because it only appends. `value_at` is O(log n) per
+- Time: `record` is O(1) amortized, because it only appends. `value_at` is O(log n) per
   query, because it is a binary search over one metric's n samples.
 - Space: O(total samples), because every sample is stored once.
 

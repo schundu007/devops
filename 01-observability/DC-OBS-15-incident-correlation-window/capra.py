@@ -83,3 +83,181 @@ WAYS_TO_SOLVE = [
     {"name": "Min-heap of heads", "idea": "Keep one pointer per service in a min-heap and slide the smallest forward.",
      "time": "O(n log k)", "space": "O(k)", "use": "Many services and long error lists."},
 ]
+
+VARIANT_TITLE = "Tightest incident window"
+VARIANT_APPROACH = "Min-heap of service heads · O(n log k) · O(k)"
+
+
+def _merge_large():
+    rng = random.Random(23)
+    return {"error_times": [sorted(rng.sample(range(0, 5000), rng.randint(1, 40))) for _ in range(15)]}
+
+
+def _quorum_large():
+    rng = random.Random(76)
+    return {"error_times": [sorted(rng.sample(range(-2000, 2000), 25)) for _ in range(8)], "m": 5}
+
+
+VARIANTS = [
+    {
+        "key": "merged-timeline",
+        "title": "One incident timeline",
+        "approach": "k-way merge with a min-heap · O(n log k) · O(k) extra",
+        "spec": {"kind": "fn", "fn": "merge_timelines", "params": ["error_times"]},
+        "statement": (
+            "For the postmortem you need a single timeline of every error across services. `error_times[s]` holds "
+            "service `s`'s error times, sorted ascending (a list may be empty).\n\n"
+            "Return every error as `[time, service]`, ordered by time; errors at the same time are ordered by "
+            "service number."
+        ),
+        "examples": [
+            {"args": {"error_times": [[1, 5], [2, 5], [0]]},
+             "explanation": "0 (service 2), 1 (service 0), 2 (service 1), then 5 from services 0 and 1 in service order.",
+             "why": {"t": "Interleave · Tie", "d": "Same-second errors sort by service number."}},
+        ],
+        "constraints": ["1 ≤ len(error_times) ≤ 1000", "0 ≤ len(error_times[s]) ≤ 1000, sorted ascending", "-10^5 ≤ time ≤ 10^5"],
+        "hints": [
+            "Each list is already sorted: only the head of each list can be next.",
+            "Keep one (time, service, index) tuple per service in a min-heap; the tuple order handles ties.",
+        ],
+        "tests": [
+            {"args": {"error_times": [[]]}, "why": {"t": "No errors", "d": "One quiet service: []."}},
+            {"args": {"error_times": [[], [3], []]}, "why": {"t": "Mostly empty", "d": "Empty lists are skipped."}},
+            {"args": {"error_times": [[7, 7], [7]]}, "why": {"t": "Duplicate times", "d": "Repeats within and across services."}},
+            {"args": {"error_times": [[-5, 10], [-10, 20], [0]]}, "why": {"t": "Negative times", "d": "Times before the reference point."}},
+            {"args": {"error_times": [[1, 2, 3, 4], [100]]}, "why": {"t": "One list runs out", "d": "The long tail comes from a single service."}},
+            {"args": _merge_large(), "why": {"t": "Large input", "d": "15 services with up to 40 errors each."}},
+        ],
+        "solutions": [
+            {"name": "Heap of heads (Optimal)",
+             "description": "Push each non-empty service's first error as (time, service, index). Pop the smallest, emit it, and push that service's next error.",
+             "time": "O(n log k)", "space": "O(k) extra",
+             "keyPoints": ["Only k heads are compared at a time", "(time, service) tuples give the tie-break", "Same heap as the tightest-window problem"],
+             "code": '''import heapq
+
+
+def merge_timelines(error_times):
+    heap = [(times[0], s, 0) for s, times in enumerate(error_times) if times]
+    heapq.heapify(heap)
+    out = []
+    while heap:
+        t, s, i = heapq.heappop(heap)
+        out.append([t, s])
+        if i + 1 < len(error_times[s]):
+            heapq.heappush(heap, (error_times[s][i + 1], s, i + 1))
+    return out
+'''},
+            {"name": "Scan every head", "slow": True,
+             "description": "Keep one pointer per service; each step scans all k heads for the smallest (time, service).",
+             "time": "O(n · k)", "space": "O(k) extra",
+             "keyPoints": ["No heap needed", "Every emitted error costs a scan of all services"],
+             "code": '''def merge_timelines(error_times):
+    ptr = [0] * len(error_times)
+    out = []
+    while True:
+        best = None
+        for s, times in enumerate(error_times):
+            if ptr[s] < len(times) and (best is None or times[ptr[s]] < error_times[best][ptr[best]]):
+                best = s
+        if best is None:
+            return out
+        out.append([error_times[best][ptr[best]], best])
+        ptr[best] += 1
+'''},
+        ],
+        "starter": '''def merge_timelines(error_times: list[list[int]]) -> list[list[int]]:
+    """Every error as [time, service], by time then service."""
+    raise NotImplementedError
+''',
+    },
+    {
+        "key": "quorum-window",
+        "title": "Window covering m of k services",
+        "approach": "Merge + sliding window with per-service counts · O(n log n) · O(n)",
+        "spec": {"kind": "fn", "fn": "quorum_window", "params": ["error_times", "m"]},
+        "statement": (
+            "Some services fail for unrelated reasons, so requiring every service is too strict. Correlate an incident "
+            "when errors from **at least `m` different services** fall inside one window.\n\n"
+            "`error_times[s]` is service `s`'s error times, sorted ascending and never empty. Return `[start, end]`, "
+            "the narrowest inclusive window that holds errors from at least `m` distinct services. On equal width, "
+            "return the smallest `start`."
+        ),
+        "examples": [
+            {"args": {"error_times": [[1, 50], [48], [100, 200]], "m": 2},
+             "explanation": "Services 0 and 1 have errors at 50 and 48: [48, 50], width 2. Service 2 is unrelated.",
+             "why": {"t": "Quorum", "d": "One noisy service no longer stretches the window."}},
+            {"args": {"error_times": [[4, 9], [2]], "m": 1},
+             "explanation": "Any single error is a width-0 window; the earliest is [2, 2].",
+             "why": {"t": "m = 1", "d": "The trivial quorum."}},
+        ],
+        "constraints": ["1 ≤ m ≤ len(error_times) ≤ 1000", "1 ≤ len(error_times[s]) ≤ 50, sorted ascending", "-10^5 ≤ time ≤ 10^5"],
+        "hints": [
+            "Merge every error into one list of (time, service) sorted by time.",
+            "Slide a window over that list, keeping a count per service and the number of distinct services inside.",
+            "While the window has m services, record it and move the left edge forward.",
+        ],
+        "tests": [
+            {"args": {"error_times": [[5]], "m": 1}, "why": {"t": "Minimal", "d": "One service, one error."}},
+            {"args": {"error_times": [[1, 5], [3, 7]], "m": 2}, "why": {"t": "Tie on width", "d": "[1, 3] and [3, 5] tie; the earlier start wins."}},
+            {"args": {"error_times": [[10, 10], [10]], "m": 2}, "why": {"t": "Same second", "d": "Duplicate times give a width-0 window."}},
+            {"args": {"error_times": [[0], [100], [200], [300]], "m": 4}, "why": {"t": "m = k", "d": "Needs every service, like the main problem."}},
+            {"args": {"error_times": [[-30, 5], [-28], [6, 90], [7]], "m": 3}, "why": {"t": "Several quorums", "d": "[5, 7] beats the earlier cluster."}},
+            {"args": _quorum_large(), "why": {"t": "Large input", "d": "8 services, 25 errors each, quorum of 5."}},
+        ],
+        "solutions": [
+            {"name": "Sliding window over merged errors (Optimal)",
+             "description": "Sort all (time, service) pairs. Extend the right edge; while the window holds m services, record it if narrower and drop the left error.",
+             "time": "O(n log n)", "space": "O(n)",
+             "keyPoints": ["Distinct count changes only when a service's count hits 0 or leaves 0", "Record before shrinking", "Compare (width, start) for the tie-break"],
+             "code": '''def quorum_window(error_times, m):
+    events = sorted((t, s) for s, times in enumerate(error_times) for t in times)
+    count = {}
+    distinct = 0
+    best = None
+    left = 0
+    for t, s in events:
+        count[s] = count.get(s, 0) + 1
+        if count[s] == 1:
+            distinct += 1
+        while distinct >= m:
+            start = events[left][0]
+            if best is None or (t - start, start) < (best[1] - best[0], best[0]):
+                best = [start, t]
+            ls = events[left][1]
+            count[ls] -= 1
+            if count[ls] == 0:
+                distinct -= 1
+            left += 1
+    return best
+'''},
+            {"name": "Try every start and end", "slow": True,
+             "description": "For every pair of error times start <= end, count the services with an error inside using binary search.",
+             "time": "O(T² · k log L)", "space": "O(T)",
+             "keyPoints": ["Every optimal window starts and ends on an error time", "Quadratic in the number of distinct times"],
+             "code": '''from bisect import bisect_left
+
+
+def quorum_window(error_times, m):
+    times = sorted({t for ts in error_times for t in ts})
+    best = None
+    for i, start in enumerate(times):
+        for end in times[i:]:
+            if best is not None and end - start >= best[1] - best[0]:
+                break
+            hit = 0
+            for ts in error_times:
+                j = bisect_left(ts, start)
+                if j < len(ts) and ts[j] <= end:
+                    hit += 1
+            if hit >= m:
+                best = [start, end]
+                break
+    return best
+'''},
+        ],
+        "starter": '''def quorum_window(error_times: list[list[int]], m: int) -> list[int]:
+    """Narrowest [start, end] holding errors from at least m services."""
+    raise NotImplementedError
+''',
+    },
+]

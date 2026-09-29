@@ -224,3 +224,238 @@ WAYS_TO_SOLVE = [
     {"name": "Condition variables", "idea": "Sleep on not_full / not_empty and wake exactly when state changes.",
      "time": "O(1)", "space": "O(capacity)", "use": "Every real bounded buffer (Go channels, Java ArrayBlockingQueue)."},
 ]
+
+import random as _random
+
+VARIANT_TITLE = "Blocking bounded queue"
+VARIANT_APPROACH = "Lock + two condition variables · O(1) per operation · O(capacity)"
+
+_RING_FAST = '''from typing import Any
+
+
+class RingBuffer:
+    def __init__(self, capacity: int) -> None:
+        self._buf: list[Any] = [None] * capacity
+        self._head = 0
+        self._count = 0
+
+    def push(self, item: Any) -> Any:
+        cap = len(self._buf)
+        if self._count < cap:
+            self._buf[(self._head + self._count) % cap] = item
+            self._count += 1
+            return None
+        evicted = self._buf[self._head]
+        self._buf[self._head] = item
+        self._head = (self._head + 1) % cap
+        return evicted
+
+    def pop(self) -> Any:
+        if self._count == 0:
+            return None
+        item = self._buf[self._head]
+        self._buf[self._head] = None
+        self._head = (self._head + 1) % len(self._buf)
+        self._count -= 1
+        return item
+
+    def size(self) -> int:
+        return self._count
+'''
+
+_RING_SLOW = '''from typing import Any
+
+
+class RingBuffer:
+    def __init__(self, capacity: int) -> None:
+        self._cap = capacity
+        self._items: list[Any] = []
+
+    def push(self, item: Any) -> Any:
+        self._items.append(item)
+        if len(self._items) > self._cap:
+            return self._items.pop(0)
+        return None
+
+    def pop(self) -> Any:
+        return self._items.pop(0) if self._items else None
+
+    def size(self) -> int:
+        return len(self._items)
+'''
+
+_STALL_FAST = '''def stall_times(capacity: int, produce: list[int], consume: list[int]) -> list[list[int]]:
+    n = len(produce)
+    enq = [0] * n
+    deq = [0] * n
+    for i in range(n):
+        t = produce[i]
+        if i:
+            t = max(t, enq[i - 1])
+        if i >= capacity:
+            t = max(t, deq[i - capacity])
+        enq[i] = t
+        d = max(consume[i], t)
+        if i:
+            d = max(d, deq[i - 1])
+        deq[i] = d
+    return [[enq[i], deq[i]] for i in range(n)]
+'''
+
+_STALL_SLOW = '''def stall_times(capacity: int, produce: list[int], consume: list[int]) -> list[list[int]]:
+    n = len(produce)
+    out = [[0, 0] for _ in range(n)]
+    if n == 0:
+        return []
+    horizon = max(produce + consume)
+    nxt_p = nxt_c = 0
+    in_queue = 0
+    for t in range(horizon + 1):
+        moved = True
+        while moved:
+            moved = False
+            if nxt_p < n and produce[nxt_p] <= t and in_queue < capacity:
+                out[nxt_p][0] = t
+                nxt_p += 1
+                in_queue += 1
+                moved = True
+            if nxt_c < nxt_p and consume[nxt_c] <= t and in_queue > 0:
+                out[nxt_c][1] = t
+                nxt_c += 1
+                in_queue -= 1
+                moved = True
+    return out
+'''
+
+
+def _rops(cap, *steps):
+    ops, vals = ["RingBuffer"], [[cap]]
+    for s in steps:
+        ops.append(s[0])
+        vals.append(list(s[1:]))
+    return {"ops": ops, "vals": vals}
+
+
+def _ring_large():
+    rng = _random.Random(1313)
+    steps = []
+    for i in range(600):
+        r = rng.random()
+        steps.append(("push", "ev-%d" % i) if r < 0.6 else ("pop",) if r < 0.9 else ("size",))
+    return _rops(16, *steps)
+
+
+def _stall_large():
+    rng = _random.Random(1188)
+    p, c, tp, tc = [], [], 0, 0
+    for _ in range(300):
+        tp += rng.randint(0, 5)
+        tc += rng.randint(0, 9)
+        p.append(tp)
+        c.append(tc)
+    return {"capacity": 8, "produce": p, "consume": c}
+
+
+VARIANTS = [
+    {
+        "key": "drop-oldest-ring",
+        "title": "Drop-oldest ring buffer",
+        "approach": "Fixed array with head and count · O(1) per operation · O(capacity)",
+        "spec": {"kind": "design", "fn": "RingBuffer", "params": [], "cmp": "exact"},
+        "statement": (
+            "Blocking is the wrong backpressure for a metrics agent: a stalled exporter must never stall the "
+            "application. Instead the buffer keeps the newest data and **drops the oldest**.\n\n"
+            "Implement `RingBuffer(capacity)` (single-threaded):\n\n"
+            "- `push(item)` appends `item`. If the buffer was full, the oldest item is evicted and returned; "
+            "otherwise return `None`\n"
+            "- `pop()` removes and returns the oldest item, or `None` when empty\n"
+            "- `size()` returns the number of buffered items\n\n"
+            "`push` and `pop` must be O(1): no shifting of the whole buffer."
+        ),
+        "examples": [
+            {"args": _rops(2, ("push", "a"), ("push", "b"), ("push", "c"), ("pop",), ("pop",), ("pop",)),
+             "explanation": "Pushing c into a full buffer evicts a. The buffer then yields b, c, and None when empty.",
+             "why": {"t": "Evict the oldest", "d": "A full buffer drops from the front, not the back."}},
+        ],
+        "constraints": ["1 ≤ capacity ≤ 10⁴", "at most 2,000 calls", "items are strings or integers"],
+        "hints": [
+            "Allocate an array of size capacity once and keep a head index and a count.",
+            "The tail slot is (head + count) % capacity. A push into a full buffer overwrites the head and moves it forward.",
+        ],
+        "tests": [
+            {"args": _rops(1, ("pop",), ("size",)), "why": {"t": "Pop empty", "d": "An empty buffer returns None and has size 0."}},
+            {"args": _rops(1, ("push", 1), ("push", 2), ("push", 3), ("pop",), ("size",)), "why": {"t": "Capacity 1", "d": "Each push evicts the previous item."}},
+            {"args": _rops(3, ("push", "x"), ("push", "x"), ("push", "x"), ("push", "y"), ("pop",), ("pop",), ("pop",)),
+             "why": {"t": "Duplicates", "d": "Equal items are still evicted one at a time, in order."}},
+            {"args": _rops(3, ("push", 1), ("push", 2), ("pop",), ("push", 3), ("push", 4), ("push", 5), ("pop",), ("pop",), ("pop",), ("pop",)),
+             "why": {"t": "Wrap-around", "d": "Head and tail wrap past the end of the array."}},
+            {"args": _rops(4, ("push", 1), ("pop",), ("pop",), ("push", 2), ("size",)), "why": {"t": "Drain then refill", "d": "Popping past empty does not break the next push."}},
+            {"args": _ring_large(), "why": {"t": "Large input", "d": "600 mixed pushes, pops and sizes on 16 slots."}},
+        ],
+        "solutions": [
+            {"name": "Circular array (Optimal)",
+             "description": "A preallocated array, a head index and a count. Push writes at (head + count) % cap or overwrites the head when full; pop reads the head.",
+             "time": "O(1) per operation", "space": "O(capacity)",
+             "keyPoints": ["No element ever moves", "Full-buffer push overwrites and advances head", "Clear popped slots so old items can be freed"],
+             "code": _RING_FAST},
+            {"name": "List with pop(0)", "slow": True,
+             "description": "Append to a Python list and pop from the front when it grows past capacity.",
+             "time": "O(capacity) per push and pop", "space": "O(capacity)",
+             "keyPoints": ["Correct and short", "pop(0) shifts every remaining element"],
+             "code": _RING_SLOW},
+        ],
+        "starter": "class RingBuffer:\n    def __init__(self, capacity: int) -> None:\n        pass\n\n    def push(self, item):\n        pass\n\n    def pop(self):\n        pass\n\n    def size(self) -> int:\n        pass\n",
+    },
+    {
+        "key": "producer-stall-times",
+        "title": "Predict producer stalls",
+        "approach": "Recurrence over item index · O(n) · O(n)",
+        "spec": {"kind": "fn", "fn": "stall_times", "params": ["capacity", "produce", "consume"], "cmp": "exact"},
+        "statement": (
+            "Capacity planning for a log pipeline: one tailer enqueues lines into a blocking queue of size "
+            "`capacity`, and one shipper dequeues them. Item `i` is ready to be enqueued at `produce[i]`, and "
+            "the shipper is ready for item `i` at `consume[i]` (both lists non-decreasing). Operations take no "
+            "time.\n\n"
+            "- The tailer handles items in order; an enqueue blocks while the queue is full\n"
+            "- The shipper handles items in order; a dequeue blocks while the queue is empty\n"
+            "- A slot freed at time t can be used at time t\n\n"
+            "Return `[enqueued_at, dequeued_at]` for every item."
+        ),
+        "examples": [
+            {"args": {"capacity": 1, "produce": [0, 0, 0], "consume": [5, 6, 7]},
+             "explanation": "Item 0 goes in at 0. Item 1 waits for the only slot until item 0 leaves at 5; item 2 waits until 6.",
+             "why": {"t": "Slow shipper", "d": "Backpressure delays the tailer to the shipper's pace."}},
+            {"args": {"capacity": 2, "produce": [3, 4], "consume": [0, 0]},
+             "explanation": "The shipper is waiting, so each item leaves the moment it arrives.",
+             "why": {"t": "Slow tailer", "d": "Dequeues block on an empty queue instead."}},
+        ],
+        "constraints": ["0 ≤ n ≤ 300", "1 ≤ capacity ≤ 100", "0 ≤ produce[i], consume[i] ≤ 3000, each list non-decreasing"],
+        "hints": [
+            "Item i can enter only after item i - capacity has left, since the queue is FIFO.",
+            "enq[i] = max(produce[i], enq[i-1], deq[i-capacity]) and deq[i] = max(consume[i], deq[i-1], enq[i]).",
+            "Both depend only on earlier items, so one pass in index order computes everything.",
+        ],
+        "tests": [
+            {"args": {"capacity": 3, "produce": [], "consume": []}, "why": {"t": "No items", "d": "Nothing to schedule: []."}},
+            {"args": {"capacity": 1, "produce": [2], "consume": [2]}, "why": {"t": "Single item, same time", "d": "Enqueue and dequeue in the same instant."}},
+            {"args": {"capacity": 2, "produce": [0, 0, 0, 0], "consume": [10, 10, 10, 10]}, "why": {"t": "Burst then drain", "d": "Two items wait; the rest enter as the shipper frees slots at 10."}},
+            {"args": {"capacity": 5, "produce": [0, 1, 2], "consume": [0, 1, 2]}, "why": {"t": "Never full", "d": "Capacity is larger than the backlog: no stalls."}},
+            {"args": {"capacity": 1, "produce": [0, 1, 2, 3], "consume": [0, 0, 0, 9]}, "why": {"t": "Late last read", "d": "Only the last item waits for the shipper."}},
+            {"args": {"capacity": 100, "produce": [7, 7, 7], "consume": [7, 7, 7]}, "why": {"t": "All at one instant", "d": "Every enqueue and dequeue happens at time 7."}},
+            {"args": _stall_large(), "why": {"t": "Large input", "d": "300 items; the shipper is slower on average."}},
+        ],
+        "solutions": [
+            {"name": "Recurrence in index order (Optimal)",
+             "description": "Walk items in order. An enqueue waits for its ready time, the previous enqueue and the dequeue of item i - capacity; a dequeue waits for its ready time, the previous dequeue and its own enqueue.",
+             "time": "O(n)", "space": "O(n)",
+             "keyPoints": ["FIFO means slot i is freed by item i - capacity", "Each time is a max of earlier times", "No clock simulation needed"],
+             "code": _STALL_FAST},
+            {"name": "Tick-by-tick simulation", "slow": True,
+             "description": "Advance a clock one unit at a time; at each tick keep letting the tailer and shipper act until neither can.",
+             "time": "O(T + n)", "space": "O(n)",
+             "keyPoints": ["Mirrors the real system", "Cost grows with the time span, not the item count"],
+             "code": _STALL_SLOW},
+        ],
+        "starter": "def stall_times(capacity: int, produce: list[int], consume: list[int]) -> list[list[int]]:\n    pass\n",
+    },
+]

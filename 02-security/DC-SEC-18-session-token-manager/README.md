@@ -132,7 +132,7 @@ class TokenManager:
 ```
 
 **Complexity**
-- Time: O(1) amortised per call, because each token is evicted at most once per issue or renew.
+- Time: O(1) amortized per call, because each token is evicted at most once per issue or renew.
 - Space: O(live tokens), because expired ones are removed.
 
 ## 10. Tests
@@ -145,7 +145,7 @@ lease where a crashed pod stops renewing; and 40,000 random operations checked a
 and count what's live. A dict gives O(1) issue and renew, but counting would scan everything.
 The key observation is that every token has the same TTL, so tokens expire in the order they were
 last touched. An OrderedDict with move-to-end on each touch keeps them in expiry order, and I evict
-from the front before every call. Everything is O(1) amortised. The edge case is expiry at exactly
+from the front before every call. Everything is O(1) amortized. The edge case is expiry at exactly
 now: it expires first, so a late renew can't revive it. Vault adds a max TTL on top, so even healthy
 clients re-authenticate eventually."
 

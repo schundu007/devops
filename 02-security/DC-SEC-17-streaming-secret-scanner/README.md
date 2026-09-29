@@ -140,7 +140,7 @@ and walk it backward from that character. Stop at an end marker: match. Fall off
 I only need the last L characters, L being the longest pattern, so a bounded deque holds the
 buffer. Each character costs O(L) at worst and usually much less. In production, gitleaks-style
 tools use regex rules with entropy checks, and high-speed engines use Aho-Corasick, which does
-O(1) amortised work per character with failure links. The reverse trie is the simplest correct version."
+O(1) amortized work per character with failure links. The reverse trie is the simplest correct version."
 
 ## 12. Level Up
 1. **"Make it O(1) per character."** Build an Aho-Corasick automaton: a forward trie plus

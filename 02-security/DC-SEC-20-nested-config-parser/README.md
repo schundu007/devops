@@ -35,7 +35,7 @@ and JSON libraries with nesting limits (Python's `json` module fails with `Recur
 extremely deep input, and many other parsers expose an explicit max-depth setting).
 
 **Reality check:** Real formats have strings, floats, objects and escapes. This chip keeps only
-integers and lists, which is enough to practise the stack. A production service would also cap the
+integers and lists, which is enough to practice the stack. A production service would also cap the
 total body size (for example at the ingress or API server) before parsing even starts.
 
 **What breaks if you get it wrong:** A recursive parser with no depth limit turns a small
