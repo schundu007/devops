@@ -224,6 +224,22 @@ def numbered(body: str) -> list[str]:
     return items
 
 
+def classic_ids() -> dict[int, str]:
+    """LeetCode number -> the Playground Problems id that carries it."""
+    global _CLASSIC_IDS
+    if _CLASSIC_IDS is None:
+        manifest = json.loads((COPILOT / "tools" / "ppg" / "data" / "python" / "manifest.json").read_text())
+        _CLASSIC_IDS = {}
+        for p in manifest["problems"]:
+            m = re.fullmatch(r"LeetCode (\d+)", p.get("source") or "")
+            if m:
+                _CLASSIC_IDS.setdefault(int(m.group(1)), p["id"])
+    return _CLASSIC_IDS
+
+
+_CLASSIC_IDS: dict[int, str] | None = None
+
+
 def master_matrix() -> dict[str, dict[str, str]]:
     readme = (ROOT / "README.md").read_text()
     table = readme.split("## Master matrix", 1)[1]
@@ -313,6 +329,7 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str
         "pattern": meta["pattern"],
         "subsystem": meta["subsystem"],
         "handbookId": None,
+        "classicId": classic_ids().get(int(meta["lc"])),
     }
     for n, name in ((2, "scenario"), (3, "why"), (11, "talkTrack"), (12, "levelUp"), (13, "related")):
         if n not in sec:
