@@ -100,41 +100,46 @@ WAYS_TO_SOLVE = [
 VARIANT_TITLE = "Range by granularity"
 VARIANT_APPROACH = "Sorted list + prefix bounds · O(log n + m log m) per query · O(n)"
 
-_BUCKET_FAST = '''from bisect import bisect_left, bisect_right, insort
+_PAGE_FAST = '''from bisect import bisect_left, bisect_right, insort
+
+_PREFIX_LEN = {"Year": 4, "Month": 7, "Day": 10, "Hour": 13, "Minute": 16, "Second": 19}
 
 
-class EventCounter:
+class PagedLogStore:
     def __init__(self) -> None:
-        self._ts: list[int] = []
+        self._logs: list[tuple[str, int]] = []
+        self._ts: dict[int, str] = {}
 
-    def record(self, ts: int) -> None:
-        insort(self._ts, ts)
+    def put(self, log_id: int, timestamp: str) -> None:
+        insort(self._logs, (timestamp, log_id))
+        self._ts[log_id] = timestamp
 
-    def counts(self, start: int, end: int, size: int) -> list[int]:
-        out = []
-        lo = start
-        while lo <= end:
-            hi = min(lo + size - 1, end)
-            out.append(bisect_right(self._ts, hi) - bisect_left(self._ts, lo))
-            lo += size
-        return out
+    def page(self, start: str, end: str, granularity: str, limit: int, after: int) -> list[int]:
+        n = _PREFIX_LEN[granularity]
+        lo = bisect_left(self._logs, (start[:n],))
+        hi = bisect_right(self._logs, (end[:n] + "~",))
+        if after != -1:
+            lo = max(lo, bisect_right(self._logs, (self._ts[after], after)))
+        return [i for _, i in self._logs[lo:min(hi, lo + limit)]]
 '''
 
-_BUCKET_SLOW = '''class EventCounter:
+_PAGE_SLOW = '''_PREFIX_LEN = {"Year": 4, "Month": 7, "Day": 10, "Hour": 13, "Minute": 16, "Second": 19}
+
+
+class PagedLogStore:
     def __init__(self) -> None:
-        self._ts: list[int] = []
+        self._logs: list[tuple[str, int]] = []
 
-    def record(self, ts: int) -> None:
-        self._ts.append(ts)
+    def put(self, log_id: int, timestamp: str) -> None:
+        self._logs.append((timestamp, log_id))
 
-    def counts(self, start: int, end: int, size: int) -> list[int]:
-        if end < start:
-            return []
-        out = [0] * ((end - start) // size + 1)
-        for t in self._ts:
-            if start <= t <= end:
-                out[(t - start) // size] += 1
-        return out
+    def page(self, start: str, end: str, granularity: str, limit: int, after: int) -> list[int]:
+        n = _PREFIX_LEN[granularity]
+        hits = sorted(x for x in self._logs if start[:n] <= x[0][:n] <= end[:n])
+        if after != -1:
+            k = next(j for j, x in enumerate(hits) if x[1] == after)
+            hits = hits[k + 1:]
+        return [i for _, i in hits[:limit]]
 '''
 
 _RET_FAST = '''from bisect import bisect_left, bisect_right, insort
@@ -183,9 +188,12 @@ class RetentionLogStore:
 '''
 
 
-def _bops(times, *queries):
-    return {"ops": ["EventCounter"] + ["record"] * len(times) + ["counts"] * len(queries),
-            "vals": [[]] + [[t] for t in times] + [list(q) for q in queries]}
+def _pops(*steps):
+    ops, vals = ["PagedLogStore"], [[]]
+    for st in steps:
+        ops.append(st[0])
+        vals.append(list(st[1:]))
+    return {"ops": ops, "vals": vals}
 
 
 def _rops(*steps):
@@ -196,14 +204,14 @@ def _rops(*steps):
     return {"ops": ops, "vals": vals}
 
 
-def _bucket_large():
+def _page_large():
     rng = random.Random(1348)
-    times = [rng.randint(0, 86399) for _ in range(500)]
-    qs = []
-    for _ in range(30):
-        a = rng.randint(0, 80000)
-        qs.append((a, a + rng.randint(0, 6000), rng.choice([60, 300, 3600])))
-    return _bops(times, *qs)
+    steps = [("put", i, _stamp(rng)) for i in range(1, 401)]
+    for _ in range(8):
+        a, b = sorted([_stamp(rng), _stamp(rng)])
+        g = rng.choice(["Year", "Month", "Day"])
+        steps.append(("page", a, b, g, rng.randint(1, 25), -1))
+    return _pops(*steps)
 
 
 def _ret_large():
@@ -218,54 +226,69 @@ def _ret_large():
 
 VARIANTS = [
     {
-        "key": "bucket-counts",
-        "title": "Counts per time bucket",
-        "approach": "Sorted timestamps + two bisects per bucket · O(n) record, O(b log n) query · O(n)",
-        "spec": {"kind": "design", "fn": "EventCounter", "params": [], "cmp": "exact"},
+        "key": "paged-retrieve",
+        "title": "Page through results",
+        "approach": "Sorted list + prefix bounds + cursor bisect · O(log n + limit) per page · O(n)",
+        "spec": {"kind": "design", "fn": "PagedLogStore", "params": [], "cmp": "exact"},
         "statement": (
-            "A dashboard panel plots error counts over a time range. Events arrive as integer timestamps "
-            "(seconds). Implement `EventCounter`:\n\n"
-            "- `record(ts)` stores one event at second `ts` (duplicates allowed)\n"
-            "- `counts(start, end, size)` splits `[start, end]` into buckets `[start, start+size-1]`, "
-            "`[start+size, start+2·size-1]`, ... with the last bucket cut at `end`, and returns the number of "
-            "events in each bucket, in order\n\n"
-            "Events outside `[start, end]` are not counted. A query with `end < start` returns `[]`."
+            "A log viewer shows a range query a page at a time instead of all at once. Implement `PagedLogStore`:\n\n"
+            "- `put(id, timestamp)` behaves as in the main problem\n"
+            "- `page(start, end, granularity, limit, after)` selects the logs in range exactly as the main problem's "
+            "`retrieve` does, orders them by **timestamp, then id**, and returns the IDs of at most `limit` of them. "
+            "With `after = -1` it returns the first page; otherwise `after` is the last ID of the previous page, "
+            "and the page starts right after that log\n\n"
+            "Ordering by (timestamp, id) keeps the pages stable: every log in range appears on exactly one page."
         ),
         "examples": [
-            {"args": _bops([0, 60, 10], (0, 59, 60), (0, 60, 60)),
-             "explanation": "The first query is one bucket [0, 59] holding 0 and 10. The second adds a bucket [60, 60] holding 60.",
-             "why": {"t": "Minute buckets", "d": "The last bucket is cut at end."}},
-            {"args": _bops([5, 5, 5, 20], (0, 29, 10)),
-             "explanation": "Buckets [0,9], [10,19], [20,29] hold 3, 0 and 1 events.",
-             "why": {"t": "Empty bucket in the middle", "d": "A bucket with no events still appears as 0."}},
+            {"args": _pops(("put", 7, "2026:09:23:02:14:05"), ("put", 3, "2026:09:23:02:14:05"), ("put", 9, "2026:09:23:02:30:00"),
+                           ("page", "2026:09:23:02:00:00", "2026:09:23:02:00:00", "Hour", 2, -1),
+                           ("page", "2026:09:23:02:00:00", "2026:09:23:02:00:00", "Hour", 2, 7)),
+             "explanation": "Logs 3 and 7 share a second, so id breaks the tie: page one is [3, 7]. The next page starts after 7 and holds [9].",
+             "why": {"t": "Two pages, tied timestamps", "d": "Equal timestamps are ordered by id, and the cursor resumes after the last one."}},
         ],
-        "constraints": ["0 ≤ ts, start, end ≤ 10⁹", "1 ≤ size ≤ 10⁶", "at most 2,000 calls", "at most 10⁴ buckets per query"],
+        "constraints": ["timestamps are zero-padded `YYYY:MM:DD:hh:mm:ss`", "granularity is Year, Month, Day, Hour, Minute or Second",
+                        "1 ≤ limit ≤ 1000", "after is -1 or an ID returned by the previous page of the same query", "at most 2,000 calls"],
         "hints": [
-            "Keep the timestamps sorted as they arrive, as in the main problem.",
-            "Each bucket is a closed range [lo, hi]: bisect_right(hi) - bisect_left(lo) counts it.",
-            "Generate bucket bounds by stepping lo by size until it passes end.",
+            "Keep (timestamp, id) pairs sorted, as in the optimal main solution: the range is one contiguous slice.",
+            "The cursor is a position too: bisect_right on (timestamp of after, after) finds where the next page begins.",
+            "The page is the slice from max(range start, cursor) with at most limit entries.",
         ],
         "tests": [
-            {"args": _bops([], (0, 100, 50)), "why": {"t": "No events", "d": "Every bucket is 0."}},
-            {"args": _bops([7], (8, 5, 1)), "why": {"t": "Reversed range", "d": "end < start returns []."}},
-            {"args": _bops([10, 10, 10], (10, 10, 1)), "why": {"t": "Duplicates, one-second range", "d": "Three events in a single-second bucket."}},
-            {"args": _bops([0, 9, 10, 19, 20], (0, 20, 10)), "why": {"t": "Bucket edges", "d": "Events on the first and last second of each bucket."}},
-            {"args": _bops([100, 200], (0, 50, 1000)), "why": {"t": "Size larger than range", "d": "One bucket cut short at end; events after end are ignored."}},
-            {"args": _bucket_large(), "why": {"t": "Large input", "d": "500 events over a day and 30 queries at 1 min, 5 min and 1 h."}},
+            {"args": _pops(("page", "2026:01:01:00:00:00", "2026:12:31:23:59:59", "Year", 5, -1)),
+             "why": {"t": "Empty store", "d": "No logs: an empty page."}},
+            {"args": _pops(("put", 1, "2026:01:01:00:00:00"), ("put", 2, "2026:01:02:00:00:00"),
+                           ("page", "2026:01:01:00:00:00", "2026:01:31:00:00:00", "Month", 2, -1),
+                           ("page", "2026:01:01:00:00:00", "2026:01:31:00:00:00", "Month", 2, 2)),
+             "why": {"t": "Last page is empty", "d": "A cursor on the final log returns []."}},
+            {"args": _pops(("put", 5, "2026:03:03:03:03:03"), ("put", 1, "2026:03:03:03:03:03"), ("put", 3, "2026:03:03:03:03:03"),
+                           ("page", "2026:03:03:00:00:00", "2026:03:03:00:00:00", "Day", 1, -1),
+                           ("page", "2026:03:03:00:00:00", "2026:03:03:00:00:00", "Day", 1, 1),
+                           ("page", "2026:03:03:00:00:00", "2026:03:03:00:00:00", "Day", 1, 3)),
+             "why": {"t": "All in one second", "d": "Pages of one walk the tie by id: 1, 3, 5."}},
+            {"args": _pops(("put", 1, "2025:12:31:23:59:59"), ("put", 2, "2026:01:01:00:00:00"), ("put", 3, "2026:01:01:00:00:01"),
+                           ("page", "2026:01:01:00:00:00", "2026:01:01:00:00:00", "Day", 10, -1)),
+             "why": {"t": "Range edges", "d": "The log one second before the day is outside the range."}},
+            {"args": _pops(("put", 4, "2026:05:05:05:05:05"), ("put", 8, "2026:06:06:06:06:06"),
+                           ("page", "2026:01:01:00:00:00", "2026:12:31:00:00:00", "Year", 1000, -1)),
+             "why": {"t": "Limit larger than the range", "d": "The page holds every log in range."}},
+            {"args": _pops(("put", 1, "2026:02:01:00:00:00"), ("page", "2026:02:01:00:00:00", "2026:02:01:00:00:00", "Day", 5, -1),
+                           ("put", 2, "2026:02:01:12:00:00"), ("page", "2026:02:01:00:00:00", "2026:02:01:00:00:00", "Day", 5, 1)),
+             "why": {"t": "Log added between pages", "d": "A log written after the cursor shows up on the next page."}},
+            {"args": _page_large(), "why": {"t": "Large input", "d": "400 logs and first pages of eight range queries."}},
         ],
         "solutions": [
-            {"name": "Sorted list + bisect per bucket (Optimal)",
-             "description": "insort keeps timestamps ordered; each bucket costs two binary searches.",
-             "time": "O(n) record, O(b log n) counts", "space": "O(n)",
-             "keyPoints": ["Closed ranges: bisect_left on lo, bisect_right on hi", "Query cost depends on buckets, not events", "The last bucket is clipped at end"],
-             "code": _BUCKET_FAST},
-            {"name": "Scan every event", "slow": True,
-             "description": "On each query, walk every stored event and add it to bucket (t - start) // size.",
-             "time": "O(1) record, O(n + b) counts", "space": "O(n)",
-             "keyPoints": ["No ordering needed", "Every query touches every event"],
-             "code": _BUCKET_SLOW},
+            {"name": "Sorted list + cursor bisect (Optimal)",
+             "description": "Keep (timestamp, id) sorted and remember each id's timestamp. The range is a slice found with prefix bounds; the cursor is one more bisect; the page is the next limit entries.",
+             "time": "O(n) put, O(log n + limit) page", "space": "O(n)",
+             "keyPoints": ["(timestamp, id) order makes the cursor unambiguous", "bisect_right on (ts, after) starts just past the cursor", "Cost depends on the page size, not the range size"],
+             "code": _PAGE_FAST},
+            {"name": "Filter, sort and skip", "slow": True,
+             "description": "On every page, collect the logs in range, sort them, find the cursor and cut out the next limit entries.",
+             "time": "O(1) put, O(n log n) page", "space": "O(n)",
+             "keyPoints": ["Easy to get right", "Every page re-sorts the whole range"],
+             "code": _PAGE_SLOW},
         ],
-        "starter": "class EventCounter:\n    def __init__(self) -> None:\n        pass\n\n    def record(self, ts: int) -> None:\n        pass\n\n    def counts(self, start: int, end: int, size: int) -> list[int]:\n        pass\n",
+        "starter": "class PagedLogStore:\n    def __init__(self) -> None:\n        pass\n\n    def put(self, log_id: int, timestamp: str) -> None:\n        pass\n\n    def page(self, start: str, end: str, granularity: str, limit: int, after: int) -> list[int]:\n        pass\n",
     },
     {
         "key": "retention-purge",
