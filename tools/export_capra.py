@@ -25,6 +25,15 @@ capra.py fields:
                 The first entry must be file "solution.py".
   WAYS_TO_SOLVE optional [{"name", "idea", "time", "space", "use"}]
   FOLLOW_UP     optional str
+  VARIANT_TITLE, VARIANT_APPROACH
+                the main problem's name and "approach · time · space" line
+                when it has use cases
+  VARIANTS      use cases: [{"key", "title", "approach", "spec", "statement",
+                  "examples", "constraints": [...], "hints": [...], "tests",
+                  "solutions": [{"name", "description", "time", "space",
+                  "keyPoints", "code", "slow"?}], "starter"? }]
+                Each is checked like the main problem: its first solution is
+                the reference, every other one must agree with it.
 
     python3 tools/export_capra.py                     # export all, write JSON
     python3 tools/export_capra.py --only DC-OBS-01    # one chip
@@ -408,9 +417,63 @@ def export_chip(folder: Path, matrix: dict[str, dict[str, str]], names: dict[str
         problem["waysToSolve"] = cfg["WAYS_TO_SOLVE"]
     if cfg.get("FOLLOW_UP"):
         problem["followUp"] = cfg["FOLLOW_UP"]
+    if cfg.get("VARIANTS"):
+        if not (cfg.get("VARIANT_TITLE") and cfg.get("VARIANT_APPROACH")):
+            raise ExportError("VARIANTS need VARIANT_TITLE and VARIANT_APPROACH")
+        problem["variantTitle"] = cfg["VARIANT_TITLE"]
+        problem["variantApproach"] = cfg["VARIANT_APPROACH"]
+        problem["variants"] = [export_variant(v) for v in cfg["VARIANTS"]]
+        elapsed += sum(v.pop("_seconds") for v in problem["variants"])
     entry["problem"] = problem
     entry["_stats"] = {"cases": len(cases), "bytes": size, "seconds": round(elapsed, 3)}
     return entry
+
+
+def export_variant(v: dict[str, Any]) -> dict[str, Any]:
+    """One use case, verified like the main problem."""
+    key = v.get("key", "?")
+    for f in ("key", "title", "approach", "spec", "statement", "examples", "constraints", "hints", "tests", "solutions"):
+        if not v.get(f):
+            raise ExportError(f"use case {key}: {f} missing")
+    spec = dict(v["spec"])
+    spec.setdefault("types", {})
+    spec.setdefault("ret", "value")
+    spec.setdefault("cmp", "exact")
+    examples, tests, sols = v["examples"], v["tests"], v["solutions"]
+    if not (1 <= len(examples) <= 3) or len(tests) < 5 or len(sols) < 2 or len(v["hints"]) < 2:
+        raise ExportError(f"use case {key}: need 1-3 examples, >= 5 tests, >= 2 solutions, >= 2 hints")
+    if not any(s.get("slow") for s in sols):
+        raise ExportError(f"use case {key}: one solution must be the slow baseline")
+    cases = [e["args"] for e in examples] + [t["args"] for t in tests]
+    records, elapsed = run_harness(sols[0]["code"], spec, cases)
+    bad = [(i, r["err"]) for i, r in enumerate(records) if not r["ok"]]
+    if bad:
+        raise ExportError(f"use case {key}: reference failed case {bad[0][0]}: {bad[0][1]}")
+    expected = [r["out"] for r in records]
+    for s in sols[1:]:
+        other, t = run_harness(s["code"], spec, cases)
+        elapsed += t
+        for i, (r, e) in enumerate(zip(other, expected)):
+            if not r["ok"] or not judge(spec["cmp"], e, r["out"]):
+                raise ExportError(f"use case {key}: {s['name']!r} disagrees on case {i}")
+    n = len(examples)
+    out: dict[str, Any] = {
+        "key": key, "title": v["title"], "approach": v["approach"], "spec": spec,
+        "statement": no_arrows(v["statement"].strip()),
+        "examples": [{"args": e["args"], "output": expected[i], "explanation": e.get("explanation", ""),
+                      **({"why": e["why"]} if "why" in e else {})} for i, e in enumerate(examples)],
+        "constraints": [re.sub(r"\*\*|`", "", no_arrows(c)) for c in v["constraints"]],
+        "hints": [no_arrows(h) for h in v["hints"]],
+        "tests": [{"args": t["args"], "expected": expected[n + i], **({"why": t["why"]} if "why" in t else {})}
+                  for i, t in enumerate(tests)],
+        "solutions": [{"name": s["name"], "description": s["description"], "code": {"python": strip_ids(s["code"])},
+                       "complexity": {"time": s["time"], "space": s["space"]}, "keyPoints": s.get("keyPoints", []),
+                       **({"slow": True} if s.get("slow") else {})} for s in sols],
+        "_seconds": elapsed,
+    }
+    if v.get("starter"):
+        out["starter"] = {"python": strip_ids(clean_starter(v["starter"]))}
+    return out
 
 
 def main() -> None:
