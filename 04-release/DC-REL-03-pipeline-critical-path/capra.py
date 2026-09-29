@@ -102,12 +102,21 @@ VARIANTS = [
         "approach": "Forward and backward pass over a topological order · O(n + E) · O(n + E)",
         "spec": {"kind": "fn", "fn": "stage_slack", "params": ["n", "deps", "duration"]},
         "statement": (
-            "The pipeline is slow and the team wants to know **which stages matter**. Speeding up a stage with "
-            "slack does nothing; only stages on the critical path move the total.\n\n"
-            "Same input as before: `n` stages, `deps` as `[a, b]` (b waits for a), `duration[i]` minutes, "
-            "unlimited runners, no cycles. With the pipeline finishing as early as possible, the **slack** of a "
-            "stage is how many minutes it could start later than its earliest start without delaying the end.\n\n"
-            "Return the slack of every stage, as a list indexed by stage. Critical stages have slack 0."
+            "The pipeline is slow and the team wants to know **which stages matter**: speeding up a stage with slack does nothing, and only stages on the critical path move the total.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of stages\n"
+            "- `deps`: pairs `[a, b]`; `b` waits for `a`\n"
+            "- `duration[i]`: minutes stage `i` takes\n"
+            "\n"
+            "### Output\n"
+            "- The slack of every stage, as a list indexed by stage\n"
+            "\n"
+            "### Rules\n"
+            "- Unlimited runners; the dependencies contain no cycles\n"
+            "- The pipeline finishes as early as possible\n"
+            "- The **slack** of a stage is how many minutes it could start later than its earliest start without delaying the end\n"
+            "- Critical stages have slack `0`"
         ),
         "examples": [
             {"args": {"n": 4, "deps": [[0, 1], [0, 2], [1, 3], [2, 3]], "duration": [2, 5, 3, 1]},
@@ -201,11 +210,19 @@ def stage_slack(n, deps, duration):
         "approach": "Kahn's algorithm by levels · O(n + E) · O(n + E)",
         "spec": {"kind": "fn", "fn": "deploy_waves", "params": ["n", "deps"]},
         "statement": (
-            "A release train deploys `n` services in **waves**. A wave deploys, all at once, every service whose "
-            "dependencies have already shipped in earlier waves. `deps[i] = [a, b]` means service `b` depends on "
-            "service `a`.\n\n"
-            "Return the minimum number of waves needed to ship everything. The dependency file is hand-edited, "
-            "so it may contain a **cycle**; in that case the release can never finish, and you return `-1`."
+            "A release train deploys services in **waves**; find how many waves it needs.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of services\n"
+            "- `deps[i] = [a, b]`: service `b` depends on service `a`\n"
+            "\n"
+            "### Output\n"
+            "- The minimum number of waves needed to ship everything\n"
+            "- `-1` if the dependencies contain a **cycle**\n"
+            "\n"
+            "### Rules\n"
+            "- A wave deploys, all at once, every service whose dependencies have already shipped in earlier waves\n"
+            "- The dependency file is hand-edited, so it may contain a cycle; then the release can never finish"
         ),
         "examples": [
             {"args": {"n": 4, "deps": [[0, 1], [0, 2], [1, 3], [2, 3]]},

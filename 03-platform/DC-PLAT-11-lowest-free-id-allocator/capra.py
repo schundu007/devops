@@ -147,13 +147,17 @@ VARIANTS = [
         "title": "Node ports with static reservations",
         "approach": "Watermark + min-heap with lazy skips · O(log r) amortized per call · O(k)",
         "spec": {"kind": "fn", "fn": "run_ports", "params": ["size", "base", "ops"], "ret": "value", "cmp": "exact"},
-        "statement": """A cluster hands out node ports from `base` to `base + size - 1`. Most services take the lowest free port, but some pin a specific one. Process `ops` in order and return one result per operation:
+        "statement": """A cluster hands out node ports. Most services take the lowest free port, but some pin a specific one.
 
-- `["allocate"]` — the smallest free port, now in use, or `null` if none is free
-- `["reserve", p]` — `true` and mark `p` in use if it is in the range and free, else `false`
-- `["release", p]` — `true` and free `p` if it is in use, else `false`
+### Input
+- `size`, `base`: the ports run from `base` to `base + size - 1`
+- `ops`: the operations, processed in order
 
-A reservation can land above the watermark, so the watermark must skip it later, and a heap entry can go stale when its port is reserved again. Skip both lazily.""",
+### Output
+- One result per operation:
+  - `["allocate"]`: the smallest free port, now in use, or `null` if none is free
+  - `["reserve", p]`: `true` and mark `p` in use if it is in the range and free, else `false`
+  - `["release", p]`: `true` and free `p` if it is in use, else `false`""",
         "examples": [
             {"args": {"size": 5, "base": 30000, "ops": [["reserve", 30001], ["allocate"], ["allocate"], ["release", 30001], ["allocate"]]},
              "explanation": "30001 is pinned, so the watermark hands out 30000 and then skips to 30002. After 30001 is released it is the lowest free port again.",
@@ -259,11 +263,19 @@ def run_ports(size, base, ops):
         "title": "DHCP leases that expire",
         "approach": "Expiry heap + free-ID heap + watermark · O(n log n) · O(size)",
         "spec": {"kind": "fn", "fn": "lease_addresses", "params": ["size", "ttl", "requests"], "ret": "value", "cmp": "exact"},
-        "statement": """A DHCP server leases addresses `0` to `size - 1`. Nobody releases a lease: it simply expires. A lease granted at time `t` holds the address on `[t, t + ttl)`, so at time `t + ttl` it is free again.
+        "statement": """A DHCP server leases addresses. Nobody releases a lease: it simply expires.
 
-`requests` holds request times in non-decreasing order. Each request gets the **smallest** address free at that moment, or `-1` if every address is leased. Return the address given to each request.
+### Input
+- `size`: the addresses run from `0` to `size - 1`
+- `ttl`: how long a lease holds its address
+- `requests`: request times in non-decreasing order
 
-Releases now come from time, not from calls: before answering a request, move every lease that has expired onto the free heap.""",
+### Output
+- The address given to each request, or `-1` if every address is leased
+
+### Rules
+- Each request gets the **smallest** address free at that moment
+- A lease granted at time `t` holds the address on `[t, t + ttl)`, so at time `t + ttl` it is free again""",
         "examples": [
             {"args": {"size": 2, "ttl": 10, "requests": [0, 1, 5, 10, 11]},
              "explanation": "0 and 1 are leased at times 0 and 1; at 5 both are taken (-1). At 10 address 0 expires and is reused; at 11 address 1 is.",

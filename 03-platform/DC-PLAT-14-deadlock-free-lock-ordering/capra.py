@@ -271,13 +271,19 @@ VARIANTS = [
         "approach": "Incremental cycle check on the acquired-before graph · O(T · k² · (V + E)) · O(V + E)",
         "spec": {"kind": "fn", "fn": "first_inversion", "params": ["traces"], "cmp": "exact"},
         "statement": (
-            "Linux's lockdep finds deadlocks **before** they happen by recording, for every lock taken, which "
-            "locks were already held. If anything ever takes `A` then `B`, and anything else takes `B` then `A`, "
-            "the two can deadlock even if the test run was lucky.\n\n"
-            "Each `traces[t]` is the list of lock names one code path acquires, in order, each held until the "
-            "end of the trace. That adds an edge `a` before `b` for every pair where `a` comes earlier in the trace.\n\n"
-            "Process traces in order and return the index of the **first** trace that creates a cycle in the "
-            "acquired-before graph (a possible deadlock), or `-1` if the lock order stays consistent."
+            "Linux's lockdep finds deadlocks **before** they happen by recording, for every lock taken, which locks were already held.\n"
+            "\n"
+            "### Input\n"
+            "- `traces[t]`: the lock names one code path acquires, in order, each held until the end of the trace\n"
+            "\n"
+            "### Output\n"
+            "- The index of the **first** trace that creates a cycle in the acquired-before graph (a possible deadlock)\n"
+            "- `-1` if the lock order stays consistent\n"
+            "\n"
+            "### Rules\n"
+            "- A trace adds an edge `a` before `b` for every pair where `a` comes earlier in the trace\n"
+            "- Process traces in order\n"
+            "- If anything ever takes `A` then `B`, and anything else takes `B` then `A`, the two can deadlock even if the test run was lucky"
         ),
         "examples": [
             {"args": {"traces": [["db", "cache"], ["cache", "queue"], ["queue", "db"]]},
@@ -377,14 +383,19 @@ def first_inversion(traces):
         "spec": {"kind": "driver", "fn": "ShardLocks", "params": ["scenario", "n", "plans", "rounds"], "cmp": "exact",
                  "driver": SHARD_DRIVER},
         "statement": (
-            "A resharding job moves rows between **any** set of shards, not just two neighbors. Implement "
-            "`ShardLocks(n)` over shards `0..n-1` and `run_txn(shards, take, work, release)`:\n\n"
-            "- `shards` lists the shards one transaction touches, in any order, possibly with repeats or empty.\n"
-            "- Hold the lock of **every** distinct shard while calling `work()`.\n"
-            "- Call `take(s)` right after acquiring shard `s`, and `release(s)` right before releasing it. "
-            "Release in the reverse order of acquiring.\n"
-            "- Many threads call `run_txn` at once; it must never deadlock. `n < 1` raises `ValueError`.\n\n"
-            "The tests replay transactions sequentially to check the order, and under threads to check safety."
+            "A resharding job moves rows between **any** set of shards, not just two neighbors.\n"
+            "\n"
+            "### Methods\n"
+            "- `ShardLocks(n)`: locks over shards `0..n-1`; `n < 1` raises `ValueError`\n"
+            "- `run_txn(shards, take, work, release)`: run one transaction over `shards`\n"
+            "\n"
+            "### Rules\n"
+            "- `shards` lists the shards one transaction touches, in any order, possibly with repeats or empty\n"
+            "- Hold the lock of **every** distinct shard while calling `work()`\n"
+            "- Call `take(s)` right after acquiring shard `s`, and `release(s)` right before releasing it\n"
+            "- Release in the reverse order of acquiring\n"
+            "- Many threads call `run_txn` at once; it must never deadlock\n"
+            "- The tests replay transactions sequentially to check the order, and under threads to check safety"
         ),
         "examples": [
             {"args": _sh("order", 5, [[3, 1, 3], []]),

@@ -43,12 +43,20 @@ valid back-to-back schedule. Missing the overlap lets the schedule through, and 
 quota admission check rejects `ml-features`, so the morning dashboards have no fresh data.
 
 ## 4. Problem Statement
-Each job is `(vcpus, start, end)`. It holds `vcpus` from `start` up to, but not including,
-`end`, so a job that ends at 60 and a job that starts at 60 never overlap. A job with
-`start == end` never runs.
+Find a tenant's peak vCPU use and check it against a quota.
 
-- `peak_usage(jobs)` returns the highest total vCPU in use at any moment (0 if there are no jobs).
-- `fits_quota(jobs, quota)` returns `True` if that peak is at most `quota`.
+### Input
+- `jobs`: each job is `(vcpus, start, end)`
+- `quota`: the vCPU quota to check against
+
+### Output
+- `peak_usage(jobs)`: the highest total vCPU in use at any moment, or `0` if there are no jobs
+- `fits_quota(jobs, quota)`: `True` if that peak is at most `quota`
+
+### Rules
+- A job holds `vcpus` from `start` up to, but **not including**, `end`
+- A job that ends at 60 and a job that starts at 60 never overlap
+- A job with `start == end` never runs
 
 ## 5. Input / Output format and Constraints
 - `peak_usage(jobs: list[tuple[int, int, int]]) -> int`,

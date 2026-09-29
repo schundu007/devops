@@ -99,12 +99,19 @@ VARIANTS = [
         "approach": "Free heap by (weight, id) + busy heap by finish time · O((n + k) log k) · O(k)",
         "spec": {"kind": "fn", "fn": "assign_backends", "params": ["weights", "jobs"]},
         "statement": (
-            "A build farm prefers its cheapest node for every job, and it never drops work: a job that finds every node busy "
-            "waits in a queue.\n\n"
-            "Node `i` has cost `weights[i]`. Job `j` arrives at second `j` and runs for `jobs[j]` seconds. Jobs leave the queue "
-            "in order, each as soon as some node is free (a node finishing at time t is free at t).\n\n"
-            "A starting job takes the free node with the smallest weight, then the smallest index. "
-            "Return the node each job ran on."
+            "Run every job on the cheapest free node of a build farm; a job never drops, it waits in a queue.\n"
+            "\n"
+            "### Input\n"
+            "- `weights[i]`: node `i`'s cost\n"
+            "- `jobs[j]`: seconds job `j` runs; job `j` arrives at second `j`\n"
+            "\n"
+            "### Output\n"
+            "- A list with the node each job ran on\n"
+            "\n"
+            "### Rules\n"
+            "- Jobs leave the queue **in order**, each as soon as some node is free\n"
+            "- A node finishing at time `t` is free at `t`\n"
+            "- A starting job takes the free node with the smallest weight, then the smallest index"
         ),
         "examples": [
             {"args": {"weights": [3, 3, 2], "jobs": [1, 2, 3, 2, 1, 2]},
@@ -185,13 +192,20 @@ def assign_backends(weights, jobs):
         "approach": "Free-id heap + busy heap by (end, id) · O(m log m + m log n) · O(n)",
         "spec": {"kind": "fn", "fn": "busiest_runner", "params": ["n", "jobs"]},
         "statement": (
-            "A CI system has `n` runners numbered `0..n-1`. `jobs[i] = [start, end]` asks for a runner over `[start, end)`; "
-            "every start time is distinct.\n\n"
-            "- Jobs are handled in order of start time.\n"
-            "- A job takes the **lowest-numbered** free runner.\n"
-            "- If none is free, it waits for the runner that frees up first (lowest number on a tie) and keeps its "
-            "original duration, so it ends later.\n\n"
-            "Return the runner that ran the most jobs, the lowest number on a tie."
+            "Find the CI runner that ran the most jobs.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: runners, numbered `0..n-1`\n"
+            "- `jobs[i] = [start, end]`: a job asking for a runner over `[start, end)`; every start time is distinct\n"
+            "\n"
+            "### Output\n"
+            "- The runner that ran the most jobs; the lowest number on a tie\n"
+            "\n"
+            "### Rules\n"
+            "- Jobs are handled in order of start time\n"
+            "- A job takes the **lowest-numbered** free runner\n"
+            "- If none is free, it waits for the runner that frees up first (lowest number on a tie)\n"
+            "- A waiting job keeps its original duration, so it ends later"
         ),
         "examples": [
             {"args": {"n": 2, "jobs": [[0, 10], [1, 5], [2, 7], [3, 4]]},

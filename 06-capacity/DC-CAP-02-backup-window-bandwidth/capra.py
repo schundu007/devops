@@ -80,11 +80,19 @@ VARIANTS = [
         "approach": "Binary search on the rate · O(n · log max) · O(1)",
         "spec": {"kind": "fn", "fn": "min_export_rate", "params": ["tables", "hours"]},
         "statement": (
-            "A nightly job exports database tables to object storage. `tables[i]` is the size of table `i` in GB. "
-            "The exporter runs at a fixed rate of `r` GB per hour and handles **one table at a time**; when a table "
-            "finishes early, the rest of that hour is wasted (the next table starts on the next hour boundary).\n\n"
-            "So table `i` takes `ceil(tables[i] / r)` hours. Return the smallest integer rate `r` that finishes "
-            "every table within `hours` hours. A lower rate means less load on the primary database."
+            "Find the smallest export rate that finishes a nightly table export in time; a lower rate means less load on the primary database.\n"
+            "\n"
+            "### Input\n"
+            "- `tables[i]`: size of table `i`, in GB\n"
+            "- `hours`: the time available, in hours\n"
+            "\n"
+            "### Output\n"
+            "- The smallest integer rate `r`, in GB per hour, that finishes every table within `hours` hours\n"
+            "\n"
+            "### Rules\n"
+            "- The exporter runs at a fixed rate of `r` GB per hour and handles **one table at a time**\n"
+            "- When a table finishes early, the rest of that hour is wasted: the next table starts on the next hour boundary\n"
+            "- So table `i` takes `ceil(tables[i] / r)` hours"
         ),
         "examples": [
             {"args": {"tables": [3, 6, 7, 11], "hours": 8},
@@ -150,10 +158,14 @@ VARIANTS = [
         "approach": "Binary search on the gap + greedy placement · O(n · log range) · O(1)",
         "spec": {"kind": "fn", "fn": "max_min_spread", "params": ["positions", "replicas"]},
         "statement": (
-            "A storage cluster has free slots at distinct positions along a row of racks, given sorted in "
-            "`positions` (in meters). You must place `replicas` copies of a shard, one per slot.\n\n"
-            "Replicas that sit close together share power and cooling, so a single failure can take out several. "
-            "Place them so the **smallest distance between any two replicas** is as large as possible, and return that distance."
+            "Spread a shard's replicas across free rack slots; replicas that sit close together share power and cooling, so a single failure can take out several.\n"
+            "\n"
+            "### Input\n"
+            "- `positions`: the free slots along a row of racks, in meters; distinct and sorted\n"
+            "- `replicas`: the number of copies of the shard to place, one per slot\n"
+            "\n"
+            "### Output\n"
+            "- The **smallest distance** between any two replicas, made as large as possible"
         ),
         "examples": [
             {"args": {"positions": [1, 2, 3, 4, 7], "replicas": 3},

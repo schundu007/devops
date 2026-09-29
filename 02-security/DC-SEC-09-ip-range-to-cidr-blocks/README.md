@@ -42,13 +42,20 @@ addresses someone else may own, which is a real exposure. Emitting one `/32` per
 58 rules, runs into the security group's rule limit, and makes the next review unreadable.
 
 ## 4. Problem Statement
-Write `range_to_cidrs(start_ip, count)`.
+Write `range_to_cidrs(start_ip, count)`: cover a run of IPv4 addresses with CIDR blocks.
 
-- The range starts at IPv4 address `start_ip` and covers `count` addresses in a row.
-- Return the **fewest** CIDR blocks that together cover **exactly** those addresses (no more,
-  no fewer), in address order, as strings like `"10.0.0.8/29"`.
-- A block `a.b.c.d/n` covers `2^(32-n)` addresses, and its first address must be a multiple of that size.
-- Return `[]` when `count` is 0. Don't use the `ipaddress` module in your answer.
+### Input
+- `start_ip`: the IPv4 address where the range starts
+- `count`: how many addresses in a row the range covers
+
+### Output
+- The **fewest** CIDR blocks that together cover **exactly** those addresses (no more, no fewer), in address order, as strings like `"10.0.0.8/29"`
+- `[]` when `count` is 0
+
+### Rules
+- A block `a.b.c.d/n` covers `2^(32-n)` addresses
+- A block's first address must be a multiple of that size
+- Don't use the `ipaddress` module in your answer
 
 ## 5. Input / Output format and Constraints
 - `range_to_cidrs(start_ip: str, count: int) -> list[str]`.

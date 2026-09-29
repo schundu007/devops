@@ -44,12 +44,17 @@ waits on the `billing` ⇄ `ledger` deadlock. The environment sits half up for a
 people look at crash-looping pods one by one.
 
 ## 4. Problem Statement
-Services are numbered `0..n-1`. `waits_on[i]` lists the services that service `i` waits for
-before it can start.
+Find every service whose waits can never end in a cycle.
 
-A service is **safe** if every chain of waits starting from it eventually reaches a service
-that waits on nothing. In other words, no chain from it ever enters a cycle. Return all safe
-services in ascending order.
+### Input
+- `waits_on[i]`: the services that service `i` waits for before it can start; services are numbered `0..n-1`
+
+### Output
+- All safe services, in ascending order
+
+### Rules
+- A service is **safe** if every chain of waits starting from it eventually reaches a service that waits on nothing
+- In other words, no chain from it ever enters a cycle
 
 ## 5. Input / Output format and Constraints
 - `safe_services(waits_on: list[list[int]]) -> list[int]`, sorted ascending.

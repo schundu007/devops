@@ -120,14 +120,20 @@ VARIANTS = [
         "approach": "Weighted union-find · O(E · α(V)) · O(V)",
         "spec": {"kind": "fn", "fn": "first_contradiction", "params": ["facts", "values"], "cmp": "exact"},
         "statement": (
-            "A capacity sheet is assembled from many teams. Fact `i` says one `facts[i][0]` holds `values[i]` "
-            "of `facts[i][1]`, and like the main problem it also holds backwards with `1/v`.\n\n"
-            "This time the facts are **not** guaranteed to agree. Read them in order and return the index of the "
-            "**first** fact whose ratio disagrees with what the earlier facts already imply. Two ratios agree when "
-            "they differ by at most `1e-6 · v` (relative).\n\n"
-            "- A fact that links units not yet connected can never contradict.\n"
-            "- `(a, a, v)` contradicts unless `v` is 1.\n\n"
-            "Return `-1` if every fact is consistent."
+            "A capacity sheet is assembled from many teams, and its facts may disagree.\n"
+            "\n"
+            "### Input\n"
+            "- `facts[i]`, `values[i]`: one `facts[i][0]` holds `values[i]` of `facts[i][1]`; like the main problem, it also holds backwards with `1/v`\n"
+            "\n"
+            "### Output\n"
+            "- The index of the **first** fact whose ratio disagrees with what the earlier facts already imply\n"
+            "- `-1` if every fact is consistent\n"
+            "\n"
+            "### Rules\n"
+            "- The facts are **not** guaranteed to agree; read them in order\n"
+            "- Two ratios agree when they differ by at most `1e-6 · v` (relative)\n"
+            "- A fact that links units not yet connected can never contradict\n"
+            "- `(a, a, v)` contradicts unless `v` is 1"
         ),
         "examples": [
             {"args": {"facts": [["cluster", "node"], ["node", "pod"], ["cluster", "pod"]], "values": [20.0, 30.0, 500.0]},
@@ -222,13 +228,20 @@ def first_contradiction(facts, values):
         "approach": "One BFS from the base unit · O(V + E + A) · O(V + E)",
         "spec": {"kind": "fn", "fn": "total_in_base", "params": ["facts", "values", "base", "amounts"], "cmp": "float"},
         "statement": (
-            "A team's quota request lists amounts in mixed units: `amounts[i] = [unit, qty]`, such as 2 clusters, "
-            "3 nodes and 5 vCPUs. The facts are the same as the main problem: one `facts[i][0]` holds `values[i]` "
-            "of `facts[i][1]`.\n\n"
-            "Return the total request expressed in `base` units: the sum of `qty` times how many `base` one `unit` holds.\n\n"
-            "- A unit equal to `base` converts at 1, even when it appears in no fact.\n"
-            "- If any unit cannot be converted to `base`, return `-1.0`.\n"
-            "- No amounts gives `0.0`."
+            "A team's quota request lists amounts in mixed units; total it in one base unit.\n"
+            "\n"
+            "### Input\n"
+            "- `facts`, `values`: as in the main problem; one `facts[i][0]` holds `values[i]` of `facts[i][1]`\n"
+            "- `base`: the unit to express the total in\n"
+            "- `amounts[i] = [unit, qty]`: one line of the request, such as 2 clusters, 3 nodes or 5 vCPUs\n"
+            "\n"
+            "### Output\n"
+            "- The total in `base` units: the sum of `qty` times how many `base` one `unit` holds\n"
+            "- `-1.0` if any unit cannot be converted to `base`\n"
+            "- `0.0` when there are no amounts\n"
+            "\n"
+            "### Rules\n"
+            "- A unit equal to `base` converts at 1, even when it appears in no fact"
         ),
         "examples": [
             {"args": {"facts": [["cluster", "node"], ["node", "vcpu"]], "values": [10.0, 8.0], "base": "vcpu",

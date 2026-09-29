@@ -231,13 +231,17 @@ VARIANTS = [
         "approach": "Sorted list + prefix bounds + cursor bisect · O(log n + limit) per page · O(n)",
         "spec": {"kind": "design", "fn": "PagedLogStore", "params": [], "cmp": "exact"},
         "statement": (
-            "A log viewer shows a range query a page at a time instead of all at once. Implement `PagedLogStore`:\n\n"
-            "- `put(id, timestamp)` behaves as in the main problem\n"
-            "- `page(start, end, granularity, limit, after)` selects the logs in range exactly as the main problem's "
-            "`retrieve` does, orders them by **timestamp, then id**, and returns the IDs of at most `limit` of them. "
-            "With `after = -1` it returns the first page; otherwise `after` is the last ID of the previous page, "
-            "and the page starts right after that log\n\n"
-            "Ordering by (timestamp, id) keeps the pages stable: every log in range appears on exactly one page."
+            "Implement `PagedLogStore`, which returns a range query a page at a time instead of all at once.\n"
+            "\n"
+            "### Methods\n"
+            "- `put(id, timestamp)`: behaves as in the main problem\n"
+            "- `page(start, end, granularity, limit, after)`: return the IDs of at most `limit` logs in range, ordered by **timestamp, then id**\n"
+            "\n"
+            "### Rules\n"
+            "- A log is in range exactly when the main problem's `retrieve` would select it\n"
+            "- With `after = -1`, return the first page\n"
+            "- Otherwise `after` is the last ID of the previous page, and the page starts right after that log\n"
+            "- Ordering by (timestamp, id) keeps the pages stable: every log in range appears on exactly one page"
         ),
         "examples": [
             {"args": _pops(("put", 7, "2026:09:23:02:14:05"), ("put", 3, "2026:09:23:02:14:05"), ("put", 9, "2026:09:23:02:30:00"),
@@ -296,11 +300,16 @@ VARIANTS = [
         "approach": "Sorted list, bisect + slice delete · O(log n + k) purge · O(n)",
         "spec": {"kind": "design", "fn": "RetentionLogStore", "params": [], "cmp": "exact"},
         "statement": (
-            "The log store from the main problem now has a retention policy. Implement `RetentionLogStore`:\n\n"
-            "- `put(id, timestamp)` and `retrieve(start, end, granularity)` behave exactly as in the main problem\n"
-            "- `purge(cutoff)` deletes every log whose timestamp is strictly earlier than `cutoff` "
-            "(a full `YYYY:MM:DD:hh:mm:ss` string) and returns how many were deleted\n\n"
-            "Purged logs never come back in later `retrieve` calls. `retrieve` returns IDs in ascending order."
+            "Implement `RetentionLogStore`: the main problem's log store with a retention policy.\n"
+            "\n"
+            "### Methods\n"
+            "- `put(id, timestamp)`: behaves exactly as in the main problem\n"
+            "- `retrieve(start, end, granularity)`: behaves exactly as in the main problem; returns IDs in ascending order\n"
+            "- `purge(cutoff)`: delete every log whose timestamp is **strictly earlier** than `cutoff`, and return how many were deleted\n"
+            "\n"
+            "### Rules\n"
+            "- `cutoff` is a full `YYYY:MM:DD:hh:mm:ss` string\n"
+            "- Purged logs never come back in later `retrieve` calls"
         ),
         "examples": [
             {"args": _rops(("put", 1, "2026:01:01:00:00:00"), ("put", 2, "2026:02:01:00:00:00"),

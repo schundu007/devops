@@ -41,12 +41,19 @@ a pointless outage on a clean system. Mishandle same-time chains and you miss `k
 which keeps a leaked credential in the cluster.
 
 ## 4. Problem Statement
-There are `n` parties, numbered `0` to `n - 1`. Party `0` and party `first` hold the secret at
-time 0. `sessions[i] = [a, b, t]` means parties `a` and `b` connected at time `t`. When two
-parties connect, if either holds the secret at that moment, both hold it afterwards.
+Find every party that ends up holding a leaked secret.
 
-Sessions that share the same time `t` happen together: the secret can pass along a whole chain
-of them in that instant. Return every party that holds the secret after all sessions, sorted ascending.
+### Input
+- `n`: the number of parties, numbered `0` to `n - 1`
+- `sessions[i] = [a, b, t]`: parties `a` and `b` connected at time `t`
+- `first`: the party that holds the secret at time 0 along with party `0`
+
+### Output
+- Every party that holds the secret after all sessions, sorted ascending
+
+### Rules
+- When two parties connect, if either holds the secret at that moment, both hold it afterwards
+- Sessions that share the same time `t` happen **together**: the secret can pass along a whole chain of them in that instant
 
 ## 5. Input / Output format and Constraints
 - `exposed(n: int, sessions: list[list[int]], first: int) -> list[int]`

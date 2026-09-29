@@ -269,7 +269,7 @@ VARIANTS = [
         "title": "Slowest route",
         "approach": "Running totals per route, scanned on query · O(1) per hop, O(P) per query · O(R + P)",
         "spec": {"kind": "design", "fn": "RouteStats", "params": [], "cmp": "exact"},
-        "statement": "The on-call dashboard wants one number, not a lookup: **which route is slowest right now?** Build `RouteStats`:\n\n- `enter(request_id, service, t)` and `exit(request_id, service, t)` work exactly as in the main problem\n- `slowest()` returns `[from, to]` for the route with the highest average hop duration over its completed hops, or `null` if no hop has completed\n- on a tie in average, return the route that is smallest as a `(from, to)` pair of strings\n\nCompare averages exactly: `a / b > c / d` is `a · d > c · b`, which never suffers from float rounding.",
+        "statement": "Build `RouteStats` so the on-call dashboard can ask which route is slowest right now.\n\n### Methods\n- `enter(request_id, service, t)` and `exit(request_id, service, t)`: exactly as in the main problem\n- `slowest()`: `[from, to]` for the route with the **highest average** hop duration over its completed hops, or `null` if no hop has completed\n\n### Rules\n- On a tie in average, return the route that is smallest as a `(from, to)` pair of strings\n- Compare averages exactly, with no floating-point rounding",
         "examples": [
             {"args": ops_for("RouteStats", [], ("slowest",), ("enter", "r1", "gateway", 0), ("exit", "r1", "orders", 12),
                              ("enter", "r2", "orders", 12), ("exit", "r2", "payments", 40), ("slowest",),
@@ -334,7 +334,7 @@ class RouteStats:
         "title": "Stuck request alarm",
         "approach": "Entry-ordered queue with lazy removal · O(1) amortized per call · O(R)",
         "spec": {"kind": "design", "fn": "HopWatch", "params": [], "cmp": "exact"},
-        "statement": "Averages hide hangs: a request that never exits never shows up in them. Build `HopWatch(limit)` to page when hops are stuck:\n\n- `enter(request_id, service, t)` and `exit(request_id, service, t)` open and close a hop as before\n- `stuck(now)` returns how many hops are **still open** and have been open for at least `limit` seconds (`now - t >= limit`)\n\nAll calls arrive in time order: the `t` and `now` values never decrease. A request ID is never entered twice while its hop is open, and it may be reused after it exits.",
+        "statement": "Build `HopWatch(limit)` to page on stuck hops, which averages hide because a request that never exits never shows up in them.\n\n### Methods\n- `enter(request_id, service, t)` and `exit(request_id, service, t)`: open and close a hop as before\n- `stuck(now)`: how many hops are **still open** and have been open for at least `limit` seconds (`now - t >= limit`)\n\n### Rules\n- All calls arrive in time order: the `t` and `now` values never decrease\n- A request ID is never entered twice while its hop is open\n- A request ID may be reused after it exits",
         "examples": [
             {"args": ops_for("HopWatch", [10], ("enter", "a", "api", 0), ("enter", "b", "api", 3), ("stuck", 9), ("stuck", 10),
                              ("exit", "a", "db", 11), ("stuck", 13), ("enter", "c", "api", 14), ("stuck", 30)),

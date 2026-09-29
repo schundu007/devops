@@ -40,12 +40,18 @@ at 02:40, 03:05 and 03:30 never alert, even though they fit one sliding hour. An
 learns your windows can pace guesses to dodge them.
 
 ## 4. Problem Statement
-`names[i]` is the account used at `times[i]`, written `"HH:MM"` in 24-hour form. All times are
-within one day. Raise an alert for an account if it was used **3 or more times within any
-60-minute span**. The span is inclusive: `10:00`, `10:30` and `11:00` count; `10:00`, `10:30`
-and `11:01` do not.
+Find the accounts used in a burst.
 
-Return the alerted account names, sorted ascending and each listed once.
+### Input
+- `names[i]`: the account used at `times[i]`
+- `times[i]`: a time written `"HH:MM"` in 24-hour form; all times are within one day
+
+### Output
+- The alerted account names, sorted ascending and each listed once
+
+### Rules
+- Alert an account used **3 or more times within any 60-minute span**
+- The span is **inclusive**: `10:00`, `10:30` and `11:00` count; `10:00`, `10:30` and `11:01` do not
 
 ## 5. Input / Output format and Constraints
 - `burst_alerts(names: list[str], times: list[str]) -> list[str]`

@@ -97,11 +97,15 @@ VARIANTS = [
         "approach": "Reverse trie collecting every end marker · O(L) per feed · O(total pattern length + L)",
         "spec": {"kind": "design", "fn": "PatternScanner", "params": [], "cmp": "exact"},
         "statement": (
-            "A True/False flag is not enough for the incident ticket: the scanner must say **which** detection "
-            "rules fired. Build `PatternScanner(patterns)` with `feed(ch)` as before, but return the **indices** "
-            "of all patterns that end exactly at this character, sorted ascending (`[]` when none).\n\n"
-            "- Several patterns can end at the same character when one is a suffix of another.\n"
-            "- The same string can appear twice in `patterns`; report both indices."
+            "A True/False flag is not enough for the incident ticket: the scanner must say **which** detection rules fired.\n"
+            "\n"
+            "### Methods\n"
+            "- `PatternScanner(patterns)`: build the scanner from the list of patterns\n"
+            "- `feed(ch)`: as before, but return the **indices** of all patterns that end exactly at this character, sorted ascending (`[]` when none)\n"
+            "\n"
+            "### Rules\n"
+            "- Several patterns can end at the same character when one is a suffix of another\n"
+            "- The same string can appear twice in `patterns`; report both indices"
         ),
         "examples": [
             {"args": _which(["AKIA", "KIA", "IA"], "xAKIA"),
@@ -182,11 +186,18 @@ class PatternScanner:
         "approach": "Reverse trie per end position + difference array · O(n · L) · O(total pattern length + n)",
         "spec": {"kind": "fn", "fn": "redact", "params": ["patterns", "line"], "cmp": "exact"},
         "statement": (
-            "Before log lines leave the host, a sidecar masks secrets. Given the `patterns` and one `line`, "
-            "replace **every character covered by any occurrence** of any pattern with `*`, and return the result.\n\n"
-            "- Occurrences may overlap or touch; the union of all of them is masked.\n"
-            "- Characters not inside any occurrence are left as they are.\n\n"
-            "Scanning the line left to right is the streaming scanner in disguise: at each position, which patterns end here?"
+            "Before log lines leave the host, a sidecar masks secrets.\n"
+            "\n"
+            "### Input\n"
+            "- `patterns`: the secret patterns\n"
+            "- `line`: one log line\n"
+            "\n"
+            "### Output\n"
+            "- `line` with **every character covered by any occurrence** of any pattern replaced by `*`\n"
+            "\n"
+            "### Rules\n"
+            "- Occurrences may overlap or touch; the union of all of them is masked\n"
+            "- Characters not inside any occurrence are left as they are"
         ),
         "examples": [
             {"args": {"patterns": ["AKIA", "pass"], "line": "key=AKIA12 pass=ok"},

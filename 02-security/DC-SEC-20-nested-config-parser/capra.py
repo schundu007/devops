@@ -91,13 +91,19 @@ VARIANTS = [
         "approach": "One pass with a bracket stack, skipping strings · O(n) · O(depth)",
         "spec": {"kind": "fn", "fn": "max_depth", "params": ["payload"]},
         "statement": (
-            "An API gateway rejects deeply nested JSON bodies before handing them to the real parser. It needs the "
-            "nesting depth of a raw payload, cheaply.\n\n"
-            "- `[` / `]` and `{` / `}` open and close a level. Depth is the most levels open at once.\n"
-            "- Text inside double-quoted strings does not count. Inside a string, `\\` escapes the next "
-            "character, so `\\\"` does not end the string.\n"
-            "- Everything else (numbers, commas, colons, spaces) is ignored.\n\n"
-            "Return the depth, or `-1` if the brackets are mismatched, unclosed or closed too often."
+            "An API gateway rejects deeply nested JSON bodies before the real parser sees them, so it needs a raw payload's nesting depth, cheaply.\n"
+            "\n"
+            "### Input\n"
+            "- `payload`: the raw request body\n"
+            "\n"
+            "### Output\n"
+            "- The depth, or `-1` if the brackets are mismatched, unclosed or closed too often\n"
+            "\n"
+            "### Rules\n"
+            "- `[` / `]` and `{` / `}` open and close a level. Depth is the most levels open at once\n"
+            "- Text inside double-quoted strings does not count\n"
+            "- Inside a string, `\\` escapes the next character, so `\\\"` does not end the string\n"
+            "- Everything else (numbers, commas, colons, spaces) is ignored"
         ),
         "examples": [
             {"args": {"payload": '{"a": [1, {"b": []}]}'},
@@ -201,11 +207,17 @@ def max_depth(payload):
         "approach": "Stack parse, skip deep lists by bracket count · O(n) · O(min(depth, cap))",
         "spec": {"kind": "fn", "fn": "truncate", "params": ["s", "max_depth"]},
         "statement": (
-            "A structured logger must never drop an event, so instead of refusing deep values it truncates them, the "
-            "way many log libraries print `...` for deep objects.\n\n"
-            "`s` uses the main problem's format (integers and lists, no spaces). A list's depth is the number of lists "
-            "open when it opens, counting itself, so the outermost list has depth 1.\n\n"
-            "Return the parsed value, with every list deeper than `max_depth` replaced by the string `\"...\"`."
+            "A structured logger truncates deep values instead of refusing them, the way many log libraries print `...` for deep objects.\n"
+            "\n"
+            "### Input\n"
+            "- `s`: the main problem's format (integers and lists, no spaces)\n"
+            "- `max_depth`: the deepest list kept\n"
+            "\n"
+            "### Output\n"
+            "- The parsed value, with every list deeper than `max_depth` replaced by the string `\"...\"`\n"
+            "\n"
+            "### Rules\n"
+            "- A list's depth is the number of lists open when it opens, counting itself, so the outermost list has depth 1"
         ),
         "examples": [
             {"args": {"s": "[1,[2,[3,[4]]]]", "max_depth": 2},

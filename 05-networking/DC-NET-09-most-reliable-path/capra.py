@@ -120,11 +120,20 @@ VARIANTS = [
         "title": "Widest path for a bulk transfer",
         "approach": "Dijkstra on max-min · O((n + L) log n) · O(n + L)",
         "spec": {"kind": "fn", "fn": "widest_path", "params": ["n", "links", "bandwidth", "src", "dst"], "ret": "value", "cmp": "exact"},
-        "statement": """A backup job copies a snapshot between two data centers over one path. The path runs only as fast as its slowest link, so its throughput is the **minimum** bandwidth along it.
+        "statement": """A backup job copies a snapshot between two data centers over one path.
 
-`links[i] = [a, b]` is a two-way link with `bandwidth[i]` Gbps. Return the highest throughput of any path from `src` to `dst`, or `0` if `dst` cannot be reached.
+### Input
+- `n`: the number of nodes
+- `links[i] = [a, b]`: a two-way link
+- `bandwidth[i]`: link `i`'s bandwidth in Gbps
+- `src`, `dst`: the start and end nodes
 
-Same Dijkstra skeleton as the reliable path, with a different way to combine: `min` along a path instead of a product, and `max` across paths.""",
+### Output
+- The highest throughput of any path from `src` to `dst`
+- `0` if `dst` cannot be reached
+
+### Rules
+- A path runs only as fast as its slowest link: its throughput is the **minimum** bandwidth along it""",
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [1, 3], [0, 2], [2, 3]], "bandwidth": [100, 10, 40, 40], "src": 0, "dst": 3},
              "explanation": "Via node 1 the 10 Gbps link caps the path at 10. Via node 2 both links carry 40.",
@@ -214,11 +223,20 @@ def widest_path(n, links, bandwidth, src, dst):
         "title": "Most reliable path within a hop limit",
         "approach": "Bellman-Ford for k rounds · O(k · L) · O(n)",
         "spec": {"kind": "fn", "fn": "reliable_within_hops", "params": ["n", "links", "success", "src", "dst", "max_hops"], "ret": "value", "cmp": "float"},
-        "statement": """A service mesh caps every request at `max_hops` proxies: a path longer than that is dropped by the TTL check, however reliable it is.
+        "statement": """A service mesh caps every request at `max_hops` proxies.
 
-`links[i] = [a, b]` is a two-way link that works with probability `success[i]`. Return the highest success probability of a path from `src` to `dst` that uses **at most** `max_hops` links, or `0.0` if there is none.
+### Input
+- `n`: the number of nodes
+- `links[i] = [a, b]`: a two-way link that works with probability `success[i]`
+- `src`, `dst`: the start and end nodes
+- `max_hops`: the most links a path may use
 
-Plain Dijkstra no longer works: the most reliable path to a middle node may use too many hops. Track the best probability per hop count instead.""",
+### Output
+- The highest success probability of a path from `src` to `dst` that uses **at most** `max_hops` links
+- `0.0` if there is none
+
+### Rules
+- A path longer than `max_hops` is dropped by the TTL check, however reliable it is""",
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [1, 2], [2, 3], [0, 3]], "success": [0.99, 0.99, 0.99, 0.5], "src": 0, "dst": 3, "max_hops": 2},
              "explanation": "The three-hop path (0.97) is over the limit, so the direct link, 0.5, is the best allowed.",

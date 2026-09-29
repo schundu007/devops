@@ -191,11 +191,14 @@ VARIANTS = [
         "approach": "Next allowed time plus a hidden counter per message · O(1) per call · O(m)",
         "spec": {"kind": "design", "fn": "RepeatCollapser", "params": []},
         "statement": (
-            "syslog does not just drop repeats; when a message finally prints again it says how many copies it hid. "
-            "Build `RepeatCollapser(window = 10)` with `log(timestamp, message)`:\n\n"
-            "- if the message printed less than `window` seconds ago, suppress it and return `-1`\n"
-            "- otherwise print it and return how many copies of it were suppressed since it last printed (0 the first time)\n\n"
-            "As in the main problem, a suppressed call does not extend the quiet period. Timestamps never go backwards."
+            "syslog does not just drop repeats: when a message finally prints again, it says how many copies it hid. Build `RepeatCollapser(window = 10)`.\n"
+            "\n"
+            "### Methods\n"
+            "- `log(timestamp, message)`: if the message printed less than `window` seconds ago, suppress it and return `-1`; otherwise print it and return how many copies of it were suppressed since it last printed (`0` the first time)\n"
+            "\n"
+            "### Rules\n"
+            "- As in the main problem, a suppressed call does **not** extend the quiet period\n"
+            "- Timestamps never go backwards"
         ),
         "examples": [
             {"args": _rops(10, (1, "disk full"), (3, "disk full"), (5, "disk full"), (11, "disk full"), (12, "disk full")),
@@ -241,11 +244,15 @@ VARIANTS = [
         "approach": "Deque of printed timestamps per message · O(1) amortized per call · O(m · limit)",
         "spec": {"kind": "design", "fn": "LogRateLimiter", "params": []},
         "statement": (
-            "One print per window hides too much during an incident; the on-call wants a few samples. "
-            "Build `LogRateLimiter(limit, window)` with `should_print(timestamp, message)`:\n\n"
-            "- print (return `True`) when fewer than `limit` copies of this message were **printed** in `(timestamp - window, timestamp]`\n"
-            "- otherwise return `False`; a suppressed call does not count\n\n"
-            "Timestamps never go backwards. With `limit = 1` this is the main problem."
+            "One print per window hides too much during an incident; the on-call wants a few samples. Build `LogRateLimiter(limit, window)`.\n"
+            "\n"
+            "### Methods\n"
+            "- `should_print(timestamp, message)`: print (return `True`) when fewer than `limit` copies of this message were **printed** in `(timestamp - window, timestamp]`; otherwise return `False`\n"
+            "\n"
+            "### Rules\n"
+            "- A suppressed call does not count as a print\n"
+            "- Timestamps never go backwards\n"
+            "- With `limit = 1` this is the main problem"
         ),
         "examples": [
             {"args": _lops(2, 10, (0, "5xx spike"), (1, "5xx spike"), (2, "5xx spike"), (10, "5xx spike"), (11, "5xx spike"), (12, "5xx spike")),

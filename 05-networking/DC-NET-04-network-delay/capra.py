@@ -119,12 +119,20 @@ VARIANTS = [
         "approach": "Bellman-Ford for max_hops rounds · O(max_hops · E) · O(V)",
         "spec": {"kind": "fn", "fn": "fastest_within_hops", "params": ["links", "n", "src", "dst", "max_hops"]},
         "statement": (
-            "An overlay network forwards a packet through at most `max_hops` links: every relay decrements a hop "
-            "budget, like an IP TTL, and the packet is dropped when the budget runs out.\n\n"
-            "`links[i] = [u, v, ms]` is a one-way link from router `u` to router `v` with `ms` milliseconds of delay. "
-            "Routers are numbered `1..n`.\n\n"
-            "Return the smallest total delay from `src` to `dst` over a path that uses **at most** `max_hops` links, "
-            "or `-1` if no such path exists. A path from a router to itself uses zero links and costs 0."
+            "Find the fastest path that fits a hop budget, like an IP TTL: every relay decrements it, and the packet is dropped when it runs out.\n"
+            "\n"
+            "### Input\n"
+            "- `links[i] = [u, v, ms]`: a one-way link from router `u` to router `v` with `ms` milliseconds of delay\n"
+            "- `n`: routers, numbered `1..n`\n"
+            "- `src`, `dst`: the start and end routers\n"
+            "- `max_hops`: the most links a path may use\n"
+            "\n"
+            "### Output\n"
+            "- The smallest total delay from `src` to `dst` over a path that uses **at most** `max_hops` links\n"
+            "- `-1` if no such path exists\n"
+            "\n"
+            "### Rules\n"
+            "- A path from a router to itself uses zero links and costs 0"
         ),
         "examples": [
             {"args": {"links": [[1, 2, 1], [2, 3, 1], [3, 4, 1], [1, 4, 10]], "n": 4, "src": 1, "dst": 4, "max_hops": 2},
@@ -201,11 +209,19 @@ VARIANTS = [
         "approach": "Max-heap Dijkstra on the bottleneck · O(E log E) · O(V + E)",
         "spec": {"kind": "fn", "fn": "max_bandwidth", "params": ["links", "n", "src", "dst"]},
         "statement": (
-            "A backup job copies a snapshot from data center `src` to data center `dst`. Its throughput is limited by "
-            "the **slowest** link on the route it takes.\n\n"
-            "`links[i] = [u, v, mbps]` is a one-way link with `mbps` of spare bandwidth. Data centers are numbered `1..n`, "
-            "and `src != dst`.\n\n"
-            "Return the largest bottleneck bandwidth over all routes from `src` to `dst`, or `0` if `dst` cannot be reached."
+            "Find the route with the highest bottleneck bandwidth for a snapshot copy between data centers.\n"
+            "\n"
+            "### Input\n"
+            "- `links[i] = [u, v, mbps]`: a one-way link from `u` to `v` with `mbps` of spare bandwidth\n"
+            "- `n`: data centers, numbered `1..n`\n"
+            "- `src`, `dst`: the source and destination; `src != dst`\n"
+            "\n"
+            "### Output\n"
+            "- The largest bottleneck bandwidth over all routes from `src` to `dst`\n"
+            "- `0` if `dst` cannot be reached\n"
+            "\n"
+            "### Rules\n"
+            "- A route's throughput is limited by its **slowest** link"
         ),
         "examples": [
             {"args": {"links": [[1, 2, 100], [2, 4, 10], [1, 3, 40], [3, 4, 40]], "n": 4, "src": 1, "dst": 4},

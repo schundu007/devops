@@ -228,11 +228,18 @@ VARIANTS = [
         "approach": "Kahn's algorithm level by level · O(A + I + V + A log A) · O(A + I + V)",
         "spec": {"kind": "fn", "fn": "build_waves", "params": ["artifacts", "inputs", "available"]},
         "statement": (
-            "The CI system runs builds in **stages**: every artifact in a stage builds in parallel, and a stage starts only when the previous one is done. "
-            "Group the buildable artifacts into the fewest stages:\n\n"
-            "- stage 1 holds every artifact whose inputs are all in `available` (or that has no inputs)\n"
-            "- stage k + 1 holds every artifact not built yet whose inputs are all in `available` or built in stages 1..k\n\n"
-            "Return the stages in order, each sorted by name. Artifacts that can never be built do not appear."
+            "The CI system runs builds in **stages**: every artifact in a stage builds in parallel, and a stage starts only when the previous one is done. Group the buildable artifacts into the fewest stages.\n"
+            "\n"
+            "### Input\n"
+            "- `artifacts`, `inputs`, `available`: as in the main problem\n"
+            "\n"
+            "### Output\n"
+            "- The stages in order, each sorted by name\n"
+            "\n"
+            "### Rules\n"
+            "- Stage 1 holds every artifact whose inputs are all in `available` (or that has no inputs)\n"
+            "- Stage k + 1 holds every artifact not built yet whose inputs are all in `available` or built in stages 1..k\n"
+            "- Artifacts that can never be built do not appear"
         ),
         "examples": [
             {"args": _wcase(["app-image", "wheel-cache", "lint", "chart"],
@@ -277,10 +284,19 @@ VARIANTS = [
         "approach": "Kahn's algorithm carrying ready times · O(A + I + V) · O(A + I + V)",
         "spec": {"kind": "fn", "fn": "earliest_finish", "params": ["artifacts", "inputs", "durations", "available"]},
         "statement": (
-            "With enough CI runners, an artifact starts the moment its **last** input is ready and takes `durations[i]` minutes. "
-            "Everything in `available` is ready at minute 0.\n\n"
-            "Return, for each artifact in the given order, the minute its build finishes, or -1 if it can never be built. "
-            "The largest value is the pipeline's critical path."
+            "With enough CI runners, find the minute each artifact's build finishes.\n"
+            "\n"
+            "### Input\n"
+            "- `artifacts`, `inputs`, `available`: as in the main problem\n"
+            "- `durations[i]`: minutes `artifacts[i]` takes to build\n"
+            "\n"
+            "### Output\n"
+            "- For each artifact in the given order, the minute its build finishes, or `-1` if it can never be built\n"
+            "- The largest value is the pipeline's critical path\n"
+            "\n"
+            "### Rules\n"
+            "- An artifact starts the moment its **last** input is ready\n"
+            "- Everything in `available` is ready at minute 0"
         ),
         "examples": [
             {"args": _fcase(["deps", "compile", "test", "image"], [["lockfile"], ["deps"], ["compile"], ["compile", "base-image"]],

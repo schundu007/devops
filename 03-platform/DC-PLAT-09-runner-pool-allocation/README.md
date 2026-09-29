@@ -42,18 +42,22 @@ duration" rule, it shows no queueing at all. You conclude three runners are plen
 next release night every build sits in the queue for 30 minutes.
 
 ## 4. Problem Statement
-You have `n` runners numbered `0` to `n - 1`. Each job is `[queued_at, planned_end]`, and no
-two jobs are queued at the same moment. Process jobs in order of `queued_at`:
+Find the runner that ran the most jobs.
 
-- If one or more runners are idle, the job goes to the **lowest-numbered** idle runner and
-  runs until `planned_end`.
-- If no runner is idle, the job waits for the runner that becomes free **first** (the lowest
-  number if several free up at the same moment). It then runs for its full duration,
-  `planned_end - queued_at`, starting from that moment.
-- A runner that frees up at time `t` is idle for a job queued at `t`.
+### Input
+- `n`: number of runners, numbered `0` to `n - 1`
+- `jobs[i] = [queued_at, planned_end]`; no two jobs are queued at the same moment
 
-Return the number of the runner that ran the most jobs. If several are tied, return the
-lowest number. With no jobs, return `0`.
+### Output
+- The number of the runner that ran the most jobs
+- On a tie, the lowest number. With no jobs, `0`
+
+### Rules
+- Process jobs in order of `queued_at`
+- If one or more runners are idle, the job goes to the **lowest-numbered** idle runner and runs until `planned_end`
+- If no runner is idle, the job waits for the runner that becomes free **first** (the lowest number if several free up at the same moment)
+- A waiting job then runs for its full duration, `planned_end - queued_at`, starting from that moment
+- A runner that frees up at time `t` is idle for a job queued at `t`
 
 ## 5. Input / Output format and Constraints
 - `n`: an integer, `1 <= n <= 100`.

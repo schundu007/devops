@@ -363,14 +363,16 @@ VARIANTS = [
         "approach": "Fixed array with head and count · O(1) per operation · O(capacity)",
         "spec": {"kind": "design", "fn": "RingBuffer", "params": [], "cmp": "exact"},
         "statement": (
-            "Blocking is the wrong backpressure for a metrics agent: a stalled exporter must never stall the "
-            "application. Instead the buffer keeps the newest data and **drops the oldest**.\n\n"
-            "Implement `RingBuffer(capacity)` (single-threaded):\n\n"
-            "- `push(item)` appends `item`. If the buffer was full, the oldest item is evicted and returned; "
-            "otherwise return `None`\n"
-            "- `pop()` removes and returns the oldest item, or `None` when empty\n"
-            "- `size()` returns the number of buffered items\n\n"
-            "`push` and `pop` must be O(1): no shifting of the whole buffer."
+            "A stalled exporter must never stall the application, so this buffer keeps the newest data and **drops the oldest** instead of blocking.\n"
+            "\n"
+            "### Methods\n"
+            "- `RingBuffer(capacity)`: create the buffer (single-threaded)\n"
+            "- `push(item)`: append `item`; if the buffer was full, evict and return the oldest item, otherwise return `None`\n"
+            "- `pop()`: remove and return the oldest item, or `None` when empty\n"
+            "- `size()`: return the number of buffered items\n"
+            "\n"
+            "### Rules\n"
+            "- `push` and `pop` must be O(1): no shifting of the whole buffer"
         ),
         "examples": [
             {"args": _rops(2, ("push", "a"), ("push", "b"), ("push", "c"), ("pop",), ("pop",), ("pop",)),
@@ -412,14 +414,21 @@ VARIANTS = [
         "approach": "Recurrence over item index · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "stall_times", "params": ["capacity", "produce", "consume"], "cmp": "exact"},
         "statement": (
-            "Capacity planning for a log pipeline: one tailer enqueues lines into a blocking queue of size "
-            "`capacity`, and one shipper dequeues them. Item `i` is ready to be enqueued at `produce[i]`, and "
-            "the shipper is ready for item `i` at `consume[i]` (both lists non-decreasing). Operations take no "
-            "time.\n\n"
+            "Simulate a log pipeline: one tailer enqueues lines into a blocking queue, and one shipper dequeues them.\n"
+            "\n"
+            "### Input\n"
+            "- `capacity`: the queue's size\n"
+            "- `produce[i]`: when item `i` is ready to be enqueued (non-decreasing)\n"
+            "- `consume[i]`: when the shipper is ready for item `i` (non-decreasing)\n"
+            "\n"
+            "### Output\n"
+            "- `[enqueued_at, dequeued_at]` for every item\n"
+            "\n"
+            "### Rules\n"
+            "- Operations take no time\n"
             "- The tailer handles items in order; an enqueue blocks while the queue is full\n"
             "- The shipper handles items in order; a dequeue blocks while the queue is empty\n"
-            "- A slot freed at time t can be used at time t\n\n"
-            "Return `[enqueued_at, dequeued_at]` for every item."
+            "- A slot freed at time `t` can be used at time `t`"
         ),
         "examples": [
             {"args": {"capacity": 1, "produce": [0, 0, 0], "consume": [5, 6, 7]},

@@ -135,12 +135,15 @@ VARIANTS = [
         "approach": "Dict + min-heap of expiries, lazy deletion · O(log n) amortized · O(issues + renews)",
         "spec": {"kind": "design", "fn": "SessionStore", "params": []},
         "statement": (
-            "Not every credential lives equally long: a CI job token lasts 5 minutes, a browser session an hour. With different "
-            "TTLs, the order tokens were issued is no longer the order they expire.\n\n"
-            "Implement `SessionStore`:\n\n"
-            "- `issue(token_id, now, ttl)`: create or replace the token; it expires at `now + ttl`.\n"
-            "- `renew(token_id, now)`: if the token is still live, extend it to `now + its own ttl`. Otherwise do nothing.\n"
-            "- `count_live(now)`: how many tokens have not expired. A token whose expiry equals `now` has expired."
+            "Track tokens with their own TTLs (a CI job token lasts 5 minutes, a browser session an hour), so issue order is no longer expiry order.\n"
+            "\n"
+            "### Methods\n"
+            "- `issue(token_id, now, ttl)`: create or replace the token; it expires at `now + ttl`\n"
+            "- `renew(token_id, now)`: if the token is still live, extend it to `now` plus **its own** `ttl`; otherwise do nothing\n"
+            "- `count_live(now)`: how many tokens have not expired\n"
+            "\n"
+            "### Rules\n"
+            "- A token whose expiry equals `now` has expired"
         ),
         "examples": [
             {"args": sops(("issue", "browser", 0, 60), ("issue", "ci-job", 10, 5), ("count_live", 14), ("count_live", 15), ("count_live", 59)),
@@ -242,13 +245,17 @@ class SessionStore:
         "approach": "Per-user deque in login order · O(1) amortized · O(live sessions)",
         "spec": {"kind": "design", "fn": "SessionLimiter", "params": []},
         "statement": (
-            "Streaming and SaaS products cap how many devices one account can be signed in on. Signing in on one device too many "
-            "kicks out that account's oldest session.\n\n"
-            "Implement `SessionLimiter(ttl, cap)`. Every session lives `ttl` seconds from its login and expires at `login + ttl` "
-            "(expired when that equals `now`).\n\n"
-            "- `login(user, session_id, now)`: start a new session (ids are never reused). If the user already has `cap` live "
-            "sessions, end the oldest one and return its id; otherwise return `None`.\n"
-            "- `live(user, now)`: how many live sessions the user has."
+            "Cap how many devices one account can be signed in on: one sign-in too many kicks out that account's oldest session.\n"
+            "\n"
+            "### Methods\n"
+            "- `SessionLimiter(ttl, cap)`: create the limiter\n"
+            "- `login(user, session_id, now)`: start a new session; if the user already has `cap` live sessions, end the **oldest** one and return its id, otherwise return `None`\n"
+            "- `live(user, now)`: how many live sessions the user has\n"
+            "\n"
+            "### Rules\n"
+            "- Every session lives `ttl` seconds from its login and expires at `login + ttl`\n"
+            "- A session is expired when its expiry equals `now`\n"
+            "- Session ids are never reused"
         ),
         "examples": [
             {"args": lops(100, 2, ("login", "ana", "laptop", 0), ("login", "ana", "phone", 5), ("login", "ana", "tv", 9), ("live", "ana", 10)),

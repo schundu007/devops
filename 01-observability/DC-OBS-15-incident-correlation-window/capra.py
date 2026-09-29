@@ -105,10 +105,16 @@ VARIANTS = [
         "approach": "k-way merge with a min-heap · O(n log k) · O(k) extra",
         "spec": {"kind": "fn", "fn": "merge_timelines", "params": ["error_times"]},
         "statement": (
-            "For the postmortem you need a single timeline of every error across services. `error_times[s]` holds "
-            "service `s`'s error times, sorted ascending (a list may be empty).\n\n"
-            "Return every error as `[time, service]`, ordered by time; errors at the same time are ordered by "
-            "service number."
+            "Build a single postmortem timeline of every error across services.\n"
+            "\n"
+            "### Input\n"
+            "- `error_times[s]`: service `s`'s error times, sorted ascending (a list may be empty)\n"
+            "\n"
+            "### Output\n"
+            "- Every error as `[time, service]`, ordered by time\n"
+            "\n"
+            "### Rules\n"
+            "- Errors at the same time are ordered by service number"
         ),
         "examples": [
             {"args": {"error_times": [[1, 5], [2, 5], [0]]},
@@ -176,11 +182,18 @@ def merge_timelines(error_times):
         "approach": "Merge + sliding window with per-service counts · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "quorum_window", "params": ["error_times", "m"]},
         "statement": (
-            "Some services fail for unrelated reasons, so requiring every service is too strict. Correlate an incident "
-            "when errors from **at least `m` different services** fall inside one window.\n\n"
-            "`error_times[s]` is service `s`'s error times, sorted ascending and never empty. Return `[start, end]`, "
-            "the narrowest inclusive window that holds errors from at least `m` distinct services. On equal width, "
-            "return the smallest `start`."
+            "Some services fail for unrelated reasons, so an incident needs only `m` services, not all of them.\n"
+            "\n"
+            "### Input\n"
+            "- `error_times[s]`: service `s`'s error times, sorted ascending and never empty\n"
+            "- `m`: the minimum number of distinct services\n"
+            "\n"
+            "### Output\n"
+            "- `[start, end]`, the narrowest window holding errors from **at least `m`** distinct services\n"
+            "\n"
+            "### Rules\n"
+            "- Both ends are **inclusive**\n"
+            "- On equal width, return the smallest `start`"
         ),
         "examples": [
             {"args": {"error_times": [[1, 50], [48], [100, 200]], "m": 2},

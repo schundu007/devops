@@ -45,16 +45,22 @@ migration runs after the code that needs it. Users see 500s during the release, 
 rollback has to unwind two half-finished services.
 
 ## 4. Problem Statement
-A release has `n` steps numbered `0..n-1` and `m` services numbered `0..m-1`.
-`service[i]` is the service that step `i` belongs to, or `-1` if it belongs to none.
-`before[i]` lists the steps that must run earlier than step `i`.
+Order the steps of a release so every dependency holds and each service's steps stay together.
 
-Return an order of all `n` steps where:
-- every rule in `before` holds, and
-- all steps of the same service appear next to each other (one contiguous block).
+### Input
+- `n`: the number of steps, numbered `0..n-1`
+- `m`: the number of services, numbered `0..m-1`
+- `service[i]`: the service that step `i` belongs to, or `-1` if it belongs to none
+- `before[i]`: the steps that must run earlier than step `i`
 
-Steps with service `-1` have no block to stay in. If several orders work, return any one.
-If none exists, return an empty list.
+### Output
+- An order of all `n` steps; if several orders work, any one
+- An empty list if none exists
+
+### Rules
+- Every rule in `before` holds
+- All steps of the same service appear next to each other (one **contiguous** block)
+- Steps with service `-1` have no block to stay in
 
 ## 5. Input / Output format and Constraints
 - `release_order(n: int, m: int, service: list[int], before: list[list[int]]) -> list[int]`

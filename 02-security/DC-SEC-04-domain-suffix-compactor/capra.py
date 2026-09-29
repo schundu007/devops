@@ -128,11 +128,19 @@ VARIANTS = [
         "approach": "Reverse trie with wildcard leaves · O(total characters) · O(total characters)",
         "spec": {"kind": "fn", "fn": "covered_hosts", "params": ["patterns", "hosts"]},
         "statement": (
-            "A TLS certificate lists Subject Alternative Names in `patterns`: exact names like `api.example.com` "
-            "or wildcards like `*.example.com`. A wildcard stands for **exactly one** leftmost label, so "
-            "`*.example.com` covers `api.example.com` but not `example.com` or `a.b.example.com`.\n\n"
-            "For each name in `hosts`, return whether the certificate covers it. Compare names the DNS way: "
-            "lowercase, and ignore a trailing dot."
+            "Check which hosts a TLS certificate's Subject Alternative Names cover.\n"
+            "\n"
+            "### Input\n"
+            "- `patterns`: the certificate's names: exact names like `api.example.com` or wildcards like `*.example.com`\n"
+            "- `hosts`: the names to check\n"
+            "\n"
+            "### Output\n"
+            "- For each name in `hosts`, whether the certificate covers it\n"
+            "\n"
+            "### Rules\n"
+            "- A wildcard stands for **exactly one** leftmost label\n"
+            "- So `*.example.com` covers `api.example.com` but not `example.com` or `a.b.example.com`\n"
+            "- Compare names the DNS way: lowercase, and ignore a trailing dot"
         ),
         "examples": [
             {"args": {"patterns": ["*.example.com", "example.com"], "hosts": ["api.example.com", "example.com", "a.b.example.com", "API.Example.COM."]},
@@ -232,11 +240,18 @@ VARIANTS = [
         "approach": "Reverse label trie, deepest zone on the path · O(total characters) · O(total characters)",
         "spec": {"kind": "fn", "fn": "owning_zone", "params": ["zones", "queries"]},
         "statement": (
-            "An internal resolver hosts several zones, some delegated inside others: `example.com`, "
-            "`corp.example.com`, `svc.us.example.com`. A query is answered by the **most specific** zone: the "
-            "longest zone that equals the name or is a label-suffix of it.\n\n"
-            "For each name in `queries`, return that zone, normalized (lowercase, no trailing dot), or `\"\"` if "
-            "no zone owns it."
+            "An internal resolver hosts several zones, some delegated inside others (`example.com`, `corp.example.com`, `svc.us.example.com`); find the zone that answers each query.\n"
+            "\n"
+            "### Input\n"
+            "- `zones`: the hosted zones\n"
+            "- `queries`: the names to resolve\n"
+            "\n"
+            "### Output\n"
+            "- For each name in `queries`, the owning zone, normalized (lowercase, no trailing dot)\n"
+            "- `\"\"` if no zone owns it\n"
+            "\n"
+            "### Rules\n"
+            "- A query is answered by the **most specific** zone: the longest zone that equals the name or is a label-suffix of it"
         ),
         "examples": [
             {"args": {"zones": ["example.com", "corp.example.com"], "queries": ["vpn.corp.example.com", "www.example.com", "corp.example.com", "notexample.com"]},

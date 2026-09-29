@@ -42,12 +42,16 @@ ships to production and stays exposed to a known CVE, and the dashboard shows gr
 ## 4. Problem Statement
 Write `compare_versions(a, b)` for dotted version strings such as `1.27.10`.
 
-- Split each version on `.` into parts. Every part is a non-negative integer and may have
-  leading zeros (`010` means 10).
-- Compare the parts from left to right as numbers. The first pair that differs decides.
-- If one version has fewer parts, its missing parts count as `0`, so `1.2` equals `1.2.0`.
+### Input
+- `a`, `b`: version strings
 
-Return `1` if `a` is newer, `-1` if `a` is older, and `0` if they are the same release.
+### Output
+- `1` if `a` is newer, `-1` if `a` is older, `0` if they are the same release
+
+### Rules
+- Split each version on `.` into parts. Every part is a non-negative integer and may have leading zeros (`010` means 10)
+- Compare the parts from left to right **as numbers**. The first pair that differs decides
+- If one version has fewer parts, its missing parts count as `0`, so `1.2` equals `1.2.0`
 
 ## 5. Input / Output format and Constraints
 - `compare_versions(a: str, b: str) -> int`, returning one of `-1`, `0`, `1`.

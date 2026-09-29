@@ -44,13 +44,14 @@ rollback is done.
 ## 4. Problem Statement
 Build a `ConfigStore` with a working copy and numbered snapshots.
 
-- `set(key, value)`: change a key in the working copy.
-- `snapshot()`: freeze the working copy and return its id. The first call returns `0`, the
-  next `1`, and so on. Later `set` calls do not change frozen snapshots.
-- `get(key, snap_id)`: return the value `key` had in snapshot `snap_id`, or `None` if the key
-  had not been set by then.
+### Methods
+- `set(key, value)`: change a key in the working copy
+- `snapshot()`: freeze the working copy and return its id; the first call returns `0`, the next `1`, and so on
+- `get(key, snap_id)`: the value `key` had in snapshot `snap_id`; `None` if the key had not been set by then
 
-If a key is set several times before one snapshot, the snapshot keeps the last value.
+### Rules
+- Later `set` calls do not change frozen snapshots
+- If a key is set several times before one snapshot, the snapshot keeps the **last** value
 
 ## 5. Input / Output format and Constraints
 - `ConfigStore()`, `set(key: str, value: str) -> None`, `snapshot() -> int`, `get(key: str, snap_id: int) -> str | None`.

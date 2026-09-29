@@ -208,13 +208,18 @@ VARIANTS = [
         "approach": "Split, check, then mask the host bits · O(n) · O(1)",
         "spec": {"kind": "fn", "fn": "valid_cidr", "params": ["block"]},
         "statement": (
-            "A firewall API takes allow rules as IPv4 CIDR blocks such as `10.0.0.0/8`. "
-            "Return `True` only when `block` is a clean network block:\n\n"
-            "- the address part follows the IPv4 rules (four parts, ASCII digits, 0-255, no leading zero)\n"
-            "- exactly one `/` followed by a prefix length from 0 to 32, with no leading zero\n"
-            "- every **host bit** (the bits after the prefix) is zero, so `10.0.0.1/8` is rejected\n\n"
-            "A block with host bits set usually means someone pasted a host address and meant a /32; "
-            "rejecting it stops a rule from quietly covering far more than intended."
+            "A firewall API takes allow rules as IPv4 CIDR blocks such as `10.0.0.0/8`. Check that a block is a clean network block.\n"
+            "\n"
+            "### Input\n"
+            "- `block`: the string to check\n"
+            "\n"
+            "### Output\n"
+            "- `True` only when `block` is a clean network block, otherwise `False`\n"
+            "\n"
+            "### Rules\n"
+            "- The address part follows the IPv4 rules: four parts, ASCII digits, 0-255, no leading zero\n"
+            "- Exactly one `/`, followed by a prefix length from 0 to 32 with no leading zero\n"
+            "- Every **host bit** (the bits after the prefix) is zero, so `10.0.0.1/8` is rejected"
         ),
         "examples": [
             {"args": {"block": "10.0.0.0/8"}, "explanation": "Only the first 8 bits are set, and they are all network bits.",
@@ -263,12 +268,19 @@ VARIANTS = [
         "approach": "Split once on :: and count groups · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "valid_ipv6", "params": ["addr"]},
         "statement": (
-            "Real IPv6 addresses in configs and logs are almost always shortened: `fe80::1`, `2001:db8::8a2e:370:7334`, `::`. "
-            "Return `True` when `addr` is a valid IPv6 address, full or shortened:\n\n"
-            "- every group is 1-4 hex digits (either case)\n"
-            "- without `::` there must be exactly 8 groups\n"
-            "- `::` may appear **at most once** and stands for **one or more** zero groups, so the written groups must number 7 or fewer\n\n"
-            "Embedded IPv4 (`::ffff:1.2.3.4`) and zone IDs (`%eth0`) are not accepted."
+            "Real IPv6 addresses are almost always shortened, like `fe80::1`, `2001:db8::8a2e:370:7334` or `::`. Validate an IPv6 address, full or shortened.\n"
+            "\n"
+            "### Input\n"
+            "- `addr`: the string to check\n"
+            "\n"
+            "### Output\n"
+            "- `True` when `addr` is a valid IPv6 address, full or shortened, otherwise `False`\n"
+            "\n"
+            "### Rules\n"
+            "- Every group is 1-4 hex digits (either case)\n"
+            "- Without `::`, there must be exactly 8 groups\n"
+            "- `::` may appear **at most once** and stands for **one or more** zero groups, so the written groups must number 7 or fewer\n"
+            "- Embedded IPv4 (`::ffff:1.2.3.4`) and zone IDs (`%eth0`) are not accepted"
         ),
         "examples": [
             {"args": {"addr": "2001:db8::8a2e:370:7334"}, "explanation": "Five written groups; :: fills in the other three.",

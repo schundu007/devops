@@ -133,12 +133,17 @@ VARIANTS = [
         "approach": "Hash map + binary search, then an age check · O(log n) per query · O(samples)",
         "spec": {"kind": "design", "fn": "MetricStore", "params": []},
         "statement": (
-            "A dashboard must not keep drawing a flat line for a target that stopped reporting. Like Prometheus's "
-            "lookback delta, a sample only answers a query while it is fresh enough.\n\n"
-            "Implement `MetricStore(lookback)`:\n\n"
-            "- `record(metric, value, timestamp)`: store a sample. Samples of one metric arrive in increasing time order.\n"
-            "- `value_at(metric, timestamp)`: the value of the newest sample at or before `timestamp`, **if** it is at most "
-            "`lookback` seconds old (`timestamp - sample_time <= lookback`). Otherwise, or if there is no such sample, return `None`."
+            "Stop answering with stale samples, like Prometheus's lookback delta, so a dashboard does not draw a flat line for a target that stopped reporting.\n"
+            "\n"
+            "### Methods\n"
+            "- `MetricStore(lookback)`: create the store\n"
+            "- `record(metric, value, timestamp)`: store a sample\n"
+            "- `value_at(metric, timestamp)`: the value of the newest sample at or before `timestamp`, **if** it is fresh enough; otherwise `None`\n"
+            "\n"
+            "### Rules\n"
+            "- Samples of one metric arrive in increasing time order\n"
+            "- A sample is fresh enough if it is at most `lookback` seconds old: `timestamp - sample_time <= lookback`\n"
+            "- If there is no sample at or before `timestamp`, return `None`"
         ),
         "examples": [
             {"args": lops(300, ("record", "up", 1.0, 1000), ("value_at", "up", 1300), ("value_at", "up", 1301)),
@@ -231,12 +236,20 @@ class MetricStore:
         "approach": "Two pointers over samples and steps · O(n + s) · O(s)",
         "spec": {"kind": "fn", "fn": "range_query", "params": ["times", "values", "start", "end", "step"]},
         "statement": (
-            "A graph panel does not ask for one instant; it asks for a whole range, evaluated every `step` seconds, "
-            "the way a Prometheus range query does.\n\n"
-            "`times` is strictly increasing and `values[i]` is the sample at `times[i]`. Evaluate the series at "
-            "`start, start + step, start + 2·step, …` up to and including `end` when it lands on a step.\n\n"
-            "At each instant, the value is the newest sample at or before it, or `None` if there is none yet. "
-            "Return the list of values, one per instant."
+            "Evaluate a series over a whole range every `step` seconds, the way a Prometheus range query does for a graph panel.\n"
+            "\n"
+            "### Input\n"
+            "- `times`: sample times, strictly increasing\n"
+            "- `values[i]`: the sample at `times[i]`\n"
+            "- `start`, `end`, `step`: evaluate at `start, start + step, start + 2·step, …`\n"
+            "\n"
+            "### Output\n"
+            "- The list of values, one per instant\n"
+            "\n"
+            "### Rules\n"
+            "- `end` is included when it lands on a step\n"
+            "- At each instant, the value is the newest sample at or before it\n"
+            "- If there is no such sample yet, the value is `None`"
         ),
         "examples": [
             {"args": {"times": [10, 25, 40], "values": [1, 2, 3], "start": 0, "end": 40, "step": 10},

@@ -132,13 +132,20 @@ VARIANTS = [
         "approach": "Vertical scan over reversed labels · O(S) · O(L)",
         "spec": {"kind": "fn", "fn": "common_zone", "params": ["fqdns"], "cmp": "exact"},
         "statement": (
-            "Before issuing one wildcard certificate or delegating a zone, find the DNS zone every host "
-            "shares. Given fully qualified names `fqdns`, return their longest common **suffix made of whole "
-            "labels** (labels are separated by `.`).\n\n"
-            "- DNS names are case-insensitive: compare in lowercase and return lowercase\n"
+            "Find the DNS zone every host shares, before issuing one wildcard certificate or delegating a zone.\n"
+            "\n"
+            "### Input\n"
+            "- `fqdns`: fully qualified names\n"
+            "\n"
+            "### Output\n"
+            "- Their longest common **suffix made of whole labels**, in lowercase\n"
+            "- `\"\"` when nothing is shared or the list is empty\n"
+            "\n"
+            "### Rules\n"
+            "- Labels are separated by `.`\n"
+            "- DNS names are case-insensitive: compare in lowercase\n"
             "- A single trailing dot (`example.com.`) is the root and is ignored\n"
-            "- Return `\"\"` when nothing is shared or the list is empty\n\n"
-            "A partial label never counts: `api.foo.com` and `api.barfoo.com` share only `com`."
+            "- A partial label never counts: `api.foo.com` and `api.barfoo.com` share only `com`"
         ),
         "examples": [
             {"args": {"fqdns": ["api.us-east.example.com", "db.eu.example.com", "EXAMPLE.com."]},
@@ -182,11 +189,19 @@ VARIANTS = [
         "approach": "Sort, compare ends of every k-window · O(n log n · m) · O(n)",
         "spec": {"kind": "fn", "fn": "longest_shared_prefix", "params": ["hosts", "k"], "cmp": "exact"},
         "statement": (
-            "An inventory holds hosts from many fleets. To propose a batch selector for a rolling restart of "
-            "at least `k` machines, find the **longest prefix shared by at least `k` hosts** (duplicates count "
-            "separately).\n\n"
-            "If several prefixes of that length qualify, return the lexicographically smallest. If fewer than "
-            "`k` hosts exist, return `\"\"`."
+            "Propose a batch selector for a rolling restart of at least `k` machines, from an inventory of many fleets.\n"
+            "\n"
+            "### Input\n"
+            "- `hosts`: the inventory's hostnames\n"
+            "- `k`: the minimum number of hosts the prefix must cover\n"
+            "\n"
+            "### Output\n"
+            "- The **longest prefix shared by at least `k` hosts**\n"
+            "- `\"\"` if fewer than `k` hosts exist\n"
+            "\n"
+            "### Rules\n"
+            "- Duplicates count separately\n"
+            "- If several prefixes of that length qualify, return the lexicographically smallest"
         ),
         "examples": [
             {"args": {"hosts": ["web-use1-01", "api-use1-01", "web-use1-02", "web-euw1-01"], "k": 2},

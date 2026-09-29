@@ -42,16 +42,21 @@ it, which is a cheap denial of service. Without correct nesting, the reviewed te
 what is deployed.
 
 ## 4. Problem Statement
-Write `expand(template, max_output)`.
+Write `expand(template, max_output)`, which expands repeat blocks in a template.
 
-- A block is written `k[body]`: a count `k` (one or more digits) and a body in square brackets.
-  It stands for `body` written `k` times in a row.
-- Bodies can contain more blocks, nested to any depth.
-- Every character that is not a digit or a bracket is copied as it is. Digits only appear
-  as counts.
-- If the expanded text, or any block while it is being expanded, would be longer than
-  `max_output` characters, raise `ValueError`. (The check is conservative: `0[...]` around a
-  huge block still fails, because the block is built before it is multiplied by zero.)
+### Input
+- `template`: text with blocks written `k[body]`
+- `max_output`: the longest text allowed, in characters
+
+### Output
+- The expanded text
+
+### Rules
+- A block `k[body]` is a count `k` (one or more digits) and a body in square brackets. It stands for `body` written `k` times in a row
+- Bodies can contain more blocks, nested to any depth
+- Every character that is not a digit or a bracket is copied as it is. Digits only appear as counts
+- If the expanded text, or any block while it is being expanded, would be longer than `max_output` characters, raise `ValueError`
+- The check is conservative: `0[...]` around a huge block still fails, because the block is built **before** it is multiplied by zero
 
 ## 5. Input / Output format and Constraints
 - `expand(template: str, max_output: int = 100_000) -> str`.

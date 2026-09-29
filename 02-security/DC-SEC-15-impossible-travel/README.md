@@ -42,13 +42,19 @@ where a third event sits between the two cities. Get the window edge wrong (60 v
 and a real session hijack slips through, or the SOC drowns in false alerts and starts ignoring them.
 
 ## 4. Problem Statement
-You get a list of events, each a string `"user,minute,risk,city"`. An event is **suspicious** if:
-- its `risk` is greater than 1,000, or
-- the same user has at least one other event in a **different** city whose `minute` is within
-  60 of this event's minute (a difference of 60 counts).
+Find the suspicious events in a sign-in log.
 
-Return every suspicious event, in the order they appear in the input. If the same string
-appears twice and is suspicious, return it twice.
+### Input
+- `events`: strings `"user,minute,risk,city"`
+
+### Output
+- Every suspicious event, in the order they appear in the input
+- If the same string appears twice and is suspicious, return it twice
+
+### Rules
+- An event is **suspicious** when its `risk` is greater than 1,000
+- An event is also **suspicious** when the same user has at least one other event in a **different** city whose `minute` is within 60 of this event's minute
+- A difference of exactly 60 counts
 
 ## 5. Input / Output format and Constraints
 - `flag_events(events: list[str]) -> list[str]`

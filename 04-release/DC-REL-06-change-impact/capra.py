@@ -202,11 +202,18 @@ VARIANTS = [
         "approach": "Reach bitmasks + popcount · O(n + E·n/64) · O(n²/64)",
         "spec": {"kind": "fn", "fn": "blast_radius", "params": ["n", "deps"], "cmp": "exact"},
         "statement": (
-            "A change-review bot labels each pull request with its blast radius. Components are `0..n-1` and "
-            "`deps[i] = [up, down]` means `down` depends on `up`; the graph has no cycles.\n\n"
-            "For every component `c`, return how many **other** components are affected by a change to `c`: "
-            "those that depend on it directly or through a chain.\n\n"
-            "Return a list of `n` counts, in component order."
+            "Label each pull request with its blast radius.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of components, numbered `0..n-1`\n"
+            "- `deps[i] = [up, down]`: `down` depends on `up`\n"
+            "\n"
+            "### Output\n"
+            "- A list of `n` counts, in component order: for component `c`, how many **other** components a change to `c` affects\n"
+            "\n"
+            "### Rules\n"
+            "- A component is affected when it depends on `c` directly or through a chain\n"
+            "- The graph has no cycles"
         ),
         "examples": [
             {"args": {"n": 4, "deps": [[0, 1], [1, 2], [0, 3]]},
@@ -248,12 +255,19 @@ VARIANTS = [
         "approach": "Precomputed reach masks, OR per batch · O(n + E·n/64 + Σ(k + n)) · O(n²/64)",
         "spec": {"kind": "fn", "fn": "rebuild_sets", "params": ["n", "deps", "changes"], "cmp": "exact"},
         "statement": (
-            "A monorepo CI job receives batches of changed components and must rebuild everything they "
-            "affect. With the same `deps` as the main problem (`[up, down]`, acyclic), each `changes[i]` lists "
-            "the components changed in batch `i`.\n\n"
-            "For each batch return the sorted list of components to rebuild: the changed components "
-            "themselves plus every component that depends on any of them, directly or indirectly. An empty "
-            "batch rebuilds nothing."
+            "A monorepo CI job receives batches of changed components and must rebuild everything they affect.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of components\n"
+            "- `deps[i] = [up, down]`: `down` depends on `up`, as in the main problem; the graph is acyclic\n"
+            "- `changes[i]`: the components changed in batch `i`\n"
+            "\n"
+            "### Output\n"
+            "- For each batch, the sorted list of components to rebuild\n"
+            "\n"
+            "### Rules\n"
+            "- Rebuild the changed components themselves plus every component that depends on any of them, directly or indirectly\n"
+            "- An empty batch rebuilds nothing"
         ),
         "examples": [
             {"args": {"n": 5, "deps": [[0, 1], [1, 2], [3, 4]], "changes": [[1], [0, 3], []]},

@@ -42,17 +42,19 @@ service name instead of request ID, the averages blend unrelated requests. The s
 looks healthy, and the team rolls back the wrong service.
 
 ## 4. Problem Statement
-Build a `HopLatency` tracker.
+Build a `HopLatency` tracker that averages hop durations per route.
 
-- `enter(request_id, service, t)`: the request starts a hop at `service` at time `t`. A request
-  has at most one open hop at a time.
-- `exit(request_id, service, t)`: the request's open hop ends at `service` at time `t`, which
-  is later than its entry time. The hop is now complete, and the ID may be reused.
-- `average(from_service, to_service)`: the mean duration of all completed hops that entered at
-  `from_service` and exited at `to_service`. Direction matters: A→B and B→A are different routes.
+### Methods
+- `enter(request_id, service, t)`: the request starts a hop at `service` at time `t`
+- `exit(request_id, service, t)`: the request's open hop ends at `service` at time `t`, which is later than its entry time; the hop is now complete
+- `average(from_service, to_service)`: the mean duration of all completed hops that entered at `from_service` and exited at `to_service`
 
-Hops that are still open do not count. `average` is only called for routes with at least
-one completed hop.
+### Rules
+- A request has at most one open hop at a time
+- After `exit`, the request ID may be reused
+- Direction matters: A→B and B→A are different routes
+- Hops that are still **open** do not count
+- `average` is only called for routes with at least one completed hop
 
 ## 5. Input / Output format and Constraints
 - `request_id` and `service`: non-empty strings. `t`: an integer, `0 <= t <= 10^9`.

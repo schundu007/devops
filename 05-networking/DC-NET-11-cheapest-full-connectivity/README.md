@@ -41,11 +41,19 @@ leave the network in separate islands, with two buildings unable to reach each o
 overspend by laying a loop where a tree was enough.
 
 ## 4. Problem Statement
-Each `sites[i] = [x, y]` is a location on the site plan. A cable between two sites costs
-their Manhattan distance, `|x1 - x2| + |y1 - y2|`. Any site can be cabled to any other.
+Find the cheapest cabling that connects every site.
 
-Return the lowest total cable cost so that every site can reach every other site. The network may
-route through other sites. With zero or one site, the cost is 0.
+### Input
+- `sites[i] = [x, y]`: a site's location on the site plan
+
+### Output
+- The lowest total cable cost so that every site can reach every other site
+- `0` with zero or one site
+
+### Rules
+- A cable between two sites costs their Manhattan distance, `|x1 - x2| + |y1 - y2|`
+- Any site can be cabled to any other
+- The network may route through other sites
 
 ## 5. Input / Output format and Constraints
 - Returns an integer.

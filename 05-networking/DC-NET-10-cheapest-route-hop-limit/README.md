@@ -42,11 +42,19 @@ wrongly report "no route". Or, if you update costs in place within a round, one 
 several hops. Either way the pipeline breaks the relay limit, or overpays by thousands of dollars a month.
 
 ## 4. Problem Statement
-There are `n` regions, numbered `0` to `n - 1`. Each `routes[i] = [a, b, price]` is a one-way
-transfer from region `a` to region `b` with that cost.
+Find the cheapest route between two regions with a limit on the regions in between.
 
-Find the lowest total cost to get from `src` to `dst` passing through **at most `max_transit`**
-regions in between (so at most `max_transit + 1` transfers). Return `-1` if no such route exists.
+### Input
+- `n`: the number of regions, numbered `0` to `n - 1`
+- `routes[i] = [a, b, price]`: a one-way transfer from region `a` to region `b` with that cost
+- `src`, `dst`: the start and destination regions
+- `max_transit`: the most regions the route may pass through in between
+
+### Output
+- The lowest total cost from `src` to `dst`, or `-1` if no such route exists
+
+### Rules
+- A route passes through **at most `max_transit`** regions in between, so it uses at most `max_transit + 1` transfers
 
 ## 5. Input / Output format and Constraints
 - Returns an integer cost, or `-1`.

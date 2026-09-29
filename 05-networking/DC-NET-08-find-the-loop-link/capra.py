@@ -110,11 +110,19 @@ VARIANTS = [
         "approach": "Union-find, count spare links and components · O((n + m) · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "recables_needed", "params": ["n", "links"]},
         "statement": (
-            "A lab has `n` switches, numbered `1` to `n`, and cables `links[i] = [a, b]`. After a messy move, "
-            "the switches have split into several isolated islands, and some islands have redundant cables "
-            "(ones that close a loop).\n\n"
-            "You may unplug any cable and plug it back in between any two switches. Return the minimum number of "
-            "cables to move so every switch can reach every other one, or `-1` if there are not enough cables."
+            "After a messy move, lab switches have split into isolated islands; reconnect them by moving as few cables as possible.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of switches, numbered `1` to `n`\n"
+            "- `links[i] = [a, b]`: a cable between switches `a` and `b`\n"
+            "\n"
+            "### Output\n"
+            "- The minimum number of cables to move so every switch can reach every other one\n"
+            "- `-1` if there are not enough cables\n"
+            "\n"
+            "### Rules\n"
+            "- Some islands have redundant cables (ones that close a loop)\n"
+            "- You may unplug any cable and plug it back in between any two switches"
         ),
         "examples": [
             {"args": {"n": 4, "links": [[1, 2], [1, 3], [2, 3]]},
@@ -208,10 +216,16 @@ def recables_needed(n, links):
         "approach": "Union-find over links in order · O((n + m) · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "first_connecting_link", "params": ["n", "links", "src", "dst"]},
         "statement": (
-            "A new WAN is cabled one link at a time. `links[i] = [a, b]` is the `i`-th link brought up, "
-            "between routers `a` and `b` (numbered `1` to `n`).\n\n"
-            "The change ticket closes as soon as router `src` can reach router `dst`. Return the index of the "
-            "first link after which that is true, or `-1` if they are never connected."
+            "A new WAN is cabled one link at a time; find when its change ticket closes, which is as soon as router `src` can reach router `dst`.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of routers, numbered `1` to `n`\n"
+            "- `links[i] = [a, b]`: the `i`-th link brought up, between routers `a` and `b`\n"
+            "- `src`, `dst`: the two routers that must connect\n"
+            "\n"
+            "### Output\n"
+            "- The index of the **first** link after which `src` can reach `dst`\n"
+            "- `-1` if they are never connected"
         ),
         "examples": [
             {"args": {"n": 5, "links": [[1, 2], [3, 4], [2, 3], [4, 5]], "src": 1, "dst": 4},

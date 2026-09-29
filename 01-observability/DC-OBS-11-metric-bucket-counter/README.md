@@ -42,16 +42,19 @@ or not at all, when you zoom. The per-hour total then differs from the per-minut
 and in a postmortem nobody trusts the graph.
 
 ## 4. Problem Statement
-Build an `EventCounter`.
+Build an `EventCounter` that counts named events in fixed-size time buckets.
 
-- `record(name, time)`: store one event called `name` at second `time`. Events may arrive in
-  any time order, and several can share a second.
-- `counts(step, name, start, end)`: split `[start, end]` (both ends inclusive) into buckets of
-  `step` size, where `"minute"` = 60 s, `"hour"` = 3600 s and `"day"` = 86400 s. The first
-  bucket is `[start, start + size - 1]`, the next begins at `start + size`, and the last
-  bucket is cut short at `end`. Return the number of `name` events in each bucket, in order.
+### Methods
+- `record(name, time)`: store one event called `name` at second `time`
+- `counts(step, name, start, end)`: return the number of `name` events in each bucket of `[start, end]`, in order
 
-An unknown `name` returns all zeros.
+### Rules
+- Events may arrive in any time order, and several can share a second
+- `[start, end]` is **inclusive** at both ends
+- `step` is `"minute"` = 60 s, `"hour"` = 3600 s or `"day"` = 86400 s
+- The first bucket is `[start, start + size - 1]`; the next begins at `start + size`
+- The last bucket is cut short at `end`
+- An unknown `name` returns all zeros
 
 ## 5. Input / Output format and Constraints
 - `name`: a non-empty string. `time`, `start`, `end`: integers, `0 <= time, start, end <= 10^9`, `start <= end`.

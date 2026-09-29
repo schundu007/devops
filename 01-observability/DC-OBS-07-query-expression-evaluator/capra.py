@@ -134,14 +134,21 @@ VARIANTS = [
         "title": "Composite alert rule",
         "approach": "Stack of operators and operands · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "eval_rule", "params": ["rule", "alerts"], "ret": "value", "cmp": "exact"},
-        "statement": """A composite alert fires from other alerts. Its rule is written in prefix form:
+        "statement": """A composite alert fires from other alerts. Its rule is written in prefix form.
 
-- an alert name matching `[a-z_][a-z0-9_]*`, true if `alerts[name]` is firing
-- `!(x)` — not x
-- `&(x,y,...)` — every argument is true
-- `|(x,y,...)` — at least one argument is true
+### Input
+- `rule`: the composite rule, built from:
+  - an alert name matching `[a-z_][a-z0-9_]*`, true if `alerts[name]` is firing
+  - `!(x)`: not x
+  - `&(x,y,...)`: every argument is true
+  - `|(x,y,...)`: at least one argument is true
+- `alerts`: whether each alert is firing
 
-Return whether the composite alert fires. There are no spaces. As with the metric query, the stack remembers what was open when a group started; here that is the operator in front of `(`.""",
+### Output
+- Whether the composite alert fires
+
+### Rules
+- There are no spaces""",
         "examples": [
             {"args": {"rule": "&(cpu_high,|(disk_full,!(maintenance)))", "alerts": {"cpu_high": True, "disk_full": False, "maintenance": False}},
              "explanation": "Not in maintenance, so the | is true, and CPU is high: the rule fires.",
@@ -236,11 +243,16 @@ def eval_rule(rule, alerts):
         "spec": {"kind": "fn", "fn": "count_containers", "params": ["spec"], "ret": "value", "cmp": "exact"},
         "statement": """A compact deploy spec lists containers and repeated groups. For capacity planning, count how many of each container it will start.
 
-- A container is a name matching `[a-z][a-z-]*`, optionally followed by a count: `api3` is three `api` containers.
-- A group is `( ... )`, optionally followed by a count that multiplies everything inside.
-- Items are separated by spaces. A missing count means 1.
+### Input
+- `spec`: items separated by spaces, each a container or a group
 
-Return `[name, count]` pairs sorted by name. The stack keeps one tally per open group; on `)` the inner tally is multiplied and merged into the outer one.""",
+### Output
+- `[name, count]` pairs sorted by name
+
+### Rules
+- A container is a name matching `[a-z][a-z-]*`, optionally followed by a count: `api3` is three `api` containers
+- A group is `( ... )`, optionally followed by a count that multiplies everything inside
+- A missing count means `1`""",
         "examples": [
             {"args": {"spec": "(web2 (envoy log-agent))3 db"},
              "explanation": "The outer group has web ×2, envoy and log-agent; ×3 gives web 6, envoy 3, log-agent 3. db appears once.",

@@ -182,13 +182,19 @@ VARIANTS = [
         "approach": "Backtracking with a prefix-mask prune · O(1) · O(1)",
         "spec": {"kind": "fn", "fn": "restore_in_cidr", "params": ["digits", "cidr"], "cmp": "exact"},
         "statement": (
-            "A firewall log stripped the dots from source addresses, but the incident is scoped: only traffic "
-            "from one subnet matters. Given the digit string `digits` and a subnet `cidr` such as `10.0.0.0/8`, "
-            "return every valid IPv4 reading of `digits` that falls **inside** the subnet.\n\n"
+            "A firewall log stripped the dots from source addresses, but only traffic from one subnet matters.\n"
+            "\n"
+            "### Input\n"
+            "- `digits`: the digit string with its dots removed\n"
+            "- `cidr`: a subnet such as `10.0.0.0/8`\n"
+            "\n"
+            "### Output\n"
+            "- Every valid IPv4 reading of `digits` that falls **inside** the subnet, sorted as strings, ascending\n"
+            "\n"
+            "### Rules\n"
             "- Each of the four parts is 0-255 with no leading zeros (`0` is fine, `01` is not)\n"
             "- An address is inside `a.b.c.d/p` when its first `p` bits equal the subnet's first `p` bits\n"
-            "- Host bits set in the `cidr` itself are ignored\n\n"
-            "Return the addresses sorted as strings, ascending."
+            "- Host bits set in the `cidr` itself are ignored"
         ),
         "examples": [
             {"args": {"digits": "10010010", "cidr": "10.0.0.0/8"},
@@ -239,11 +245,18 @@ VARIANTS = [
         "approach": "DP over position and octet count mod 4 · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "count_splits", "params": ["digits"], "cmp": "exact"},
         "statement": (
-            "A broken exporter wrote a list of IPv4 addresses into one field with **every** separator removed: "
-            "no dots and no commas. Before trying to repair the data, count how ambiguous it is.\n\n"
-            "Return the number of ways to cut `digits` into a sequence of **one or more** valid IPv4 addresses. "
-            "Each address is four parts of 0-255 with no leading zeros, and the parts are read in order.\n\n"
-            "An empty string or a string with a non-digit has 0 readings."
+            "A broken exporter wrote a list of IPv4 addresses into one field with **every** separator removed (no dots and no commas); count how ambiguous it is.\n"
+            "\n"
+            "### Input\n"
+            "- `digits`: the merged field\n"
+            "\n"
+            "### Output\n"
+            "- The number of ways to cut `digits` into a sequence of **one or more** valid IPv4 addresses\n"
+            "- `0` for an empty string or a string with a non-digit\n"
+            "\n"
+            "### Rules\n"
+            "- Each address is four parts of 0-255 with no leading zeros\n"
+            "- The parts are read in order"
         ),
         "examples": [
             {"args": {"digits": "1111"}, "explanation": "Only 1.1.1.1.",

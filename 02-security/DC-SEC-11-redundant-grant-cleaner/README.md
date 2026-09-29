@@ -42,12 +42,17 @@ in the middle of paths, which a pure prefix check does not handle (see DC-SEC-08
 someone "fixes" it by granting `/logs/*`, which is far wider than before.
 
 ## 4. Problem Statement
-You get a list of grant paths. Each path starts with `/` and is made of segments separated by
-`/`. A grant **covers** another grant if the other path begins with the first path followed by
-`/`. So `/logs/app` covers `/logs/app/2026`, but not `/logs/apple` or `/logs/app-old`.
+Remove grants that another grant already covers.
 
-Return the grants that are **not** covered by any other grant, sorted in ascending order.
-All input paths are distinct.
+### Input
+- `grants`: distinct grant paths; each starts with `/` and is made of segments separated by `/`
+
+### Output
+- The grants **not** covered by any other grant, sorted in ascending order
+
+### Rules
+- A grant **covers** another grant if the other path begins with the first path followed by `/`
+- `/logs/app` covers `/logs/app/2026`, but not `/logs/apple` or `/logs/app-old`
 
 ## 5. Input / Output format and Constraints
 - `remove_covered(grants: list[str]) -> list[str]`

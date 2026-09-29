@@ -42,15 +42,21 @@ operators, and it applies all of them to whole vectors of series, not single num
 or fires constantly, and nobody notices until an outage.
 
 ## 4. Problem Statement
-Write `evaluate(expr)`. `expr` holds non-negative integers, the operators `+`, `-`, `*`
-and `/`, and spaces. There are no parentheses.
+Write `evaluate(expr)`, which computes an arithmetic expression with operator precedence.
 
-- `*` and `/` are applied before `+` and `-`.
-- Operators on the same level are applied left to right.
-- Division is integer division that truncates toward zero (`7 / 2 = 3`).
+### Input
+- `expr`: non-negative integers, the operators `+`, `-`, `*` and `/`, and spaces; there are no parentheses
 
-The expression is always valid, never divides by zero, and every intermediate result fits in
-a 32-bit signed integer. Return the result as an `int`. Do not use `eval`.
+### Output
+- The result as an `int`
+
+### Rules
+- `*` and `/` are applied before `+` and `-`
+- Operators on the same level are applied left to right
+- Division is integer division that truncates **toward zero** (`7 / 2 = 3`)
+- The expression is always valid and never divides by zero
+- Every intermediate result fits in a 32-bit signed integer
+- Do not use `eval`
 
 ## 5. Input / Output format and Constraints
 - `expr: str`, with `1 <= len(expr) <= 3 * 10^5`.

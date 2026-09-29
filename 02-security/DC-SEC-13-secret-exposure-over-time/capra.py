@@ -99,11 +99,19 @@ VARIANTS = [
         "approach": "Sort by time + union-find with a component count · O(m log m + m · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "mesh_complete_at", "params": ["n", "links"]},
         "statement": (
-            "A service mesh rollout records each mTLS trust link as `links[i] = [a, b, t]`: services `a` and `b` "
-            "trust each other from time `t` on. Trust is transitive, so services in one connected group share a "
-            "trust domain. Links are **not** sorted by time.\n\n"
-            "Return the earliest time at which all `n` services (numbered `0` to `n - 1`) are in a single trust "
-            "domain, or `-1` if that never happens."
+            "A service mesh rollout records mTLS trust links; find when every service shares one trust domain.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of services, numbered `0` to `n - 1`\n"
+            "- `links[i] = [a, b, t]`: services `a` and `b` trust each other from time `t` on\n"
+            "\n"
+            "### Output\n"
+            "- The earliest time at which all `n` services are in a single trust domain\n"
+            "- `-1` if that never happens\n"
+            "\n"
+            "### Rules\n"
+            "- Trust is transitive, so services in one connected group share a trust domain\n"
+            "- Links are **not** sorted by time"
         ),
         "examples": [
             {"args": {"n": 4, "links": [[0, 1, 5], [2, 3, 3], [1, 2, 9], [0, 3, 7]]},
@@ -191,12 +199,20 @@ def mesh_complete_at(n, links):
         "approach": "Union-find per time slot, stamping newly exposed parties · O(m log m + (m + n) · α(n)) · O(n + m)",
         "spec": {"kind": "fn", "fn": "exposure_times", "params": ["n", "sessions", "first"]},
         "statement": (
-            "The incident report needs a **timeline**, not just a list. Use the same rules as before: party `0` "
-            "and party `first` hold the secret at time 0, `sessions[i] = [a, b, t]` passes it between `a` and "
-            "`b` if either holds it, and sessions at the same time `t` happen together, so the secret can pass "
-            "along a chain of them in one instant.\n\n"
-            "Return a list where entry `p` is the time party `p` first held the secret: `0` for the two initial "
-            "holders, and `-1` for parties that never got it. Rotate credentials in that order."
+            "The incident report needs a **timeline**, not just a list, so credentials can be rotated in that order.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of parties, numbered `0` to `n - 1`\n"
+            "- `sessions[i] = [a, b, t]`: parties `a` and `b` connected at time `t`\n"
+            "- `first`: the party that holds the secret at time 0 along with party `0`\n"
+            "\n"
+            "### Output\n"
+            "- A list where entry `p` is the time party `p` first held the secret\n"
+            "- `0` for the two initial holders, `-1` for parties that never got it\n"
+            "\n"
+            "### Rules\n"
+            "- A session passes the secret between `a` and `b` if either holds it\n"
+            "- Sessions at the same time `t` happen together, so the secret can pass along a chain of them in one instant"
         ),
         "examples": [
             {"args": {"n": 6, "sessions": [[1, 2, 5], [2, 3, 8], [1, 5, 10], [3, 4, 2]], "first": 1},

@@ -44,12 +44,19 @@ treat an unreachable router as "reached eventually", a partition goes unreported
 blackholed.
 
 ## 4. Problem Statement
-There are `n` routers numbered `1..n`. Each link `(u, v, ms)` carries a signal **one way**, from
-`u` to `v`, and takes `ms` milliseconds (`ms >= 0`). A signal starts at router `source` at time 0
-and is copied down every outgoing link as soon as it arrives.
+Find when the last router receives a signal.
 
-Return the time at which the **last** router receives the signal. If any router never receives
-it, return `-1`.
+### Input
+- `n`: routers, numbered `1..n`
+- `links`: each `(u, v, ms)` carries a signal **one way**, from `u` to `v`, and takes `ms` milliseconds (`ms >= 0`)
+- `source`: the router where the signal starts, at time 0
+
+### Output
+- The time at which the **last** router receives the signal
+- `-1` if any router never receives it
+
+### Rules
+- A router copies the signal down every outgoing link as soon as it arrives
 
 ## 5. Input / Output format and Constraints
 - `links: list[tuple[int, int, int]]`, `n: int`, `source: int`. Returns `int`.

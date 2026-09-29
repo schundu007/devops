@@ -173,11 +173,17 @@ VARIANTS = [
         "approach": "Read and write pointers · O(n) · O(1) extra",
         "spec": {"kind": "driver", "fn": "uniq", "params": ["lines"], "driver": _UNIQ_DRIVER},
         "statement": (
-            "A crash-looping sidecar writes the same line thousands of times in a row, and the shipper's buffer is fixed size. "
-            "Like `uniq`, keep only the **first line of each run** of identical consecutive lines.\n\n"
-            "- change `lines` **in place** and return the new length `n`\n"
-            "- `lines[:n]` must hold the kept lines in their original order\n"
-            "- identical lines that are not next to each other are both kept"
+            "A crash-looping sidecar writes the same line thousands of times in a row, and the shipper's buffer is fixed size. Like `uniq`, keep only the **first line of each run** of identical consecutive lines.\n"
+            "\n"
+            "### Input\n"
+            "- `lines`: the log lines\n"
+            "\n"
+            "### Output\n"
+            "- The new length `n`; `lines[:n]` holds the kept lines in their original order\n"
+            "\n"
+            "### Rules\n"
+            "- Change `lines` **in place**\n"
+            "- Identical lines that are not next to each other are both kept"
         ),
         "examples": [
             {"args": {"lines": ["probe failed", "probe failed", "probe failed", "restarting", "probe failed"]},
@@ -218,10 +224,18 @@ VARIANTS = [
         "approach": "Read and write pointers with a run counter · O(n) · O(1) extra",
         "spec": {"kind": "driver", "fn": "cap_runs", "params": ["lines", "k"], "driver": _CAP_DRIVER},
         "statement": (
-            "Collapsing a burst to one line hides how bad it was; the SOC wants the first `k` copies of every run as samples. "
-            "In place, keep at most `k` consecutive copies of each run of identical lines and drop the rest.\n\n"
-            "- return the new length `n`; `lines[:n]` holds the result in order\n"
-            "- with `k = 1` this is `uniq`"
+            "Collapsing a burst to one line hides how bad it was; the SOC wants the first `k` copies of every run as samples. Keep at most `k` consecutive copies of each run of identical lines and drop the rest.\n"
+            "\n"
+            "### Input\n"
+            "- `lines`: the log lines\n"
+            "- `k`: the most copies of a run to keep\n"
+            "\n"
+            "### Output\n"
+            "- The new length `n`; `lines[:n]` holds the result in order\n"
+            "\n"
+            "### Rules\n"
+            "- Work **in place**\n"
+            "- With `k = 1` this is `uniq`"
         ),
         "examples": [
             {"args": {"lines": ["401 /login"] * 5 + ["200 /login"] + ["401 /login"] * 2, "k": 2},

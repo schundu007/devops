@@ -40,14 +40,17 @@ already timed out comes back to life, which is exactly what short TTLs were supp
 If expiry is never enforced, the live-session count and the memory grow forever.
 
 ## 4. Problem Statement
-Build a `TokenManager(ttl)`. Every token lives `ttl` seconds after it was last issued or renewed.
-- `issue(token_id, now)`: create the token (or reset it, if the id already exists), expiring at `now + ttl`.
-- `renew(token_id, now)`: if the token exists and has **not** expired, reset its expiry to
-  `now + ttl`. Otherwise do nothing.
-- `count_live(now)`: return how many tokens have an expiry **later** than `now`.
+Build a `TokenManager(ttl)` that counts live tokens.
 
-Expiry happens before anything else at the same moment: a token that expires at time 6 is
-already dead for a `renew` or `count_live` at time 6. Across all calls, `now` never decreases.
+### Methods
+- `issue(token_id, now)`: create the token, or reset it if the id already exists; it expires at `now + ttl`
+- `renew(token_id, now)`: if the token exists and has **not** expired, reset its expiry to `now + ttl`; otherwise do nothing
+- `count_live(now)`: how many tokens have an expiry **later** than `now`
+
+### Rules
+- Every token lives `ttl` seconds after it was last issued or renewed
+- Expiry happens before anything else at the same moment: a token that expires at time 6 is already dead for a `renew` or `count_live` at time 6
+- Across all calls, `now` never decreases
 
 ## 5. Input / Output format and Constraints
 - `TokenManager(ttl: int)`, `issue(str, int) -> None`, `renew(str, int) -> None`, `count_live(int) -> int`

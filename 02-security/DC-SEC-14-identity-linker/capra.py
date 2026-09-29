@@ -118,11 +118,20 @@ VARIANTS = [
         "title": "Lateral movement through sessions",
         "approach": "Union-find per timestamp with reset · O(S log S + S · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "compromised_hosts", "params": ["n", "sessions", "first"], "ret": "value", "cmp": "exact"},
-        "statement": """Host `0` was compromised, and at time `0` the attacker also reached host `first`. `sessions[i] = [a, b, t]` is an SSH session between hosts `a` and `b` at time `t`. A session between a compromised host and a clean one compromises the clean one, instantly, so sessions at the **same** time can chain.
+        "statement": """An attacker is spreading between hosts over SSH sessions.
 
-Return every compromised host after all sessions, sorted ascending.
+### Input
+- `n`: the number of hosts
+- `sessions[i] = [a, b, t]`: an SSH session between hosts `a` and `b` at time `t`
+- `first`: a host the attacker also reached at time `0`
 
-Union-find again, but links only count within one timestamp: union the hosts of each time group, then undo the unions of any host that did not end up connected to a compromised one.""",
+### Output
+- Every compromised host after all sessions, sorted ascending
+
+### Rules
+- Host `0` was compromised, and host `first` is compromised at time `0`
+- A session between a compromised host and a clean one compromises the clean one, instantly
+- Sessions at the **same** time can chain; links only count within one timestamp""",
         "examples": [
             {"args": {"n": 6, "sessions": [[1, 2, 5], [2, 3, 8], [1, 5, 10]], "first": 1},
              "explanation": "Host 1 is compromised at 0. It reaches 2 at 5, 2 reaches 3 at 8, and 1 reaches 5 at 10.",
@@ -213,11 +222,18 @@ def compromised_hosts(n, sessions, first):
         "title": "Redundant trust links",
         "approach": "Union-find in input order · O(L · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "redundant_links", "params": ["n", "links"], "ret": "value", "cmp": "exact"},
-        "statement": """An audit rebuilds the trust graph between `n` accounts (`0` to `n - 1`), adding the links in `links` one by one in the order they were created. Each `[a, b]` is a two-way trust relationship.
+        "statement": """An audit rebuilds the trust graph between accounts, adding the links one by one in the order they were created.
 
-A link is **redundant** if, when it is added, `a` and `b` can already reach each other through earlier links: it widens the blast radius without connecting anything new. Return every redundant link, in input order.
+### Input
+- `n`: the number of accounts, numbered `0` to `n - 1`
+- `links`: each `[a, b]` is a two-way trust relationship, in creation order
 
-This is the union-find from the identity linker used as a cycle detector: a link whose two ends already share a root closes a loop.""",
+### Output
+- Every redundant link, in input order
+
+### Rules
+- A link is **redundant** if, when it is added, `a` and `b` can already reach each other through earlier links
+- A redundant link widens the blast radius without connecting anything new""",
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [1, 2], [0, 2], [2, 3]]},
              "explanation": "0 and 2 are already joined through 1 when [0, 2] arrives.",

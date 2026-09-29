@@ -170,7 +170,7 @@ VARIANTS = [
         "title": "Minimum consumer throughput",
         "approach": "Binary search on the rate with a feasibility check · O(p · log max) · O(1)",
         "spec": {"kind": "fn", "fn": "min_drain_rate", "params": ["backlog", "minutes"], "cmp": "exact"},
-        "statement": "After an outage a Kafka consumer must drain a backlog before the maintenance window closes. `backlog[i]` is the number of messages stuck on partition `i`. The consumer works on **one partition at a time** at `rate` messages per minute and only moves to the next partition at a whole minute, so partition `i` takes `ceil(backlog[i] / rate)` minutes.\n\nReturn the **smallest integer rate** that drains every partition within `minutes`.\n\nHere nothing is a commit, but the shape is the same as bisect: if a rate is fast enough, every higher rate is too. Search for the first rate where the check turns true.",
+        "statement": "After an outage, a Kafka consumer must drain a backlog before the maintenance window closes.\n\n### Input\n- `backlog[i]`: the number of messages stuck on partition `i`\n- `minutes`: the time available\n\n### Output\n- The **smallest integer** `rate` (messages per minute) that drains every partition within `minutes`\n\n### Rules\n- The consumer works on one partition at a time at `rate` messages per minute\n- It only moves to the next partition at a whole minute, so partition `i` takes `ceil(backlog[i] / rate)` minutes",
         "examples": [
             {"args": {"backlog": [3, 6, 7, 11], "minutes": 8},
              "explanation": "At 4 per minute: 1 + 2 + 2 + 3 = 8 minutes, which fits. At 3 per minute it takes 1 + 2 + 3 + 4 = 10.",
@@ -220,7 +220,7 @@ def min_drain_rate(backlog: list[int], minutes: int) -> int:
         "title": "Log lines in a time window",
         "approach": "Lower and upper bound binary searches · O(q · log n) · O(1)",
         "spec": {"kind": "fn", "fn": "count_in_windows", "params": ["timestamps", "queries"], "cmp": "exact"},
-        "statement": "An incident review needs log volume for many time ranges. `timestamps` holds the epoch second of every log line in **non-decreasing** order; many lines can share a second. Each query `[start, end]` asks how many lines fall in `start <= t <= end`.\n\nReturn one count per query, in order.\n\nThe sorted file is the commit history again: 'is this line at or after start?' is false then true, so one binary search finds where the window begins and another finds where it ends.",
+        "statement": "Count log lines per time range for an incident review.\n\n### Input\n- `timestamps`: the epoch second of every log line, in **non-decreasing** order; many lines can share a second\n- `queries`: each `[start, end]` asks how many lines fall in `start <= t <= end`\n\n### Output\n- One count per query, in order",
         "examples": [
             {"args": {"timestamps": [100, 101, 101, 101, 105, 110], "queries": [[101, 105], [102, 104], [0, 1000]]},
              "explanation": "Three lines at 101 and one at 105 make 4. Nothing was logged from 102 to 104. The last window covers everything.",

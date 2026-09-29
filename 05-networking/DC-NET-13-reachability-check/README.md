@@ -41,11 +41,19 @@ bastion is allowed, so we're safe") and you miss a path through the bastion. Tha
 path is how many real breaches reach the data tier.
 
 ## 4. Problem Statement
-There are `n` systems, numbered `0` to `n - 1`. Each `links[i] = [a, b]` means traffic is allowed
-between `a` and `b` in both directions.
+Decide whether traffic can get from one system to another.
 
-Return `True` if traffic starting at `source` can reach `target`, possibly through other
-systems, and `False` otherwise. A system can always reach itself.
+### Input
+- `n`: the number of systems, numbered `0` to `n - 1`
+- `links[i] = [a, b]`: traffic is allowed between `a` and `b` in **both** directions
+- `source`, `target`: the two systems to check
+
+### Output
+- `True` if traffic starting at `source` can reach `target`, otherwise `False`
+
+### Rules
+- Traffic may pass through other systems
+- A system can always reach itself
 
 ## 5. Input / Output format and Constraints
 - Returns a bool.

@@ -91,10 +91,15 @@ VARIANTS = [
         "approach": "Sliding window over a running sum · O(n) · O(1)",
         "spec": {"kind": "fn", "fn": "longest_within_budget", "params": ["errors_per_min", "budget"]},
         "statement": (
-            "Instead of pass/fail probes, your SLO dashboard stores `errors_per_min[i]`, the number of failed "
-            "requests in minute `i`. The error budget allows `budget` failed requests in total.\n\n"
-            "Return the length of the longest run of **consecutive** minutes whose failed requests add up to at "
-            "most `budget`. Return `0` if no minute fits on its own."
+            "Your SLO dashboard stores failed-request counts per minute instead of pass/fail probes; find the longest stretch that fits the error budget.\n"
+            "\n"
+            "### Input\n"
+            "- `errors_per_min[i]`: the number of failed requests in minute `i`\n"
+            "- `budget`: the total number of failed requests the error budget allows\n"
+            "\n"
+            "### Output\n"
+            "- The length of the longest run of **consecutive** minutes whose failed requests add up to at most `budget`\n"
+            "- `0` if no minute fits on its own"
         ),
         "examples": [
             {"args": {"errors_per_min": [0, 2, 0, 5, 1, 0, 0, 3], "budget": 4},
@@ -166,9 +171,15 @@ VARIANTS = [
         "approach": "Window over failure positions · O(n) · O(f)",
         "spec": {"kind": "fn", "fn": "tightest_burst", "params": ["checks", "k"]},
         "statement": (
-            "An alert fires when `k` health checks fail close together. To tune its evaluation window, find the "
-            "**shortest** run of consecutive checks that contains at least `k` failures (`0` in `checks`).\n\n"
-            "Return its length, or `0` if the whole list has fewer than `k` failures."
+            "An alert fires when `k` health checks fail close together; to tune its evaluation window, find the tightest burst of failures.\n"
+            "\n"
+            "### Input\n"
+            "- `checks`: health-check results in time order; `0` means failed\n"
+            "- `k`: the number of failures\n"
+            "\n"
+            "### Output\n"
+            "- The length of the **shortest** run of consecutive checks that contains at least `k` failures\n"
+            "- `0` if the whole list has fewer than `k` failures"
         ),
         "examples": [
             {"args": {"checks": [1, 0, 1, 1, 0, 0, 1, 0], "k": 3},

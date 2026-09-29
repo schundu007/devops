@@ -46,14 +46,16 @@ thread asleep.
 ## 4. Problem Statement
 Build a thread-safe `BoundedBlockingQueue` with a fixed capacity.
 
-- `enqueue(item)` adds at the back. If the queue is full, the calling thread **blocks** until
-  there is room.
-- `dequeue()` removes and returns the front item. If the queue is empty, the calling thread
-  **blocks** until an item arrives.
-- `size()` returns the current number of items.
-- The queue is FIFO and must never hold more than `capacity` items. Many producer and consumer
-  threads may call it at once.
-- `capacity < 1` raises `ValueError`. Use `threading` primitives, not `queue.Queue`.
+### Methods
+- `enqueue(item)`: add `item` at the back; if the queue is full, the calling thread **blocks** until there is room
+- `dequeue()`: remove and return the front item; if the queue is empty, the calling thread **blocks** until an item arrives
+- `size()`: return the current number of items
+
+### Rules
+- The queue is FIFO and must never hold more than `capacity` items
+- Many producer and consumer threads may call it at once
+- `capacity < 1` raises `ValueError`
+- Use `threading` primitives, not `queue.Queue`
 
 ## 5. Input / Output format and Constraints
 - `capacity`: `1 <= capacity <= 10^4`. Items are any Python object.

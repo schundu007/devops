@@ -42,14 +42,19 @@ handover at exactly 08:00 as a gap (an off-by-one) floods the team with false wa
 people stop reading them.
 
 ## 4. Problem Statement
-You are given every engineer's on-call shifts. `schedules[p]` is engineer `p`'s list of shifts
-`[start, end]` (end exclusive), sorted by `start` and not overlapping each other. Shifts of
-different engineers may overlap freely.
+Find the times when nobody is on call.
 
-Return every `[gap_start, gap_end]` where **nobody** is on call, in time order. Only count
-time between the earliest shift start and the latest shift end. Before and after is out of
-scope. A gap must have positive length: shifts that touch, like `[0, 8]` and `[8, 16]`, leave
-no gap. With no shifts at all, return `[]`.
+### Input
+- `schedules[p]`: engineer `p`'s shifts as `[start, end]` pairs (end **exclusive**), sorted by `start` and not overlapping each other
+
+### Output
+- Every `[gap_start, gap_end]` where **nobody** is on call, in time order
+- `[]` when there are no shifts at all
+
+### Rules
+- Shifts of different engineers may overlap freely
+- Only count time between the earliest shift start and the latest shift end; before and after is out of scope
+- A gap must have positive length: shifts that touch, like `[0, 8]` and `[8, 16]`, leave no gap
 
 ## 5. Input / Output format and Constraints
 - `schedules`: `list[list[list[int]]]`, with up to 50 engineers and up to `10^4` shifts in total.

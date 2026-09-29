@@ -253,7 +253,7 @@ VARIANTS = [
         "title": "Critical routers",
         "approach": "Tarjan's articulation points, iterative DFS · O(V + E) · O(V + E)",
         "spec": {"kind": "fn", "fn": "critical_routers", "params": ["n", "links"], "cmp": "exact"},
-        "statement": "The same network of `n` devices (`0..n-1`) and undirected `links`, but now the question is about **devices**: which single router, if it reboots or dies, splits the devices that remain into more disconnected groups than before?\n\n- A device with no links is never critical\n- Parallel links between the same pair are allowed; there are no self-links\n\nReturn the critical devices in increasing order. These are the articulation points of the graph, found with the same discovery time and low-link DFS as bridges.",
+        "statement": "Find every router whose single failure splits the network.\n\n### Input\n- `n`: number of devices, numbered `0..n-1`\n- `links`: the same undirected links as the main problem\n\n### Output\n- The critical devices, in increasing order\n\n### Rules\n- A device is **critical** if, when it reboots or dies, the devices that remain split into more disconnected groups than before\n- A device with no links is never critical\n- Parallel links between the same pair are allowed; there are no self-links",
         "examples": [
             {"args": {"n": 5, "links": [[0, 1], [1, 2], [2, 0], [1, 3], [3, 4]]},
              "explanation": "Removing 1 cuts 3 and 4 off from the ring; removing 3 cuts 4 off. Devices 0, 2 and 4 can fail safely.",
@@ -304,7 +304,7 @@ def critical_routers(n: int, links: list[list[int]]) -> list[int]:
         "title": "Worst single link failure",
         "approach": "Bridge DFS from the core with subtree sizes · O(V + E) · O(V + E)",
         "spec": {"kind": "fn", "fn": "max_isolated", "params": ["n", "links"], "cmp": "exact"},
-        "statement": "Device `0` is the **core** (the internet uplink). Every other device needs a path to it. Capacity planning wants the blast radius of the worst single link failure:\n\n- For each link, count the devices that reach device 0 now but would not with that link down\n- Return the largest such count, or `0` if no link failure cuts anything off\n\nDevices that cannot reach the core today do not count. Only bridges can cut devices off, and a bridge found in a DFS rooted at 0 cuts off exactly the DFS subtree below it.",
+        "statement": "Capacity planning wants the blast radius of the worst single link failure.\n\n### Input\n- `n`: number of devices, numbered `0..n-1`; device `0` is the **core** (the internet uplink)\n- `links`: undirected links, as in the main problem\n\n### Output\n- The largest number of devices one link failure cuts off from device `0`, or `0` if no link failure cuts anything off\n\n### Rules\n- Every other device needs a path to the core\n- A link's count is the devices that reach device `0` now but would not with that link down\n- Devices that cannot reach the core today do not count",
         "examples": [
             {"args": {"n": 6, "links": [[0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [3, 5]]},
              "explanation": "Link 2-3 is a bridge with devices 3, 4 and 5 behind it. Links 3-4 and 3-5 cut off one device each.",

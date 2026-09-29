@@ -44,14 +44,22 @@ off by a factor of 900. You either buy 900 times too many nodes, or run a canary
 more traffic than you meant and turn a small bad release into an outage.
 
 ## 4. Problem Statement
-You get a list of facts. Fact `i` is a pair `(a, b)` with a positive number `values[i] = v`,
-meaning "one `a` holds `v` of `b`". Facts can be used backwards: one `b` holds `1/v` of `a`.
+Compute unit ratios by chaining facts.
 
-For each query `(x, y)`, return how many `y` one `x` holds, by chaining facts. Return `-1.0`
-if `x` or `y` does not appear in any fact, or if no chain of facts connects them. A query
-`(x, x)` is `1.0` when `x` is known.
+### Input
+- `facts[i]`: a pair `(a, b)`
+- `values[i]`: a positive number `v`, meaning "one `a` holds `v` of `b`"
+- `queries`: pairs `(x, y)`
 
-The facts never contradict each other.
+### Output
+- For each query, how many `y` one `x` holds
+- `-1.0` if `x` or `y` does not appear in any fact, or if no chain of facts connects them
+
+### Rules
+- Facts can be used backwards: one `b` holds `1/v` of `a`
+- Chain facts to connect `x` to `y`
+- A query `(x, x)` is `1.0` when `x` is known
+- The facts never contradict each other
 
 ## 5. Input / Output format and Constraints
 - `facts: list[tuple[str, str]]`, `values: list[float]` (same length), `queries: list[tuple[str, str]]`.

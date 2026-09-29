@@ -41,17 +41,20 @@ out: lease expiry, clock skew, and a holder that dies while holding a lock.
 connections pile up, pools run dry, and unrelated services that share the database start timing out.
 
 ## 4. Problem Statement
-`n` workers sit in a ring over `n` locks. Worker `i` needs lock `i` (its **left** lock) and
-lock `(i + 1) % n` (its **right** lock).
+Implement a lock table for `n` workers in a ring that never deadlocks.
 
-Implement `LockTable(n)` and `run_job(worker, take_left, take_right, work, release_left, release_right)`:
+### Methods
+- `LockTable(n)`: `n` workers sit in a ring over `n` locks; `n < 2` raises `ValueError`
+- `run_job(worker, take_left, take_right, work, release_left, release_right)`: run one job for `worker`
 
-- Each worker's own thread calls `run_job` many times, at the same time as the other workers.
-- Hold **both** of the worker's locks while calling `work()`.
-- Call `take_left` or `take_right` right after acquiring that lock, and `release_left` or
-  `release_right` right before releasing it. The tests use these calls to check safety.
-- The table must **never deadlock**, whatever the thread interleaving.
-- `n < 2` raises `ValueError`.
+### Rules
+- Worker `i` needs lock `i` (its **left** lock) and lock `(i + 1) % n` (its **right** lock)
+- Each worker's own thread calls `run_job` many times, at the same time as the other workers
+- Hold **both** of the worker's locks while calling `work()`
+- Call `take_left` or `take_right` right after acquiring that lock
+- Call `release_left` or `release_right` right before releasing it
+- The tests use these calls to check safety
+- The table must **never deadlock**, whatever the thread interleaving
 
 ## 5. Input / Output format and Constraints
 - `n`: `2 <= n <= 100`. `worker`: `0 <= worker < n`.

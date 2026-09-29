@@ -43,13 +43,19 @@ request into a crash. If that parser sits in a fail-closed admission webhook, on
 request stops deployments for the whole cluster, which is a denial of service on your control plane.
 
 ## 4. Problem Statement
-You get a string `s` that is either an integer (like `"-42"`) or a list written with `[`, `]`
-and `,` (like `"[1,[2,[3]],[]]"`), with no spaces. Lists can be empty, and can hold integers
-and other lists. Return the value as Python `int`s and `list`s.
+Parse a nested list string into Python values, refusing input nested too deep.
 
-Nesting **depth** is the number of lists open at the deepest point: `"5"` has depth 0, `"[1]"`
-has depth 1 and `"[[1]]"` has depth 2. If the depth is greater than `max_depth`, raise
-`ValueError` instead of parsing.
+### Input
+- `s`: either an integer (like `"-42"`) or a list written with `[`, `]` and `,` (like `"[1,[2,[3]],[]]"`), with no spaces
+- `max_depth`: the deepest nesting allowed
+
+### Output
+- The value as Python `int`s and `list`s
+
+### Rules
+- Lists can be empty, and can hold integers and other lists
+- Nesting **depth** is the number of lists open at the deepest point: `"5"` has depth 0, `"[1]"` has depth 1 and `"[[1]]"` has depth 2
+- If the depth is greater than `max_depth`, raise `ValueError` instead of parsing
 
 ## 5. Input / Output format and Constraints
 - `parse(s: str, max_depth: int = 64) -> int | list`

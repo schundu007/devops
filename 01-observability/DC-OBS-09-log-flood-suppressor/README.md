@@ -43,14 +43,15 @@ repeats every second never prints again, and a live outage goes silent in the lo
 map never forgets old messages, the agent's memory grows until the agent itself is OOM-killed.
 
 ## 4. Problem Statement
-Build `LogSuppressor(window=10)` with one method, `should_print(timestamp, message)`.
+Build `LogSuppressor(window=10)`, which suppresses a message repeated within `window` seconds of its last print.
 
-- Return `True` if this exact `message` has not been **printed** in the last `window` seconds,
-  and remember that it was printed at `timestamp`.
-- Otherwise return `False`. A suppressed call does **not** count as a print, so it does not
-  restart the quiet period.
-- A message printed at time `t` may print again at `t + window` or later.
-- Calls arrive with non-decreasing timestamps. Many calls may share one second.
+### Methods
+- `should_print(timestamp, message)`: return `True` if this exact `message` has not been **printed** in the last `window` seconds, and remember that it was printed at `timestamp`; otherwise return `False`
+
+### Rules
+- A suppressed call does **not** count as a print, so it does not restart the quiet period
+- A message printed at time `t` may print again at `t + window` or later
+- Calls arrive with non-decreasing timestamps; many calls may share one second
 
 ## 5. Input / Output format and Constraints
 - `window: int`, `1 <= window <= 3600`.

@@ -125,12 +125,17 @@ VARIANTS = [
         "approach": "Hash map + max-heap, lazy deletion · O(log n) amortized · O(reports)",
         "spec": {"kind": "design", "fn": "HostLoad", "params": []},
         "statement": (
-            "A scheduler places the next batch job away from the busiest machine, so it keeps asking which host is hottest. "
-            "Hosts report their CPU percent repeatedly, and hosts are decommissioned.\n\n"
-            "Implement `HostLoad`:\n\n"
-            "- `report(host, cpu)`: the host's CPU is now `cpu`, replacing any earlier report. A retired host that reports again is back.\n"
-            "- `retire(host)`: forget the host. Retiring an unknown host does nothing.\n"
-            "- `hottest()`: the host with the highest current CPU, the alphabetically smallest on a tie, or `None` if no host is known."
+            "Track which host is hottest, so a scheduler can place the next batch job away from it.\n"
+            "\n"
+            "### Methods\n"
+            "- `report(host, cpu)`: the host's CPU percent is now `cpu`, replacing any earlier report\n"
+            "- `retire(host)`: forget the host\n"
+            "- `hottest()`: the host with the highest current CPU; `None` if no host is known\n"
+            "\n"
+            "### Rules\n"
+            "- A retired host that reports again is back\n"
+            "- Retiring an unknown host does nothing\n"
+            "- On a CPU tie, `hottest` returns the alphabetically smallest host"
         ),
         "examples": [
             {"args": hops(("report", "web-1", 90), ("report", "web-2", 40), ("hottest",), ("report", "web-1", 10), ("hottest",)),
@@ -222,11 +227,17 @@ class HostLoad:
         "approach": "Two heaps with lazy deletion · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "spread_after_each", "params": ["updates"]},
         "statement": (
-            "A flapping-sensor alert fires when the spread of a series, its maximum minus its minimum, gets too wide. "
-            "Samples can arrive late, and a repeated timestamp is a correction that replaces the old value.\n\n"
-            "`updates[i] = [timestamp, value]`, in arrival order. After applying each update, record "
-            "`max - min` over the current value of every timestamp seen so far.\n\n"
-            "Return the list of spreads, one per update."
+            "Report the spread of a series (its maximum minus its minimum) after every update, for a flapping-sensor alert.\n"
+            "\n"
+            "### Input\n"
+            "- `updates[i] = [timestamp, value]`, in arrival order\n"
+            "\n"
+            "### Output\n"
+            "- The list of spreads, one per update: `max - min` over the current value of every timestamp seen so far, after applying that update\n"
+            "\n"
+            "### Rules\n"
+            "- Samples can arrive late\n"
+            "- A repeated timestamp is a **correction** that replaces the old value"
         ),
         "examples": [
             {"args": {"updates": [[1, 10], [2, 4], [3, 7], [1, 5]]},

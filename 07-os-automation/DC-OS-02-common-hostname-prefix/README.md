@@ -42,8 +42,14 @@ also hits `us-east-staging-*` hosts. Take one that is too long and you miss host
 only half applied, and the incident comes back on the hosts you skipped.
 
 ## 4. Problem Statement
-Given a list of hostnames, return the longest string that every hostname starts with. Return `""`
-if the list is empty, or if the hostnames do not share even their first character.
+Find the longest string that every hostname starts with.
+
+### Input
+- `hosts`: a list of hostnames
+
+### Output
+- The longest string that every hostname starts with
+- `""` if the list is empty, or if the hostnames do not share even their first character
 
 ## 5. Input / Output format and Constraints
 - Returns a string.

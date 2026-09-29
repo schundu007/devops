@@ -43,12 +43,17 @@ used it to read the `.env` file, so they still hold the database password. Two w
 orders table is dumped with a credential you believed was never exposed.
 
 ## 4. Problem Statement
-There are `n` resources numbered `0` to `n - 1`. `holds[i]` lists the resources whose
-credentials can be found in resource `i`: if you control `i`, you can take over every resource
-in `holds[i]`. An attacker starts in control of resource `leaked`.
+Find every resource an attacker can take over from one leaked resource.
 
-Return every resource the attacker can end up controlling, including `leaked`, sorted in
-ascending order.
+### Input
+- `holds[i]`: the resources whose credentials can be found in resource `i`; `n` resources are numbered `0` to `n - 1`
+- `leaked`: the resource the attacker starts in control of
+
+### Output
+- Every resource the attacker can end up controlling, **including** `leaked`, sorted ascending
+
+### Rules
+- If you control `i`, you can take over every resource in `holds[i]`
 
 ## 5. Input / Output format and Constraints
 - `blast_radius(holds: list[list[int]], leaked: int) -> list[int]`

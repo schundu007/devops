@@ -44,17 +44,22 @@ real issue is one hot backend. Or you miss that some requests are dropped with 5
 average CPU looks fine.
 
 ## 4. Problem Statement
-There are `k` backends, numbered `0` to `k - 1`, and each one handles one request at a time.
+Assign requests to backends round-robin and find the busiest backends.
 
-Request `i` arrives at time `arrival[i]` (arrivals are strictly increasing) and keeps its backend
-busy for `load[i]` time units, so that backend is idle again at time `arrival[i] + load[i]`. A
-backend that becomes idle at time `t` can take a request that arrives at `t`.
+### Input
+- `k`: backends, numbered `0` to `k - 1`; each handles one request at a time
+- `arrival[i]`: when request `i` arrives; strictly increasing
+- `load[i]`: how long request `i` keeps its backend busy
 
-Request `i` tries backend `i % k` first. If that one is busy, it tries `i % k + 1`, `i % k + 2`,
-and so on, wrapping from `k - 1` back to `0`, and takes the first idle backend. If all `k`
-backends are busy, the request is dropped.
+### Output
+- The IDs of the backends that served the **most** requests, in increasing order
 
-Return the IDs of the backends that served the **most** requests, in increasing order.
+### Rules
+- A backend serving request `i` is idle again at time `arrival[i] + load[i]`
+- A backend that becomes idle at time `t` can take a request that arrives at `t`
+- Request `i` tries backend `i % k` first, then `i % k + 1`, `i % k + 2`, and so on, wrapping from `k - 1` back to `0`
+- It takes the first idle backend
+- If all `k` backends are busy, the request is **dropped**
 
 ## 5. Input / Output format and Constraints
 - `busiest_backends(k: int, arrival: list[int], load: list[int]) -> list[int]`

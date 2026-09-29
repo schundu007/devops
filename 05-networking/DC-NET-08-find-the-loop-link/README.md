@@ -42,12 +42,19 @@ that closes the loop.
 switch off the network while the storm continues. Two problems instead of one.
 
 ## 4. Problem Statement
-A network of `n` switches, numbered `1` to `n`, was a tree: every switch was connected and there
-were no loops. Then exactly one extra link was added. You get all links in `links`, in the order
-they were added, where `links[i] = [a, b]` is a cable between switches `a` and `b`.
+Find the one extra link that put a loop into a tree of switches.
 
-Return the link that you can disable so the network becomes a tree again. If several links
-would work, return the one that appears **last** in `links`.
+### Input
+- `n`: the number of switches, numbered `1` to `n`
+- `links[i] = [a, b]`: a cable between switches `a` and `b`, in the order the links were added
+
+### Output
+- The link to disable so the network becomes a tree again
+
+### Rules
+- Before the extra link, the network was a tree: every switch was connected and there were no loops
+- Exactly one extra link was added
+- If several links would work, return the one that appears **last** in `links`
 
 ## 5. Input / Output format and Constraints
 - `n`: the number of switches. `links`: a list of `[a, b]` pairs.

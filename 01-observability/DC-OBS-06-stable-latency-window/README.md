@@ -42,10 +42,15 @@ stable and your SLO threshold or canary comparison is too loose. The next regres
 the check, and you find out from customers.
 
 ## 4. Problem Statement
-You get a list of latency samples in time order and a band width `limit`.
+Find the longest stable stretch of latency samples.
 
-Find the longest run of **consecutive** samples in which the largest sample minus the
-smallest sample is at most `limit`. Return its length. Return 0 for an empty list.
+### Input
+- `latency_ms`: latency samples, in time order
+- `limit`: the band width
+
+### Output
+- The length of the longest run of **consecutive** samples in which the largest sample minus the smallest sample is at most `limit`
+- `0` for an empty list
 
 ## 5. Input / Output format and Constraints
 - `latency_ms: list[int]`, `0 <= len <= 10^5`, each value `0 <= v <= 10^9`.

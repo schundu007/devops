@@ -231,12 +231,21 @@ VARIANTS = [
         "approach": "Bellman-Ford, k + 1 rounds, fee added on departure · O((k + 1) · R) · O(n)",
         "spec": {"kind": "fn", "fn": "cheapest_with_fees", "params": ["n", "routes", "fees", "src", "dst", "max_transit"]},
         "statement": (
-            "Same inter-region transfer network, but now every region you pass **through** charges a processing fee on top of the route price "
-            "(a NAT gateway or inspection hop in that region).\n\n"
-            "- `routes[i] = [a, b, price]` is a one-way route\n"
-            "- leaving any region other than `src` adds `fees[region]`; `src` never charges\n"
-            "- at most `max_transit` middle regions may be used\n\n"
-            "Return the cheapest total cost from `src` to `dst`, or -1 if no route fits."
+            "Same transfer network, but every region you pass **through** charges a processing fee on top of the route price (a NAT gateway or inspection hop in that region).\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of regions\n"
+            "- `routes[i] = [a, b, price]`: a one-way route\n"
+            "- `fees[region]`: the processing fee of `region`\n"
+            "- `src`, `dst`: the start and destination regions\n"
+            "- `max_transit`: the most middle regions the route may use\n"
+            "\n"
+            "### Output\n"
+            "- The cheapest total cost from `src` to `dst`, or `-1` if no route fits\n"
+            "\n"
+            "### Rules\n"
+            "- Leaving any region other than `src` adds `fees[region]`; `src` never charges\n"
+            "- At most `max_transit` middle regions may be used"
         ),
         "examples": [
             {"args": _fee_case(3, [[0, 1, 10], [1, 2, 10], [0, 2, 50]], [0, 100, 0], 0, 2, 1),
@@ -284,10 +293,16 @@ VARIANTS = [
         "approach": "Bellman-Ford rounds until dst fits the budget · O(n · R) · O(n)",
         "spec": {"kind": "fn", "fn": "fewest_hops", "params": ["n", "routes", "src", "dst", "budget"]},
         "statement": (
-            "Each extra hop adds latency and another place to fail, so the network team asks the question the other way round: "
-            "what is the **smallest number of hops** from `src` to `dst` whose total transfer cost is at most `budget`?\n\n"
-            "- `routes[i] = [a, b, price]` is a one-way route with a non-negative price\n"
-            "- return the minimum hop count, or -1 if no route fits the budget"
+            "Each extra hop adds latency and another place to fail, so ask the question the other way round: find the fewest hops within a cost budget.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: the number of regions\n"
+            "- `routes[i] = [a, b, price]`: a one-way route with a non-negative price\n"
+            "- `src`, `dst`: the start and destination regions\n"
+            "- `budget`: the most the route's total transfer cost may be\n"
+            "\n"
+            "### Output\n"
+            "- The **smallest number of hops** from `src` to `dst` whose total transfer cost is at most `budget`, or `-1` if no route fits the budget"
         ),
         "examples": [
             {"args": _hop_case(4, [[0, 3, 900], [0, 1, 100], [1, 3, 300], [1, 2, 50], [2, 3, 50]], 0, 3, 400),

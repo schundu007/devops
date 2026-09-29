@@ -40,13 +40,19 @@ commits that do not build (exit code 125 in `git bisect run`). A flaky test brea
 The wrong change gets reverted, the release still fails, and the team loses another half day.
 
 ## 4. Problem Statement
-Commits are numbered `1..n` in history order. Some commit broke the build, and every commit
-from that one onward is bad. Every commit before it is good. Commit `n` (HEAD) is known
-to be bad.
+Find the commit that broke the build.
 
-You get `is_bad(commit)`, which runs the full CI suite on one commit and returns `True` if
-it fails. Return the number of the first bad commit, calling `is_bad` as few times as
-possible.
+### Input
+- `n`: commits are numbered `1..n` in history order
+- `is_bad(commit)`: runs the full CI suite on one commit and returns `True` if it fails
+
+### Output
+- The number of the first bad commit
+
+### Rules
+- Every commit from the breaking one onward is bad; every commit before it is good
+- Commit `n` (HEAD) is known to be bad
+- Call `is_bad` as **few** times as possible
 
 ## 5. Input / Output format and Constraints
 - `first_bad_commit(n: int, is_bad: Callable[[int], bool]) -> int`

@@ -41,12 +41,18 @@ unrelated and the team investigates three separate incidents, while the one shar
 failover goes unnoticed for another hour.
 
 ## 4. Problem Statement
-You get `error_times`, one list per service. Each list holds that service's error times,
-sorted ascending and never empty.
+Find the narrowest time window that contains an error from every service.
 
-Return `[start, end]`: the narrowest window (both ends inclusive) that contains at least one
-error time from **every** service. The width is `end - start`. If several windows are
-equally narrow, return the one with the smallest `start`.
+### Input
+- `error_times[s]`: service `s`'s error times, sorted ascending and never empty
+
+### Output
+- `[start, end]`, the narrowest window holding at least one error time from **every** service
+
+### Rules
+- Both ends are **inclusive**
+- The width is `end - start`
+- If several windows are equally narrow, return the one with the smallest `start`
 
 ## 5. Input / Output format and Constraints
 - `error_times: list[list[int]]`, with `1 <= len(error_times) <= 3500`.

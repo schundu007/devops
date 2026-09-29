@@ -108,12 +108,20 @@ VARIANTS = [
         "approach": "Sort + binary search, bucket by t // size · O(n log n + b) · O(n + b)",
         "spec": {"kind": "fn", "fn": "aligned_counts", "params": ["times", "size", "start", "end"], "cmp": "exact"},
         "statement": (
-            "Dashboards such as Grafana align buckets to the clock, not to the query start: with `size = 60` the "
-            "buckets are `[0, 59]`, `[60, 119]`, … no matter where the query begins.\n\n"
-            "Given event `times` (any order, duplicates allowed) and a query `[start, end]` (inclusive), return "
-            "`[bucketStart, count]` for **every** aligned bucket that overlaps the query, in order. Count only "
-            "events inside `[start, end]`, so the first and last buckets may be partial.\n\n"
-            "Empty buckets are listed with count 0."
+            "Dashboards such as Grafana align buckets to the clock, not to the query start.\n"
+            "\n"
+            "### Input\n"
+            "- `times`: event seconds, in any order, duplicates allowed\n"
+            "- `size`: the bucket size in seconds\n"
+            "- `start`, `end`: the query range, **inclusive**\n"
+            "\n"
+            "### Output\n"
+            "- `[bucketStart, count]` for **every** aligned bucket that overlaps the query, in order\n"
+            "\n"
+            "### Rules\n"
+            "- With `size = 60` the buckets are `[0, 59]`, `[60, 119]`, … no matter where the query begins\n"
+            "- Count only events inside `[start, end]`, so the first and last buckets may be partial\n"
+            "- Empty buckets are listed with count 0"
         ),
         "examples": [
             {"args": {"times": [5, 59, 60, 61, 130], "size": 60, "start": 30, "end": 125},
@@ -179,11 +187,19 @@ def aligned_counts(times, size, start, end):
         "approach": "Sort + two pointers · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "first_alert", "params": ["times", "window", "threshold"], "cmp": "exact"},
         "statement": (
-            "An alert fires when an error name records at least `threshold` events in any rolling window of "
-            "`window` seconds, i.e. in `[t - window + 1, t]` for some second `t`.\n\n"
-            "Given the event `times` (any order, duplicates allowed), return the **earliest** second `t` at which "
-            "the alert fires, or `-1` if it never does.\n\n"
-            "Unlike fixed buckets, the window slides: a burst split across two buckets must still fire."
+            "Find the second a burst alert first fires.\n"
+            "\n"
+            "### Input\n"
+            "- `times`: the error name's event seconds, in any order, duplicates allowed\n"
+            "- `window`: the rolling window length in seconds\n"
+            "- `threshold`: the event count that fires the alert\n"
+            "\n"
+            "### Output\n"
+            "- The **earliest** second `t` at which the alert fires, or `-1` if it never does\n"
+            "\n"
+            "### Rules\n"
+            "- The alert fires when at least `threshold` events fall in `[t - window + 1, t]` for some second `t`\n"
+            "- Unlike fixed buckets, the window slides: a burst split across two buckets must still fire"
         ),
         "examples": [
             {"args": {"times": [50, 70, 65, 100, 110], "window": 60, "threshold": 3},

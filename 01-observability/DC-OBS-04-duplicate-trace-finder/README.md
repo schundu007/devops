@@ -43,15 +43,18 @@ hides inside the first. If it is too strict, one bug splits into 500 issues and 
 floods the on-call channel.
 
 ## 4. Problem Statement
-A call tree is made of `Frame` nodes. Each frame has a function `name` and an ordered list
-of `children`: the calls it made, in order.
+Find every subtree shape that repeats in a call tree.
 
-Two subtrees have the **same shape** if their roots have the same name and the same number of
-children, and each pair of children, taken in order, also has the same shape.
+### Input
+- `root`: a tree of `Frame` nodes; each frame has a function `name` and an ordered list of `children`: the calls it made, in order
 
-Return the canonical text of every shape that appears **two or more times** anywhere in the
-tree. Report each shape once, sorted. Canonical text is `name` for a leaf and
-`name(child1,child2,...)` otherwise; `render(frame)` in the starter builds it.
+### Output
+- The canonical text of every shape that appears **two or more times** anywhere in the tree, each shape once, sorted
+
+### Rules
+- Two subtrees have the **same shape** if their roots have the same name and the same number of children, and each pair of children, taken in order, also has the same shape
+- Canonical text is `name` for a leaf and `name(child1,child2,...)` otherwise
+- `render(frame)` in the starter builds the canonical text
 
 ## 5. Input / Output format and Constraints
 - Input: `root: Frame | None`. `Frame(name: str, children: list[Frame])`.

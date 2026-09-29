@@ -155,11 +155,19 @@ VARIANTS = [
         "title": "Parallel deploy waves",
         "approach": "Kahn's algorithm by levels · O(n + E + n log n) · O(n + E)",
         "spec": {"kind": "fn", "fn": "deploy_waves", "params": ["n", "before"], "ret": "value", "cmp": "exact"},
-        "statement": """The release tool runs steps in **waves**: every step whose earlier steps have all finished starts in the next wave, all at once. `before[i]` lists the steps that must finish before step `i`.
+        "statement": """The release tool runs steps in **waves**.
 
-Return the waves as lists of step numbers, each sorted ascending, in the order they run. If the rules contain a cycle, no step in it can ever start: return `[]`. For `n = 0` return `[]` as well.
+### Input
+- `n`: the number of steps
+- `before[i]`: the steps that must finish before step `i`
 
-This is the topological sort from the main problem processed level by level: a wave is exactly the set of steps whose in-degree reached zero in the previous round.""",
+### Output
+- The waves as lists of step numbers, each sorted ascending, in the order they run
+- `[]` if the rules contain a cycle, and `[]` for `n = 0`
+
+### Rules
+- Every step whose earlier steps have all finished starts in the next wave, all at once
+- No step in a cycle can ever start""",
         "examples": [
             {"args": {"n": 5, "before": [[], [0], [0], [1, 2], []]},
              "explanation": "Steps 0 and 4 need nothing; 1 and 2 wait for 0; 3 waits for both.",
@@ -234,11 +242,20 @@ This is the topological sort from the main problem processed level by level: a w
         "title": "Shortest release time",
         "approach": "Topological order + longest-path DP · O(n + E) · O(n + E)",
         "spec": {"kind": "fn", "fn": "min_release_time", "params": ["n", "duration", "before"], "ret": "value", "cmp": "exact"},
-        "statement": """Each release step takes `duration[i]` minutes, and any number of steps can run in parallel. A step starts as soon as every step in `before[i]` has finished.
+        "statement": """Find how long a release takes when its steps can run in parallel.
 
-Return the minimum total time until every step has finished. If the rules contain a cycle, return `-1`. For `n = 0` return `0`.
+### Input
+- `n`: the number of steps
+- `duration[i]`: the minutes step `i` takes
+- `before[i]`: the steps that must finish before step `i` starts
 
-The answer is the longest (critical) path through the dependency graph: walk the steps in topological order and let each finish at `duration[i] + max(finish of its earlier steps)`.""",
+### Output
+- The minimum total time until every step has finished
+- `-1` if the rules contain a cycle; `0` for `n = 0`
+
+### Rules
+- Any number of steps can run in parallel
+- A step starts as soon as every step in `before[i]` has finished""",
         "examples": [
             {"args": {"n": 4, "duration": [5, 10, 3, 2], "before": [[], [0], [0], [1, 2]]},
              "explanation": "0 ends at 5; 1 at 15 and 2 at 8 run in parallel; 3 starts at 15 and ends at 17.",

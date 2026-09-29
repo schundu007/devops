@@ -173,11 +173,18 @@ VARIANTS = [
         "approach": "Group, sort, slide with a country counter · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "flag_users", "params": ["events", "k", "window"]},
         "statement": (
-            "Sign-ins from a VPN hop between two countries all day, so two countries is too noisy. "
-            "Flag a user when their sign-ins come from **k or more distinct countries** within `window` minutes.\n\n"
-            "- each event is `\"user,minute,country\"`; events arrive in any order\n"
-            "- a user is flagged when some set of their events spans at most `window` minutes (last minus first) and covers at least `k` countries\n\n"
-            "Return the flagged users, sorted, each once."
+            "Sign-ins from a VPN hop between two countries all day, so two countries is too noisy. Flag users whose sign-ins come from **k or more distinct countries** within `window` minutes.\n"
+            "\n"
+            "### Input\n"
+            "- `events`: strings `\"user,minute,country\"`, in any order\n"
+            "- `k`: the number of distinct countries that flags a user\n"
+            "- `window`: the span in minutes\n"
+            "\n"
+            "### Output\n"
+            "- The flagged users, sorted, each once\n"
+            "\n"
+            "### Rules\n"
+            "- A user is flagged when some set of their events spans at most `window` minutes (last minus first) and covers at least `k` countries"
         ),
         "examples": [
             {"args": {"events": ["ana,0,US", "ana,30,DE", "ana,50,IN", "bo,0,US", "bo,30,DE", "bo,200,IN"], "k": 3, "window": 60},
@@ -219,11 +226,18 @@ VARIANTS = [
         "approach": "Group, sort, count in a sliding window · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "mfa_fatigue", "params": ["denials", "k", "window"]},
         "statement": (
-            "An attacker with a stolen password spams MFA pushes until the victim taps approve. "
-            "Each **denied** push is logged as `\"user,minute\"`, in any order.\n\n"
-            "- a user is under attack once `k` or more denials fall in `[t - window, t]` for some denial minute `t`\n"
-            "- report the **first** such minute `t` for each user\n\n"
-            "Return `[user, minute]` pairs sorted by user."
+            "An attacker with a stolen password spams MFA pushes until the victim taps approve. Find the minute each user came under attack.\n"
+            "\n"
+            "### Input\n"
+            "- `denials`: each **denied** push, logged as `\"user,minute\"`, in any order\n"
+            "- `k`: the number of denials that signals an attack\n"
+            "- `window`: the span in minutes\n"
+            "\n"
+            "### Output\n"
+            "- `[user, minute]` pairs sorted by user, where `minute` is the **first** such minute `t` for that user\n"
+            "\n"
+            "### Rules\n"
+            "- A user is under attack once `k` or more denials fall in `[t - window, t]` for some denial minute `t`"
         ),
         "examples": [
             {"args": {"denials": ["kim,0", "kim,2", "kim,3", "kim,9", "raj,0", "raj,20", "raj,40"], "k": 3, "window": 5},

@@ -124,11 +124,17 @@ VARIANTS = [
         "approach": "Union-find · O((E + Q) · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "reach_many", "params": ["n", "links", "queries"], "cmp": "exact"},
         "statement": (
-            "A network policy linter checks hundreds of flows against one topology. The systems and two-way "
-            "`links` are the same as the main problem, but now there are many `queries[j] = [source, target]`.\n\n"
-            "Return one boolean per query, in order: `True` if traffic from `source` can reach `target`. "
-            "A system always reaches itself.\n\n"
-            "Walking the graph again for every query repeats the same work; group the systems once instead."
+            "A network policy linter checks hundreds of flows against one topology.\n"
+            "\n"
+            "### Input\n"
+            "- `n`, `links`: the systems and two-way links, as in the main problem\n"
+            "- `queries[j] = [source, target]`: one flow to check\n"
+            "\n"
+            "### Output\n"
+            "- One boolean per query, in order: `True` if traffic from `source` can reach `target`\n"
+            "\n"
+            "### Rules\n"
+            "- A system always reaches itself"
         ),
         "examples": [
             {"args": {"n": 5, "links": [[0, 1], [1, 2], [3, 4]], "queries": [[0, 2], [2, 3], [4, 3], [1, 1]]},
@@ -215,11 +221,19 @@ def reach_many(n, links, queries):
         "approach": "Reverse union-find (add links back) · O((E + F) · α(n)) · O(n + E)",
         "spec": {"kind": "fn", "fn": "still_reachable", "params": ["n", "links", "failures", "source", "target"], "cmp": "exact"},
         "statement": (
-            "A chaos drill takes links down one at a time. `failures` lists distinct indices into `links`, in "
-            "the order those links fail; a failed link stays down.\n\n"
-            "After **each** failure, report whether `source` can still reach `target` over the links that are "
-            "still up. Return one boolean per failure, in order.\n\n"
-            "Deleting edges from a union-find is hard, but adding them is easy: replay the drill backwards."
+            "A chaos drill takes links down one at a time.\n"
+            "\n"
+            "### Input\n"
+            "- `n`, `links`: the systems and two-way links, as in the main problem\n"
+            "- `failures`: distinct indices into `links`, in the order those links fail\n"
+            "- `source`, `target`: the two systems to check\n"
+            "\n"
+            "### Output\n"
+            "- One boolean per failure, in order: whether `source` can still reach `target`\n"
+            "\n"
+            "### Rules\n"
+            "- A failed link stays down\n"
+            "- Check after **each** failure, over the links that are still up"
         ),
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [1, 3], [0, 2], [2, 3]], "failures": [1, 3, 0], "source": 0, "target": 3},

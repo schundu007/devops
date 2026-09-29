@@ -41,13 +41,19 @@ account linked only through the ops email. Three months later a personal access 
 forgotten account pushes to a production repo.
 
 ## 4. Problem Statement
-Each entry of `accounts` is `[name, email1, email2, ...]`: one account, found in some system.
-Two accounts belong to the same person if they share at least one email, directly or through a
-chain of other accounts. Accounts of the same person always carry the same name, but two
-different people can share a name.
+Merge the accounts that belong to the same person.
 
-Return one row per person: `[name, *emails]` with the emails sorted ascending and each listed
-once. Sort the rows by `(name, first email)`.
+### Input
+- `accounts`: each entry is `[name, email1, email2, ...]`: one account, found in some system
+
+### Output
+- One row per person: `[name, *emails]`, with the emails sorted ascending and each listed once
+- The rows sorted by `(name, first email)`
+
+### Rules
+- Two accounts belong to the same person if they share at least one email, directly or through a chain of other accounts
+- Accounts of the same person always carry the same name
+- Two different people can share a name
 
 ## 5. Input / Output format and Constraints
 - `link_identities(accounts: list[list[str]]) -> list[list[str]]`

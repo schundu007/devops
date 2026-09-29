@@ -151,14 +151,20 @@ VARIANTS = [
         "approach": "Fenwick tree + binary lifting · O(log n) per op · O(n)",
         "spec": {"kind": "fn", "fn": "route_with_updates", "params": ["weights", "ops"]},
         "statement": (
-            "A progressive rollout changes backend weights while traffic keeps flowing: the controller moves the "
-            "canary from 5% to 25% to 50%, or drains a bad pod by setting its weight to `0`.\n\n"
-            "Start from `weights` and apply `ops` in order:\n\n"
-            "- `[\"set\", i, w]` sets backend `i`'s weight to `w`.\n"
-            "- `[\"pick\", ticket]` routes one request. With the **current** weights, backend 0 owns tickets "
-            "`[0, w0)`, backend 1 owns `[w0, w0 + w1)`, and so on. Return the owning backend, or `-1` if the "
-            "total weight is 0 or `ticket` is not below the total.\n\n"
-            "Return the list of answers for the picks, in order."
+            "A progressive rollout changes backend weights while traffic keeps flowing (the controller moves the canary from 5% to 25% to 50%, or drains a bad pod by setting its weight to `0`); route requests as the weights change.\n"
+            "\n"
+            "### Input\n"
+            "- `weights`: the starting weight of each backend\n"
+            "- `ops`: operations, applied in order:\n"
+            "  - `[\"set\", i, w]`: set backend `i`'s weight to `w`\n"
+            "  - `[\"pick\", ticket]`: route one request\n"
+            "\n"
+            "### Output\n"
+            "- The list of answers for the picks, in order\n"
+            "\n"
+            "### Rules\n"
+            "- A pick uses the **current** weights: backend 0 owns tickets `[0, w0)`, backend 1 owns `[w0, w0 + w1)`, and so on\n"
+            "- A pick returns the owning backend, or `-1` if the total weight is `0` or `ticket` is not below the total"
         ),
         "examples": [
             {"args": {"weights": [95, 5], "ops": [["pick", 94], ["pick", 95], ["set", 1, 25], ["pick", 94], ["pick", 110]]},
@@ -263,12 +269,20 @@ VARIANTS = [
         "approach": "Sorted ring positions + binary search · O((v + k) log v) · O(v)",
         "spec": {"kind": "fn", "fn": "ring_owners", "params": ["nodes", "keys", "ring_size"]},
         "statement": (
-            "A cache tier uses consistent hashing so that adding a node moves only a slice of the keys. Each "
-            "entry `nodes[i] = [name, position]` places a (virtual) node at `position` on a ring of size "
-            "`ring_size`; one physical node usually appears many times.\n\n"
-            "A key hashed to `h` belongs to the first node at a position `>= h`, going clockwise and wrapping "
-            "around to the smallest position after the end of the ring.\n\n"
-            "Return the owning node's name for each hash in `keys`, in order. Positions are distinct."
+            "A cache tier uses consistent hashing so that adding a node moves only a slice of the keys; find the node that owns each key.\n"
+            "\n"
+            "### Input\n"
+            "- `nodes[i] = [name, position]`: a (virtual) node placed at `position` on the ring; one physical node usually appears many times\n"
+            "- `keys`: key hashes\n"
+            "- `ring_size`: the size of the ring\n"
+            "\n"
+            "### Output\n"
+            "- The owning node's name for each hash in `keys`, in order\n"
+            "\n"
+            "### Rules\n"
+            "- A key hashed to `h` belongs to the first node at a position `>= h`, going clockwise\n"
+            "- Past the end of the ring, wrap around to the smallest position\n"
+            "- Positions are distinct"
         ),
         "examples": [
             {"args": {"nodes": [["cache-a", 100], ["cache-b", 400], ["cache-a", 700]], "keys": [50, 100, 101, 650, 900], "ring_size": 1000},

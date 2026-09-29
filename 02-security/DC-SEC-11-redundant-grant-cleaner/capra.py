@@ -186,7 +186,7 @@ VARIANTS = [
         "title": "Most specific allow or deny",
         "approach": "Segment trie, deepest rule wins · O(total segments) · O(rule segments)",
         "spec": {"kind": "fn", "fn": "decide", "params": ["rules", "paths"], "cmp": "exact"},
-        "statement": "A storage policy is a list of rules `rules[i] = [effect, prefix]`, where `effect` is `\"allow\"` or `\"deny\"` and `prefix` is an absolute path. A rule **matches** a path when the prefix covers it by whole segments: `/logs` matches `/logs` and `/logs/app`, but not `/logs-old`. The prefix `/` matches everything.\n\nFor each requested path return the decision of the **most specific** matching rule, the one with the most segments:\n\n- if an allow and a deny rule tie on the same prefix, **deny** wins\n- if no rule matches, the answer is **deny** (default deny)\n\nThis is the same parent/child relation as the grant cleaner, asked for one path at a time.",
+        "statement": "Decide allow or deny for each path under a prefix-based storage policy.\n\n### Input\n- `rules[i] = [effect, prefix]`: `effect` is `\"allow\"` or `\"deny\"`; `prefix` is an absolute path\n- `paths`: the requested paths\n\n### Output\n- For each requested path, the decision of the **most specific** matching rule: the one with the most segments\n\n### Rules\n- A rule matches a path when the prefix covers it by whole segments: `/logs` matches `/logs` and `/logs/app`, but not `/logs-old`\n- The prefix `/` matches everything\n- If an allow and a deny rule tie on the same prefix, deny wins\n- If no rule matches, the answer is **deny** (default deny)",
         "examples": [
             {"args": {"rules": [["allow", "/logs"], ["deny", "/logs/secret"], ["allow", "/logs/secret/public"]],
                       "paths": ["/logs/app", "/logs/secret/keys", "/logs/secret/public/readme", "/metrics"]},
@@ -238,7 +238,7 @@ def decide(rules: list[list[str]], paths: list[str]) -> list[str]:
         "title": "Redundant CIDR blocks",
         "approach": "Sort by (network, prefix length) + one pass · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "remove_covered_cidrs", "params": ["blocks"], "cmp": "exact"},
-        "statement": "A firewall allow list holds IPv4 blocks in CIDR form, like `10.1.0.0/16`. A block is **redundant** when another block in the list already contains every address it covers, for example `10.1.2.0/24` inside `10.1.0.0/16`.\n\n- A block may be written with host bits set (`10.1.2.3/16`); it means the network `10.1.0.0/16`\n- Identical blocks count once\n\nReturn the blocks that remain, in canonical form (`network/length`), sorted by network address and then prefix length. This is the grant cleaner on bits instead of path segments.",
+        "statement": "Remove redundant IPv4 blocks from a firewall allow list.\n\n### Input\n- `blocks`: IPv4 blocks in CIDR form, like `10.1.0.0/16`\n\n### Output\n- The blocks that remain, in canonical form (`network/length`), sorted by network address and then prefix length\n\n### Rules\n- A block is **redundant** when another block in the list already contains every address it covers, for example `10.1.2.0/24` inside `10.1.0.0/16`\n- A block may be written with host bits set (`10.1.2.3/16`); it means the network `10.1.0.0/16`\n- Identical blocks count once",
         "examples": [
             {"args": {"blocks": ["10.1.2.0/24", "10.1.0.0/16", "10.2.0.0/16", "10.1.255.255/32"]},
              "explanation": "Both 10.1.2.0/24 and 10.1.255.255/32 sit inside 10.1.0.0/16. 10.2.0.0/16 is a separate network.",

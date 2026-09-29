@@ -122,10 +122,18 @@ VARIANTS = [
         "approach": "Counter + heap of size k · O(n + u log k) · O(u)",
         "spec": {"kind": "fn", "fn": "top_signatures", "params": ["lines", "k"]},
         "statement": (
-            "An incident bot posts the most common error signatures from the last deploy's logs. Each entry of "
-            "`lines` is one normalized signature, such as `\"E503:upstream\"`.\n\n"
-            "Return the `k` most frequent signatures as `[signature, count]` pairs, most frequent first. Break ties "
-            "by signature in ascending order. If there are fewer than `k` distinct signatures, return them all."
+            "Find the most common error signatures in the last deploy's logs.\n"
+            "\n"
+            "### Input\n"
+            "- `lines`: one normalized signature per entry, such as `\"E503:upstream\"`\n"
+            "- `k`: how many signatures to return\n"
+            "\n"
+            "### Output\n"
+            "- The `k` most frequent signatures as `[signature, count]` pairs, most frequent first\n"
+            "\n"
+            "### Rules\n"
+            "- Ties go to the signature in **ascending** order\n"
+            "- If there are fewer than `k` distinct signatures, return them all"
         ),
         "examples": [
             {"args": {"lines": ["oom", "timeout", "oom", "refused", "timeout", "oom"], "k": 2},
@@ -185,11 +193,15 @@ def top_signatures(lines, k):
         "approach": "Min-heap of the k largest · O(log k) per add · O(k)",
         "spec": {"kind": "design", "fn": "KthLoudest", "params": []},
         "statement": (
-            "An alerting rule pages only when a pod's error rate is among the `k` worst seen so far. The threshold is "
-            "the **k-th largest** rate reported to date.\n\n"
-            "Build `KthLoudest(k)` with one method:\n\n"
-            "- `add(rate)`: record a new rate and return the current k-th largest rate, counting duplicates. If fewer "
-            "than `k` rates have been recorded, return `-1`."
+            "An alert pages only when a pod's error rate is among the `k` worst seen so far.\n"
+            "\n"
+            "### Methods\n"
+            "- `KthLoudest(k)`: create the tracker\n"
+            "- `add(rate)`: record a new rate and return the current **k-th largest** rate reported to date\n"
+            "\n"
+            "### Rules\n"
+            "- Duplicates count\n"
+            "- If fewer than `k` rates have been recorded, `add` returns `-1`"
         ),
         "examples": [
             {"args": kops(3, 4, 5, 8, 2, 10, 9),

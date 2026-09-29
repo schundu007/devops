@@ -42,16 +42,21 @@ left with only spaces, while this chip keeps them.
 URL in the file is cut in half and the deploy fails the validation step.
 
 ## 4. Problem Statement
-You get the lines of a config file. Remove comments using these rules:
-- `//` starts a line comment. Everything from it to the end of that line is removed.
-- `/*` starts a block comment. Everything up to and including the next `*/` is removed, even
-  if that is on a later line. The characters right after `/*` cannot close it: `/*/` does not end the block.
-- Whichever marker appears first wins. `//` inside a block comment is just comment text, and so
-  is `/*` after a `//`.
-- When a block comment spans lines, the text before it and the text after it join into **one** line.
+Remove the comments from the lines of a config file.
 
-Return the remaining lines in order, dropping lines that are empty (`""`). Every `/*` is closed
-by the end of the input. There are no string literals.
+### Input
+- `lines`: the lines of a config file; there are no string literals
+
+### Output
+- The remaining lines in order, dropping lines that are empty (`""`)
+
+### Rules
+- `//` starts a line comment; everything from it to the end of that line is removed
+- `/*` starts a block comment; everything up to and including the next `*/` is removed, even if that is on a later line
+- The characters right after `/*` cannot close it: `/*/` does not end the block
+- Whichever marker appears **first** wins: `//` inside a block comment is just comment text, and so is `/*` after a `//`
+- When a block comment spans lines, the text before it and the text after it join into **one** line
+- Every `/*` is closed by the end of the input
 
 ## 5. Input / Output format and Constraints
 - `strip_comments(lines: list[str]) -> list[str]`

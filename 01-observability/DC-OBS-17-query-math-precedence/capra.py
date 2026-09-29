@@ -133,12 +133,15 @@ VARIANTS = [
         "spec": {"kind": "fn", "fn": "evaluate", "params": ["expr"], "ret": "value", "cmp": "exact"},
         "statement": """The dashboard query language now allows parentheses, so `(errors + timeouts) * 100 / total` can be written directly.
 
-`expr` holds non-negative integers, `+ - * /`, parentheses and spaces. There is no unary minus.
+### Input
+- `expr`: non-negative integers, `+ - * /`, parentheses and spaces; there is no unary minus
 
-- `*` and `/` bind tighter than `+` and `-`; equal levels go left to right.
-- Division truncates toward zero, and a group can be negative, so `7 / (2 - 4)` is `-3`.
+### Output
+- The value as an `int`
 
-Return the value as an `int`. The stack of terms from the main problem still works: each `(` saves the current stack and pending operator and starts a new one.""",
+### Rules
+- `*` and `/` bind tighter than `+` and `-`; equal levels go left to right
+- Division truncates toward zero, and a group can be negative, so `7 / (2 - 4)` is `-3`""",
         "examples": [
             {"args": {"expr": "(40 + 10) * 100 / 2000"},
              "explanation": "50 * 100 = 5000, then 5000 / 2000 = 2 (truncated).",
@@ -247,11 +250,17 @@ def evaluate(expr):
         "title": "Rules stored in reverse Polish notation",
         "approach": "Operand stack · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "eval_rpn", "params": ["tokens"], "ret": "value", "cmp": "exact"},
-        "statement": """An alerting backend compiles every rule to reverse Polish notation once, so evaluating it on each scrape needs no parsing. `tokens` is that compiled form: integers (possibly negative, such as `"-3"`) and the operators `+ - * /`.
+        "statement": """An alerting backend compiles every rule to reverse Polish notation once, so evaluating it on each scrape needs no parsing.
 
-Each operator takes the two most recent values, left operand first. Division truncates toward zero.
+### Input
+- `tokens`: the compiled rule: integers (possibly negative, such as `"-3"`) and the operators `+ - * /`
 
-Return the value as an `int`. This is the stack of terms again, with precedence already resolved by the compiler.""",
+### Output
+- The value as an `int`
+
+### Rules
+- Each operator takes the two most recent values, **left** operand first
+- Division truncates toward zero""",
         "examples": [
             {"args": {"tokens": ["500", "100", "*", "2000", "/"]},
              "explanation": "500 * 100 = 50000, then 50000 / 2000 = 25.",

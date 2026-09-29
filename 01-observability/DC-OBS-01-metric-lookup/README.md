@@ -43,13 +43,13 @@ before it. The team fixes the wrong thing, and the outage repeats.
 ## 4. Problem Statement
 Build a `MetricStore` that keeps samples for many metrics.
 
-- `record(metric, value, timestamp)`: save one sample. For each metric, timestamps arrive
-  in strictly increasing order, because a scraper never goes back in time.
-- `value_at(metric, timestamp)`: return the value of the newest sample of `metric` whose time
-  is **at or before** `timestamp`. If the metric is unknown, or all its samples are later
-  than `timestamp`, return `None`.
+### Methods
+- `record(metric, value, timestamp)`: save one sample
+- `value_at(metric, timestamp)`: return the value of the newest sample of `metric` whose time is **at or before** `timestamp`; `None` if the metric is unknown or all its samples are later than `timestamp`
 
-A value of `0.0` is a real reading, not "no data".
+### Rules
+- For each metric, timestamps arrive in strictly increasing order (a scraper never goes back in time)
+- A value of `0.0` is a real reading, not "no data"
 
 ## 5. Input / Output format and Constraints
 - `metric`: a non-empty string, e.g. `cpu_usage` or `node_cpu{instance="10.0.3.17"}`.

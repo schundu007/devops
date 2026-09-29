@@ -42,13 +42,18 @@ encoder overwrites events it hasn't read yet. For an audit log, that means a fai
 silently disappears from the uploaded record, which is exactly the evidence an investigation needs.
 
 ## 4. Problem Statement
-Write `compress(buf)`, where `buf` is a list of single characters.
+Write `compress(buf)`: run-length encode a list of characters in place.
 
-- Split `buf` into runs of equal characters.
-- Replace each run with the character, followed by the run length in decimal if the run is longer
-  than 1 (`"aaa"` → `"a3"`, `"b"` → `"b"`, 12 `c`s → `"c12"`).
-- Do it **in place**: write the result at the start of `buf` using O(1) extra space.
-- Return the length of the result. Only `buf[:length]` matters. The rest can hold anything.
+### Input
+- `buf`: a list of single characters
+
+### Output
+- The length of the result; only `buf[:length]` matters, and the rest can hold anything
+
+### Rules
+- Split `buf` into runs of equal characters
+- Replace each run with the character, followed by the run length in decimal if the run is longer than 1 (`"aaa"` → `"a3"`, `"b"` → `"b"`, 12 `c`s → `"c12"`)
+- Work **in place**: write the result at the start of `buf` using O(1) extra space
 
 ## 5. Input / Output format and Constraints
 - `compress(buf: list[str]) -> int`. `buf` is changed in place.

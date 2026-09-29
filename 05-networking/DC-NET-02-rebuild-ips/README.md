@@ -41,11 +41,19 @@ miss a valid split, and the investigation names the wrong host. A clean server i
 while the one that was actually compromised keeps running.
 
 ## 4. Problem Statement
-Write `restore_addresses(digits)`. `digits` is the text of an IPv4 address after its three dots
-were removed. Return **every** valid IPv4 address that could produce `digits` when its dots are
-removed. That means: insert exactly three dots, never reorder, add or drop a digit, and each of
-the four parts must be a number from 0 to 255 with no leading zero (`"0"` on its own is fine).
-Any order is fine. If the string has non-digits, or no valid address exists, return an empty list.
+Write `restore_addresses(digits)`: restore every IPv4 address that could have produced `digits`.
+
+### Input
+- `digits`: the text of an IPv4 address after its three dots were removed
+
+### Output
+- **Every** valid IPv4 address that produces `digits` when its dots are removed, in any order
+- An empty list if `digits` has non-digits, or no valid address exists
+
+### Rules
+- Insert exactly three dots; never reorder, add or drop a digit
+- Each of the four parts is a number from 0 to 255
+- No leading zero: `"0"` on its own is fine
 
 ## 5. Input / Output format and Constraints
 - Input: `digits: str`, length 0 to 20.

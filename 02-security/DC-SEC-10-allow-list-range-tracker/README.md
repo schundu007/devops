@@ -43,14 +43,18 @@ every service on ports 8000–8100 (an outage). A remove that doesn't split corr
 debug ports open after security signed off the fix (an exposure).
 
 ## 4. Problem Statement
-Build an `AllowList` over integers (ports, or IPv4 addresses as numbers). All ranges are
-half-open, `[lo, hi)`: `lo` is included and `hi` is not.
+Build an `AllowList` over integers (ports, or IPv4 addresses as numbers).
 
-- `add(lo, hi)`: allow every value in `[lo, hi)`.
-- `remove(lo, hi)`: stop allowing every value in `[lo, hi)`. A range can split into two.
-- `covers(lo, hi)`: `True` only if **every** value in `[lo, hi)` is allowed right now.
-- `ranges()`: the allowed values as sorted `(lo, hi)` pairs, merged so that no two pairs overlap
-  or touch (`(10, 20)` and `(20, 30)` are reported as `(10, 30)`).
+### Methods
+- `add(lo, hi)`: allow every value in `[lo, hi)`
+- `remove(lo, hi)`: stop allowing every value in `[lo, hi)`
+- `covers(lo, hi)`: `True` only if **every** value in `[lo, hi)` is allowed right now
+- `ranges()`: the allowed values as sorted `(lo, hi)` pairs
+
+### Rules
+- All ranges are **half-open**, `[lo, hi)`: `lo` is included and `hi` is not
+- `remove` can split a range into two
+- `ranges()` merges pairs so that no two overlap or touch: `(10, 20)` and `(20, 30)` are reported as `(10, 30)`
 
 ## 5. Input / Output format and Constraints
 - `add(lo: int, hi: int) -> None`, `remove(lo: int, hi: int) -> None`,

@@ -42,14 +42,16 @@ and a test that renders "all files in the config dir" passes on your laptop but 
 a file path as a directory, and a template writes `app.yaml/` as a folder, which the pod can't read.
 
 ## 4. Problem Statement
-Design `FileSystem` with four operations. All paths are absolute, like `/a/b/c`, and `/` is the root.
+Design `FileSystem`, an in-memory file system with four operations.
 
-- `ls(path)`: if `path` is a file, return a list containing only its name. If it is a directory,
-  return the names of its direct children (files and directories), sorted in plain string order.
-- `mkdir(path)`: create the directory. Create any missing parent directories too.
-- `write(path, content)`: append `content` to the file. If the file does not exist, create it first,
-  along with any missing parent directories.
-- `read(path)`: return the file's full content.
+### Methods
+- `ls(path)`: if `path` is a file, return a list containing only its name; if it is a directory, return the names of its direct children (files and directories), sorted in **plain string order**
+- `mkdir(path)`: create the directory, along with any missing parent directories
+- `write(path, content)`: **append** `content` to the file; if the file does not exist, create it first, along with any missing parent directories
+- `read(path)`: return the file's full content
+
+### Rules
+- All paths are absolute, like `/a/b/c`, and `/` is the root
 
 ## 5. Input / Output format and Constraints
 - `ls -> list[str]`, `read -> str`, and `mkdir` and `write` return `None`.

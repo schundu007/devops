@@ -41,11 +41,19 @@ two alone needs 950 GB, so the migration runs over. The restore can't start, and
 date slips, often past the change freeze.
 
 ## 4. Problem Statement
-You have the file sizes `files[0..n-1]` in the order they must be copied, and a deadline of
-`nights`. Each night you choose a capacity `C` (the same every night) and copy files **in order**
-until the next file would push that night's total above `C`. That file then starts the next night.
+Find the smallest nightly capacity that copies every file before the deadline.
 
-Return the smallest `C` that copies every file within `nights` nights.
+### Input
+- `files[i]`: size of file `i`; files must be copied in this order
+- `nights`: the number of nights available
+
+### Output
+- The smallest capacity `C` that copies every file within `nights` nights
+
+### Rules
+- `C` is the same every night
+- Each night copies files **in order** until the next file would push that night's total above `C`
+- That file then starts the next night
 
 ## 5. Input / Output format and Constraints
 - Returns an integer (GB per night).

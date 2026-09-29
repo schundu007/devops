@@ -129,14 +129,17 @@ VARIANTS = [
         "approach": "Keys changed per snapshot + history lookups · O(c log c) per diff · O(changes)",
         "spec": {"kind": "design", "fn": "ConfigStore", "params": []},
         "statement": (
-            "Before a rollback, the on-call engineer asks which settings differ between the release that worked and the one "
-            "that broke.\n\n"
-            "Implement `ConfigStore`:\n\n"
-            "- `set(key, value)`: change the current value.\n"
-            "- `snapshot()`: freeze the current values and return the snapshot id `0, 1, 2, …`.\n"
-            "- `diff(a, b)`: the sorted list of keys whose value differs between snapshots `a` and `b` (a key that exists in only "
-            "one of them differs). `a` may be larger than `b`; `diff(a, a)` is `[]`.\n\n"
-            "A key set to a new value and then back to the old one before the later snapshot is **not** a difference."
+            "List which settings differ between two snapshots, so on-call can compare the release that worked with the one that broke.\n"
+            "\n"
+            "### Methods\n"
+            "- `set(key, value)`: change the current value\n"
+            "- `snapshot()`: freeze the current values and return the snapshot id `0, 1, 2, …`\n"
+            "- `diff(a, b)`: the sorted list of keys whose value differs between snapshots `a` and `b`\n"
+            "\n"
+            "### Rules\n"
+            "- A key that exists in only one of the snapshots differs\n"
+            "- `a` may be larger than `b`; `diff(a, a)` is `[]`\n"
+            "- A key set to a new value and then back to the old one before the later snapshot is **not** a difference"
         ),
         "examples": [
             {"args": ops(("set", "replicas", "3"), ("set", "image", "api:1.4"), ("snapshot",), ("set", "image", "api:1.5"),
@@ -247,13 +250,16 @@ class ConfigStore:
         "approach": "History per key with tombstones + binary search · O(log c) get · O(changes)",
         "spec": {"kind": "design", "fn": "ConfigStore", "params": []},
         "statement": (
-            "Real config stores also delete keys, and an old snapshot must still show a key that was deleted later, like an "
-            "etcd read at an older revision.\n\n"
-            "Implement `ConfigStore`:\n\n"
-            "- `set(key, value)`: change the current value.\n"
-            "- `delete(key)`: remove the key from the current values. Deleting a missing key does nothing.\n"
-            "- `snapshot()`: freeze the current values and return the snapshot id `0, 1, 2, …`.\n"
-            "- `get(key, snap_id)`: the key's value in that snapshot, or `None` if it did not exist then."
+            "Support deletes: an old snapshot must still show a key that was deleted later, like an etcd read at an older revision.\n"
+            "\n"
+            "### Methods\n"
+            "- `set(key, value)`: change the current value\n"
+            "- `delete(key)`: remove the key from the current values\n"
+            "- `snapshot()`: freeze the current values and return the snapshot id `0, 1, 2, …`\n"
+            "- `get(key, snap_id)`: the key's value in that snapshot; `None` if it did not exist then\n"
+            "\n"
+            "### Rules\n"
+            "- Deleting a missing key does nothing"
         ),
         "examples": [
             {"args": ops(("set", "legacy_auth", "on"), ("snapshot",), ("delete", "legacy_auth"), ("snapshot",),

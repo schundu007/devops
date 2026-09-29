@@ -111,11 +111,17 @@ VARIANTS = [
         "title": "Windows over quota",
         "approach": "Difference map + sweep · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "breach_windows", "params": ["jobs", "quota"], "ret": "value", "cmp": "exact"},
-        "statement": """Knowing the peak says *whether* a tenant breaks its quota; the incident report needs *when*. Each job is `[vcpus, start, end]`, active on `[start, end)`.
+        "statement": """Knowing the peak says *whether* a tenant breaks its quota; the incident report needs *when*.
 
-Return every maximal time window `[from, to]` (meaning `[from, to)`) during which total vCPU in use is **strictly above** `quota`, sorted by start. Windows that touch are one window: `[1, 3]` and `[3, 5]` are reported as `[1, 5]`.
+### Input
+- `jobs`: each job is `[vcpus, start, end]`, active on `[start, end)`
+- `quota`: the vCPU quota
 
-Same sweep as the main problem: the running total only changes at start and end times, so a window can only open or close at one of them.""",
+### Output
+- Every maximal time window `[from, to]` (meaning `[from, to)`) during which total vCPU in use is **strictly above** `quota`, sorted by start
+
+### Rules
+- Windows that touch are one window: `[1, 3]` and `[3, 5]` are reported as `[1, 5]`""",
         "examples": [
             {"args": {"jobs": [[2, 1, 5], [3, 3, 7], [4, 6, 9]], "quota": 4},
              "explanation": "From 3 to 5 usage is 5; from 6 to 7 it is 7. Between 5 and 6 only 3 vCPU run.",
@@ -187,11 +193,14 @@ Same sweep as the main problem: the running total only changes at start and end 
         "title": "Burst billing over the commitment",
         "approach": "Difference map + weighted sweep · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "overage", "params": ["jobs", "quota"], "ret": "value", "cmp": "exact"},
-        "statement": """The tenant has a committed capacity of `quota` vCPU. Usage above it is allowed but billed per vCPU-minute. Each job is `[vcpus, start, end]` in minutes, active on `[start, end)`.
+        "statement": """A tenant's usage above its committed capacity is allowed but billed per vCPU-minute.
 
-Return the total overage: the sum over every minute of `max(0, usage − quota)`, where `usage` is the total vCPU running in that minute.
+### Input
+- `jobs`: each job is `[vcpus, start, end]` in minutes, active on `[start, end)`
+- `quota`: the committed capacity in vCPU
 
-Same sweep again, weighted by time: between two neighboring change times usage is constant, so that stretch adds `(next − t) × max(0, running − quota)`.""",
+### Output
+- The total overage: the sum over every minute of `max(0, usage − quota)`, where `usage` is the total vCPU running in that minute""",
         "examples": [
             {"args": {"jobs": [[2, 1, 5], [3, 3, 7]], "quota": 4},
              "explanation": "Only [3, 5) is over: usage 5, one vCPU over for 2 minutes = 2.",

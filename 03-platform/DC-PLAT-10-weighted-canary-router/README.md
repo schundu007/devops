@@ -42,14 +42,18 @@ backend (weight 0), or gives the canary 6% instead of 5%. During a bad release, 
 real users hit the broken version the rollout was supposed to keep them away from.
 
 ## 4. Problem Statement
-Build a `WeightedRouter` from a list of non-negative integer weights, one per backend.
+Build a router that picks backends at random, in proportion to their weights.
 
-- `pick()` returns a backend index `i` with probability `weights[i] / sum(weights)`.
-- A backend with weight `0` is drained and must never be picked.
-- Use the injected `rng` as the only source of randomness, and draw exactly one number per
-  pick: `ticket = rng.randrange(total)`. Backend 0 owns tickets `[0, w0)`, backend 1 owns
-  `[w0, w0 + w1)`, and so on. This makes the router testable and repeatable.
-- Reject bad input with `ValueError`: an empty list, a negative weight, or a total of `0`.
+### Methods
+- `WeightedRouter(weights, rng)`: build from a list of non-negative integer weights, one per backend
+- `pick()`: return a backend index `i` with probability `weights[i] / sum(weights)`
+
+### Rules
+- A backend with weight `0` is drained and must **never** be picked
+- Use the injected `rng` as the only source of randomness
+- Draw exactly one number per pick: `ticket = rng.randrange(total)`
+- Backend 0 owns tickets `[0, w0)`, backend 1 owns `[w0, w0 + w1)`, and so on; this makes the router testable and repeatable
+- Raise `ValueError` for an empty list, a negative weight, or a total of `0`
 
 ## 5. Input / Output format and Constraints
 - `weights`: `list[int]`, `1 <= len(weights) <= 10^5`, `0 <= weights[i] <= 10^5`, sum `> 0`.

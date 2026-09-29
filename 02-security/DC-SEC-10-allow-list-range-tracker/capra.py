@@ -151,12 +151,15 @@ VARIANTS = [
         "approach": "Sorted disjoint ranges + running total · O(log n + k) add, O(1) count · O(n)",
         "spec": {"kind": "design", "fn": "AllowCount", "params": []},
         "statement": (
-            "A security review wants the blast radius of an allow-list: how many addresses it opens up in total, "
-            "after every change.\n\n"
-            "Implement `AllowCount`:\n\n"
-            "- `add(lo, hi)`: allow every value in the half-open range `[lo, hi)`. Ranges may overlap earlier ones.\n"
-            "- `count()`: how many distinct values are allowed right now.\n\n"
-            "`count` is called often, so it should not walk every range."
+            "Count how many addresses an allow-list opens up in total, after every change, for a security review.\n"
+            "\n"
+            "### Methods\n"
+            "- `add(lo, hi)`: allow every value in the half-open range `[lo, hi)`\n"
+            "- `count()`: how many **distinct** values are allowed right now\n"
+            "\n"
+            "### Rules\n"
+            "- Ranges may overlap earlier ones\n"
+            "- `count` is called often, so it should not walk every range"
         ),
         "examples": [
             {"args": cops(("add", 10, 20), ("count",), ("add", 15, 30), ("count",), ("add", 0, 5), ("count",)),
@@ -246,12 +249,17 @@ class AllowCount:
         "approach": "Sorted disjoint reserved ranges + binary search · O(log n) first_free · O(n)",
         "spec": {"kind": "design", "fn": "PortAllocator", "params": []},
         "statement": (
-            "A node agent hands out host ports to containers. Blocks of ports get reserved and released, and a new container "
-            "asks for the first free port at or above some base.\n\n"
-            "Implement `PortAllocator`:\n\n"
-            "- `reserve(lo, hi)`: mark every port in `[lo, hi)` as reserved (overlaps are fine).\n"
-            "- `release(lo, hi)`: mark every port in `[lo, hi)` as free again; this can split a reserved block.\n"
-            "- `first_free(port)`: the smallest port `>= port` that is not reserved. Ports are unbounded above, so one always exists."
+            "Hand out host ports to containers: blocks get reserved and released, and a container asks for the first free port at or above a base.\n"
+            "\n"
+            "### Methods\n"
+            "- `reserve(lo, hi)`: mark every port in `[lo, hi)` as reserved\n"
+            "- `release(lo, hi)`: mark every port in `[lo, hi)` as free again\n"
+            "- `first_free(port)`: the smallest port `>= port` that is not reserved\n"
+            "\n"
+            "### Rules\n"
+            "- Reserved ranges may overlap\n"
+            "- A release can split a reserved block\n"
+            "- Ports are unbounded above, so a free port always exists"
         ),
         "examples": [
             {"args": pops(("reserve", 8000, 8100), ("first_free", 8000), ("first_free", 7999), ("release", 8050, 8060), ("first_free", 8000)),

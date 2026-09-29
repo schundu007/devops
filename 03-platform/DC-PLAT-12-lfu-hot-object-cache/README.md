@@ -42,15 +42,18 @@ hot object. The cache hit ratio drops from 95% to 60%, origin traffic goes up 8 
 origin falls over during the next traffic peak.
 
 ## 4. Problem Statement
-Build an `LFUCache` that holds at most `capacity` objects.
+Build an `LFUCache` that holds at most `capacity` objects and evicts the least frequently used one.
 
-- `get(key)` returns the cached value and counts one use of `key`, or returns `None` on a miss.
-- `put(key, value)` inserts or updates. An update also counts as one use.
-- When a **new** key is inserted into a full cache, first evict the key with the **fewest
-  uses**. If several keys tie, evict the one whose last use is the **oldest**.
-- A newly inserted key starts with 1 use. With `capacity == 0`, nothing is ever stored.
+### Methods
+- `get(key)`: return the cached value and count one use of `key`; return `None` on a miss
+- `put(key, value)`: insert or update; an update also counts as one use
 
-Both operations must run in O(1) average time.
+### Rules
+- When a **new** key is inserted into a full cache, first evict the key with the **fewest uses**
+- If several keys tie, evict the one whose last use is the **oldest**
+- A newly inserted key starts with 1 use
+- With `capacity == 0`, nothing is ever stored
+- Both operations must run in O(1) average time
 
 ## 5. Input / Output format and Constraints
 - `capacity`: `0 <= capacity <= 10^4`.

@@ -130,11 +130,18 @@ VARIANTS = [
         "approach": "Sweep line over sorted start/end events · O(N log N) · O(N)",
         "spec": {"kind": "fn", "fn": "understaffed", "params": ["schedules", "m"]},
         "statement": (
-            "Some teams need more than one responder: a primary and a secondary, or a two-person rule for production changes. "
-            "A gap is now any time with **fewer than `m`** engineers on call.\n\n"
-            "`schedules[p]` is engineer `p`'s shifts, `[start, end)` pairs sorted by start and not overlapping each other.\n\n"
-            "Between the first shift start and the last shift end, return every maximal `[start, end]` window in which fewer "
-            "than `m` engineers are on call, in time order. Return `[]` if nobody has shifts."
+            "Find the times with too few responders, for teams that need a primary and a secondary, or a two-person rule for production changes.\n"
+            "\n"
+            "### Input\n"
+            "- `schedules[p]`: engineer `p`'s shifts, `[start, end)` pairs sorted by start and not overlapping each other\n"
+            "- `m`: the number of engineers that must be on call\n"
+            "\n"
+            "### Output\n"
+            "- Every maximal `[start, end]` window in which **fewer than `m`** engineers are on call, in time order\n"
+            "- `[]` if nobody has shifts\n"
+            "\n"
+            "### Rules\n"
+            "- Only look between the first shift start and the last shift end"
         ),
         "examples": [
             {"args": {"schedules": [[[0, 10]], [[2, 6], [8, 12]]], "m": 2},
@@ -208,11 +215,17 @@ VARIANTS = [
         "approach": "K-way merge into covered spans, then binary search per alert · O((N + A) log N) · O(N)",
         "spec": {"kind": "fn", "fn": "unpaged_alerts", "params": ["schedules", "alerts"]},
         "statement": (
-            "After an incident review, the question is not where the gaps are but which pages actually fell into them.\n\n"
-            "`schedules[p]` is engineer `p`'s shifts, `[start, end)` pairs sorted by start and not overlapping each other. "
-            "`alerts` is a list of alert times, in any order, possibly repeated.\n\n"
-            "An alert at time `t` reaches someone if some shift has `start <= t < end`. Return the alerts that reached nobody, "
-            "in their original order."
+            "Find which alerts fell into coverage gaps, for an incident review.\n"
+            "\n"
+            "### Input\n"
+            "- `schedules[p]`: engineer `p`'s shifts, `[start, end)` pairs sorted by start and not overlapping each other\n"
+            "- `alerts`: alert times, in any order, possibly repeated\n"
+            "\n"
+            "### Output\n"
+            "- The alerts that reached nobody, in their original order\n"
+            "\n"
+            "### Rules\n"
+            "- An alert at time `t` reaches someone if some shift has `start <= t < end`"
         ),
         "examples": [
             {"args": {"schedules": [[[0, 8]], [[8, 16]], [[20, 24]]], "alerts": [3, 8, 16, 18, 23]},

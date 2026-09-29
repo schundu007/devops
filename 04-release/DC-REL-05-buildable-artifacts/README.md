@@ -41,11 +41,18 @@ a missing base image, and the release window closes. A missed cycle is worse: it
 build hang, or make the tool report "up to date" when nothing was built.
 
 ## 4. Problem Statement
-You get a list of artifact names. `inputs[i]` lists everything `artifacts[i]` needs. You also
-get `available`: things you already have, such as base images and toolchains.
+Find every artifact that can be built from what is already available.
 
-An artifact can be built when every one of its inputs is available or is another artifact
-that can be built. Return all artifacts that can be built, in any order.
+### Input
+- `artifacts`: the artifact names
+- `inputs[i]`: everything `artifacts[i]` needs
+- `available`: things you already have, such as base images and toolchains
+
+### Output
+- All artifacts that can be built, in any order
+
+### Rules
+- An artifact can be built when every one of its inputs is available or is another artifact that can be built
 
 ## 5. Input / Output format and Constraints
 - `buildable(artifacts: list[str], inputs: list[list[str]], available: list[str]) -> list[str]`

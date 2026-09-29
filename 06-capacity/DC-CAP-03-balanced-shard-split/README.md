@@ -40,11 +40,19 @@ same *load*. One worker gets the 1,400 hot range plus neighbors, hits its limit 
 the others sit idle. Consumer lag grows only on that worker's keys, which is hard to diagnose.
 
 ## 4. Problem Statement
-`loads[i]` is the load of key range `i`, and the ranges are in key order. Assign the ranges to at
-most `workers` workers so that each worker takes one **contiguous** block of ranges, and every range
-is assigned.
+Split ordered key ranges across workers so the busiest worker carries as little load as possible.
 
-Return the smallest possible load on the busiest worker. A worker's load is the sum of its ranges.
+### Input
+- `loads[i]`: the load of key range `i`; the ranges are in key order
+- `workers`: the most workers you may use
+
+### Output
+- The smallest possible load on the busiest worker
+
+### Rules
+- Each worker takes one **contiguous** block of ranges
+- Every range is assigned
+- A worker's load is the sum of its ranges
 
 ## 5. Input / Output format and Constraints
 - Returns an integer.

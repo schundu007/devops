@@ -43,16 +43,21 @@ outside the allowed skew, and you get an unsupported cluster. Nodes may stop reg
 APIs may behave differently, and rollback is hard, because etcd data has already been migrated.
 
 ## 4. Problem Statement
-A cluster state is a tuple of component versions, all of the same length, for example
-`("1.28", "1.27", "3.5")` for (control plane, kubelet, etcd).
+Find the fewest single-component changes from one cluster state to another.
 
-In one **step** you change exactly **one** component to any other version, and the new state
-must be in the list `approved`. The starting state does not have to be approved: you may start
-from a state that is out of policy.
+### Input
+- `start`, `target`: cluster states; a state is a tuple of component versions, all of the same length, for example `("1.28", "1.27", "3.5")` for (control plane, kubelet, etcd)
+- `approved`: the list of allowed states
 
-Given `start`, `target` and `approved`, return the fewest steps from `start` to `target`.
-Return `0` if they are equal, and `-1` if `target` cannot be reached (including when `target` is
-not approved).
+### Output
+- The fewest steps from `start` to `target`
+- `0` if they are equal
+- `-1` if `target` cannot be reached, including when `target` is not approved
+
+### Rules
+- One **step** changes exactly **one** component to any other version
+- The new state must be in `approved`
+- The starting state does not have to be approved: you may start from a state that is out of policy
 
 ## 5. Input / Output format and Constraints
 - `min_upgrade_steps(start: Sequence[str], target: Sequence[str], approved: list[Sequence[str]]) -> int`

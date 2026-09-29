@@ -42,11 +42,19 @@ tool checked only direct users. The change merges, and three hops away the payme
 loses its database route during checkout.
 
 ## 4. Problem Statement
-There are `n` components numbered `0..n-1`. Each pair `(u, v)` in `deps` means component `v`
-directly uses component `u`, so a change to `u` can affect `v`. The graph has no cycles.
+Answer whether a change to one component can affect another.
 
-For each query `(u, v)`, return `True` if `v` depends on `u` directly or through a chain of
-other components, and `False` otherwise. A component does not count as depending on itself.
+### Input
+- `n`: the number of components, numbered `0..n-1`
+- `deps`: pairs `(u, v)` meaning component `v` directly uses component `u`, so a change to `u` can affect `v`
+- `queries`: pairs `(u, v)`
+
+### Output
+- For each query, `True` if `v` depends on `u` directly or through a chain of other components, and `False` otherwise
+
+### Rules
+- The graph has no cycles
+- A component does **not** count as depending on itself
 
 ## 5. Input / Output format and Constraints
 - `impacts(n: int, deps: list[tuple[int, int]], queries: list[tuple[int, int]]) -> list[bool]`

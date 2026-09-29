@@ -42,12 +42,21 @@ flaky link: you promise 99.9% in the SLO and deliver 99.5%. Over a month that is
 hours of extra failures instead of about 43 minutes.
 
 ## 4. Problem Statement
-You have `n` network nodes numbered `0` to `n - 1`. Each `links[i] = [a, b]` is a two-way link
-that works with probability `success[i]`. A path works only if every link on it works, so its
-success is the product of its links' probabilities.
+Find the most reliable path between two network nodes.
 
-Return the highest success probability of any path from `src` to `dst`. If `dst` cannot be
-reached, return `0.0`.
+### Input
+- `n`: the number of nodes, numbered `0` to `n - 1`
+- `links[i] = [a, b]`: a two-way link
+- `success[i]`: the probability that link `i` works
+- `src`, `dst`: the start and end nodes
+
+### Output
+- The highest success probability of any path from `src` to `dst`
+- `0.0` if `dst` cannot be reached
+
+### Rules
+- A path works only if every link on it works
+- A path's success is the **product** of its links' probabilities
 
 ## 5. Input / Output format and Constraints
 - Returns a float. Answers within `1e-9` relative error are accepted.

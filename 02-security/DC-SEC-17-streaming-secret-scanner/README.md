@@ -43,9 +43,15 @@ without a newline (for example inside a progress bar) is never masked. It lands 
 build log, which 300 engineers can read, and the key has to be rotated.
 
 ## 4. Problem Statement
-Build a `SecretScanner` from a list of fixed patterns. Then characters arrive one at a time
-through `feed(ch)`. After each character, return `True` if some pattern exactly equals the
-text that ends at this character (a suffix of everything fed so far), otherwise `False`.
+Build a `SecretScanner` that reports, after each streamed character, whether a pattern just matched.
+
+### Methods
+- `SecretScanner(patterns)`: build the scanner from a list of fixed patterns
+- `feed(ch)`: take the next character; return `True` if some pattern matches, otherwise `False`
+
+### Rules
+- Characters arrive one at a time through `feed(ch)`
+- A pattern matches when it **exactly** equals the text that ends at this character (a suffix of everything fed so far)
 
 ## 5. Input / Output format and Constraints
 - `SecretScanner(patterns: list[str])`, then `feed(ch: str) -> bool` with `len(ch) == 1`.

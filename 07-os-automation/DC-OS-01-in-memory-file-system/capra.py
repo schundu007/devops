@@ -266,12 +266,17 @@ VARIANTS = [
         "approach": "Segment tree with a running total per node · O(L) per call · O(segments)",
         "spec": {"kind": "design", "fn": "DiskUsage", "params": []},
         "statement": (
-            "A node agent needs `du` answers on every scrape, so walking the whole tree each time is too slow. "
-            "Build `DiskUsage` with:\n\n"
-            "- `write(path, size)`: create the file (and missing parents) or overwrite its size\n"
-            "- `du(path)`: total bytes of the file, or of every file under the directory; 0 if the path does not exist\n"
-            "- `rm(path)`: delete the file or the whole directory subtree; nothing happens if it does not exist\n\n"
-            "Paths are absolute. A path is never used as both a file and a directory, and `rm` is never called on `/`."
+            "A node agent needs `du` answers on every scrape, so walking the whole tree each time is too slow. Build `DiskUsage`.\n"
+            "\n"
+            "### Methods\n"
+            "- `write(path, size)`: create the file (and missing parents), or **overwrite** its size\n"
+            "- `du(path)`: total bytes of the file, or of every file under the directory; `0` if the path does not exist\n"
+            "- `rm(path)`: delete the file or the whole directory subtree; nothing happens if it does not exist\n"
+            "\n"
+            "### Rules\n"
+            "- Paths are absolute\n"
+            "- A path is never used as both a file and a directory\n"
+            "- `rm` is never called on `/`"
         ),
         "examples": [
             {"args": _dops(("write", "/var/log/app.log", 300), ("write", "/var/log/old.log", 700), ("write", "/var/lib/db", 50),
@@ -318,12 +323,19 @@ VARIANTS = [
         "approach": "Trie of mount segments, keep the deepest match · O(total segments) · O(mount segments)",
         "spec": {"kind": "fn", "fn": "resolve_mounts", "params": ["mounts", "paths"]},
         "statement": (
-            "The kernel sends each file access to the **deepest mount point** that contains it, the same way an ingress picks the longest path prefix. "
-            "Given the mount table `mounts` and a list of `paths`, return the mount that serves each path:\n\n"
-            "- a mount contains a path when it is the path itself or an ancestor directory of it, on whole segments (`/data` does not contain `/database`)\n"
+            "The kernel sends each file access to the **deepest mount point** that contains it, the same way an ingress picks the longest path prefix. Find the mount that serves each path.\n"
+            "\n"
+            "### Input\n"
+            "- `mounts`: the mount table\n"
+            "- `paths`: the paths to resolve\n"
+            "\n"
+            "### Output\n"
+            "- For each path, in order, the mount that serves it, or `\"\"` if no mount contains it\n"
+            "\n"
+            "### Rules\n"
+            "- A mount contains a path when it is the path itself or an ancestor directory of it, on **whole segments** (`/data` does not contain `/database`)\n"
             "- `/` contains every path\n"
-            "- return `\"\"` for a path that no mount contains\n\n"
-            "Paths and mounts are absolute, with no trailing slash (except `/`) and no empty segments."
+            "- Paths and mounts are absolute, with no trailing slash (except `/`) and no empty segments"
         ),
         "examples": [
             {"args": {"mounts": ["/", "/var", "/var/lib/docker"], "paths": ["/var/lib/docker/overlay2", "/var/log/syslog", "/etc/hosts"]},

@@ -44,12 +44,18 @@ the outage continues. If you don't notice there are too few links, people spend 
 plan that can never work instead of ordering cables right away.
 
 ## 4. Problem Statement
-There are `n` devices numbered `0` to `n - 1`, and a list of undirected cables `(a, b)`. In one
-**move**, you may unplug any existing cable and plug it in between any two devices. You cannot
-add new cables.
+Find the fewest cable moves that let every device reach every other device.
 
-Return the minimum number of moves needed so that every device can reach every other device.
-If that is impossible with the cables available, return `-1`.
+### Input
+- `n`: number of devices, numbered `0` to `n - 1`
+- `links`: undirected cables `(a, b)`
+
+### Output
+- The minimum number of moves, or `-1` if it is impossible with the cables available
+
+### Rules
+- One **move** unplugs any existing cable and plugs it in between any two devices
+- You cannot add new cables
 
 ## 5. Input / Output format and Constraints
 - `n: int`, `links: list[tuple[int, int]]`. Returns `int`.

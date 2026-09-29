@@ -90,12 +90,18 @@ VARIANTS = [
         "title": "Backlog drain rate",
         "approach": "Binary search on the rate · O(n · log max) · O(1)",
         "spec": {"kind": "fn", "fn": "min_drain_rate", "params": ["backlogs", "hours"], "ret": "value", "cmp": "exact"},
-        "statement": """A consumer has to empty the backlog of every partition before a maintenance window closes. `backlogs[i]` is the number of messages waiting in partition `i`.
+        "statement": """A consumer has to empty the backlog of every partition before a maintenance window closes.
 
-- Each hour the consumer picks **one** partition and drains up to `rate` messages from it.
-- If the partition has fewer than `rate` left, it finishes and the rest of that hour is idle.
+### Input
+- `backlogs[i]`: the number of messages waiting in partition `i`
+- `hours`: the hours available
 
-Return the smallest integer `rate` that empties every partition within `hours` hours. The set of feasible rates is monotonic, so the same search-on-the-answer idea as the shard split applies, with a different feasibility check: partition `i` needs `ceil(backlogs[i] / rate)` hours.""",
+### Output
+- The smallest integer `rate` that empties every partition within `hours` hours
+
+### Rules
+- Each hour the consumer picks **one** partition and drains up to `rate` messages from it
+- If the partition has fewer than `rate` left, it finishes and the rest of that hour is idle""",
         "examples": [
             {"args": {"backlogs": [3, 6, 7, 11], "hours": 8},
              "explanation": "At rate 4 the partitions take 1 + 2 + 2 + 3 = 8 hours. Rate 3 needs 1 + 2 + 3 + 4 = 10.",
@@ -155,11 +161,14 @@ Return the smallest integer `rate` that empties every partition within `hours` h
         "title": "Spread replicas along a rack row",
         "approach": "Binary search on the gap + greedy placement · O(n log n + n · log span) · O(n)",
         "spec": {"kind": "fn", "fn": "max_min_spacing", "params": ["positions", "replicas"], "ret": "value", "cmp": "exact"},
-        "statement": """A data center row has free slots at `positions` (distinct integers, in any order, measured in rack units from the end of the row). You must place `replicas` copies of a service on distinct slots.
+        "statement": """Place copies of a service along a data center row as far apart as possible, to survive a shared power or cooling fault.
 
-To survive a shared power or cooling fault, the copies should be as far apart as possible. Return the largest possible value of the **smallest** distance between any two placed replicas.
+### Input
+- `positions`: the free slots, distinct integers in any order, measured in rack units from the end of the row
+- `replicas`: the number of copies to place, each on a distinct slot
 
-The search is on the answer again, but maximizing instead of minimizing: for a gap `g`, place greedily from the leftmost slot and check whether `replicas` copies fit.""",
+### Output
+- The largest possible value of the **smallest** distance between any two placed replicas""",
         "examples": [
             {"args": {"positions": [1, 2, 3, 4, 7], "replicas": 3},
              "explanation": "Slots 1, 4 and 7 are 3 apart. No placement of three replicas keeps every pair 4 apart.",

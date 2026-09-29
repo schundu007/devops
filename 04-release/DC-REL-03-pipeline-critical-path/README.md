@@ -40,11 +40,19 @@ runner sizing). Stage times also vary from run to run, so teams track p50 and p9
 critical path. The pipeline does not get faster, and the real bottleneck stays unfixed.
 
 ## 4. Problem Statement
-A pipeline has `n` stages numbered `0..n-1`. Stage `i` takes `duration[i]` minutes. Each pair
-`(a, b)` in `deps` means stage `b` cannot start until stage `a` has finished. Any number of
-stages can run at the same time, and the dependencies contain no cycles.
+Find the minimum time to finish a pipeline of dependent stages.
 
-Return the minimum number of minutes needed to finish every stage.
+### Input
+- `n`: the number of stages, numbered `0..n-1`
+- `deps`: pairs `(a, b)`; stage `b` cannot start until stage `a` has finished
+- `duration[i]`: minutes stage `i` takes
+
+### Output
+- The minimum number of minutes needed to finish every stage
+
+### Rules
+- Any number of stages can run at the same time
+- The dependencies contain no cycles
 
 ## 5. Input / Output format and Constraints
 - `pipeline_time(n: int, deps: list[tuple[int, int]], duration: list[int]) -> int`

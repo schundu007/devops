@@ -210,12 +210,20 @@ VARIANTS = [
         "approach": "Prim with zero-cost existing links · O(n² + L) · O(n + L)",
         "spec": {"kind": "fn", "fn": "min_extra_cost", "params": ["sites", "links"], "cmp": "exact"},
         "statement": (
-            "Some sites are already wired together: `links[i] = [a, b]` is a fiber run between site `a` and "
-            "site `b` that costs nothing to use. Every new link between two sites costs their Manhattan "
-            "distance.\n\n"
-            "Return the minimum cost of **new** links so that every site can reach every other site, through "
-            "any mix of existing and new links.\n\n"
-            "Existing links may be redundant or form cycles; that is fine, they are free."
+            "Some sites are already wired together; connect the rest as cheaply as possible.\n"
+            "\n"
+            "### Input\n"
+            "- `sites[i] = [x, y]`: a site's location\n"
+            "- `links[i] = [a, b]`: an existing fiber run between site `a` and site `b`\n"
+            "\n"
+            "### Output\n"
+            "- The minimum cost of **new** links so that every site can reach every other site\n"
+            "\n"
+            "### Rules\n"
+            "- Existing links cost nothing to use\n"
+            "- Every new link between two sites costs their Manhattan distance\n"
+            "- Sites may reach each other through any mix of existing and new links\n"
+            "- Existing links may be redundant or form cycles; that is fine, they are free"
         ),
         "examples": [
             {"args": {"sites": [[0, 0], [10, 0], [10, 10], [0, 10]], "links": [[0, 2]]},
@@ -260,11 +268,20 @@ VARIANTS = [
         "approach": "Prim, then drop the k-1 longest tree links · O(n²) · O(n)",
         "spec": {"kind": "fn", "fn": "min_cost_regions", "params": ["sites", "k"], "cmp": "exact"},
         "statement": (
-            "Compliance wants the sites grouped into exactly `k` separate regional networks: sites inside a "
-            "region must reach each other, and no link may cross regions. Which site goes in which region is "
-            "up to you.\n\n"
-            "Return the minimum total Manhattan length of links so that the sites form **exactly** `k` "
-            "connected regions (or one region per site when `k` is at least the number of sites)."
+            "Compliance wants the sites grouped into exactly `k` separate regional networks.\n"
+            "\n"
+            "### Input\n"
+            "- `sites[i] = [x, y]`: a site's location\n"
+            "- `k`: the number of regions\n"
+            "\n"
+            "### Output\n"
+            "- The minimum total Manhattan length of links so that the sites form **exactly** `k` connected regions\n"
+            "\n"
+            "### Rules\n"
+            "- Sites inside a region must reach each other\n"
+            "- No link may cross regions\n"
+            "- Which site goes in which region is up to you\n"
+            "- When `k` is at least the number of sites, there is one region per site"
         ),
         "examples": [
             {"args": {"sites": [[0, 0], [1, 0], [100, 0], [101, 0]], "k": 2},

@@ -103,11 +103,16 @@ VARIANTS = [
         "approach": "Stack of lengths, no strings built · O(n) · O(depth)",
         "spec": {"kind": "fn", "fn": "expanded_length", "params": ["template"]},
         "statement": (
-            "Before an admission webhook expands a policy template, it wants the exact size of the result, so it can "
-            "reject expansion bombs without allocating anything.\n\n"
-            "Templates use the main problem's syntax: `k[body]` is `body` repeated `k` times, blocks nest, and every "
-            "other character is copied as is.\n\n"
-            "Return the length of the fully expanded text. It may be far larger than memory."
+            "An admission webhook wants the exact size of an expanded template, to reject expansion bombs without allocating anything.\n"
+            "\n"
+            "### Input\n"
+            "- `template`: the main problem's syntax: `k[body]` is `body` repeated `k` times, blocks nest, and every other character is copied as is\n"
+            "\n"
+            "### Output\n"
+            "- The length of the fully expanded text\n"
+            "\n"
+            "### Rules\n"
+            "- The length may be far larger than memory"
         ),
         "examples": [
             {"args": _len_case("3[a2[c]]"),
@@ -187,10 +192,14 @@ VARIANTS = [
         "approach": "Parse tree with sizes, descend with modulo · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "char_at", "params": ["template", "index"]},
         "statement": (
-            "A reviewer asks what sits at position `index` (0-based) of an expanded template, for example to show "
-            "context around a flagged action, but the full expansion is too big to build.\n\n"
-            "Templates use the main problem's syntax. Return the character at `index` in the expanded text, or `\"\"` "
-            "if `index` is past the end."
+            "Find the character at one position of an expanded template, without building the full expansion (it is too big).\n"
+            "\n"
+            "### Input\n"
+            "- `template`: the main problem's syntax\n"
+            "- `index`: a **0-based** position in the expanded text\n"
+            "\n"
+            "### Output\n"
+            "- The character at `index`, or `\"\"` if `index` is past the end"
         ),
         "examples": [
             {"args": {"template": "2[ab3[c]]", "index": 6},

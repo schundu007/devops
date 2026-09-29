@@ -44,15 +44,18 @@ stat still shows 9999 after the fix. Capacity planning then sizes the fleet for 
 never happened, and someone buys 30% more nodes.
 
 ## 4. Problem Statement
-Build a `SampleTracker` for one metric.
+Build a `SampleTracker` for one metric that accepts late and corrected samples.
 
-- `update(timestamp, value)`: record a sample. Timestamps may arrive in any order. If a
-  timestamp was already recorded, this is a **correction**: the new value replaces the old one.
-- `current()`: the value at the **newest timestamp** seen so far.
-- `maximum()`: the highest value across all timestamps, after corrections.
-- `minimum()`: the lowest value across all timestamps, after corrections.
+### Methods
+- `update(timestamp, value)`: record a sample
+- `current()`: the value at the **newest timestamp** seen so far
+- `maximum()`: the highest value across all timestamps, after corrections
+- `minimum()`: the lowest value across all timestamps, after corrections
 
-`current`, `maximum` and `minimum` are only called after at least one `update`.
+### Rules
+- Timestamps may arrive in any order
+- A timestamp that was already recorded is a **correction**: the new value replaces the old one
+- `current`, `maximum` and `minimum` are only called after at least one `update`
 
 ## 5. Input / Output format and Constraints
 - `timestamp`: an integer, `1 <= timestamp <= 10^9`. `value`: a float, `-10^9 <= value <= 10^9`.

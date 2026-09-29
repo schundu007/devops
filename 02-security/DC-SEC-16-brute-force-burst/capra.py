@@ -162,12 +162,18 @@ VARIANTS = [
         "approach": "Group, sort, slide a window of k · O(n log n) · O(n)",
         "spec": {"kind": "fn", "fn": "threshold_alerts", "params": ["events", "k", "window"], "cmp": "exact"},
         "statement": (
-            "Detection rules differ per signal: 5 failed SSH logins in 60 seconds, 20 failed API keys in 10 "
-            "minutes. Generalize the key-card alert.\n\n"
-            "`events[i] = [name, t]` is a failure for account `name` at second `t` (unsorted, duplicates "
-            "allowed). An account alerts when some `k` of its events fit in a span of at most `window` "
-            "seconds (last - first ≤ window).\n\n"
-            "Return the alerted account names sorted ascending."
+            "Detection rules differ per signal (5 failed SSH logins in 60 seconds, 20 failed API keys in 10 minutes), so generalize the key-card alert.\n"
+            "\n"
+            "### Input\n"
+            "- `events[i] = [name, t]`: a failure for account `name` at second `t`; unsorted, duplicates allowed\n"
+            "- `k`: how many events raise an alert\n"
+            "- `window`: the span length in seconds\n"
+            "\n"
+            "### Output\n"
+            "- The alerted account names, sorted ascending\n"
+            "\n"
+            "### Rules\n"
+            "- An account alerts when some `k` of its events fit in a span of at most `window` seconds (last - first ≤ window)"
         ),
         "examples": [
             {"args": {"events": [["root", 0], ["root", 30], ["root", 61], ["root", 90]], "k": 3, "window": 60},
@@ -211,12 +217,20 @@ VARIANTS = [
         "approach": "Per-account deque of recent times · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "first_alerts", "params": ["events", "k", "window"], "cmp": "exact"},
         "statement": (
-            "In production the detector sees failures live, in time order, and must page **the moment** an "
-            "account crosses the line. `events[i] = [name, t]` arrive with non-decreasing `t`.\n\n"
-            "When an event gives its account `k` events within the last `window` seconds (times in "
-            "`[t - window, t]`, this event included), the account fires once, at time `t`. Later events for "
-            "an account that already fired are ignored.\n\n"
-            "Return `[name, t]` for each firing, in the order they fire."
+            "The detector sees failures live and must page **the moment** an account crosses the line.\n"
+            "\n"
+            "### Input\n"
+            "- `events[i] = [name, t]`: failures in time order, with non-decreasing `t`\n"
+            "- `k`: how many events make an account fire\n"
+            "- `window`: the look-back span in seconds\n"
+            "\n"
+            "### Output\n"
+            "- `[name, t]` for each firing, in the order they fire\n"
+            "\n"
+            "### Rules\n"
+            "- An event fires its account when the account has `k` events within the last `window` seconds: times in `[t - window, t]`, this event included\n"
+            "- The account fires once, at that event's time `t`\n"
+            "- Later events for an account that already fired are ignored"
         ),
         "examples": [
             {"args": {"events": [["bob", 0], ["amy", 10], ["bob", 20], ["amy", 30], ["bob", 40], ["amy", 41]], "k": 3, "window": 40},

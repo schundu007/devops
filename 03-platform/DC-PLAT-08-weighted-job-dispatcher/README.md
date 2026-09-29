@@ -43,17 +43,20 @@ has to wait, and expensive on-demand nodes run jobs while spot nodes sit idle. T
 and nobody notices, because every job still finishes.
 
 ## 4. Problem Statement
-You have `m` workers. Worker `i` has a preference weight `weights[i]`, and lower is better (think
-cost per hour).
+Dispatch each job to a worker, preferring cheap workers.
 
-Job `j` joins the queue at second `j` and needs `durations[j]` seconds of work. Jobs are dispatched
-**in queue order**: job `j` cannot start before job `j - 1` was dispatched.
+### Input
+- `weights[i]`: worker `i`'s preference weight; lower is better (think cost per hour)
+- `durations[j]`: seconds of work job `j` needs; job `j` joins the queue at second `j`
 
-When job `j` is dispatched, it goes to the **idle** worker with the smallest weight, breaking ties
-by the smallest index. If no worker is idle at that moment, the job waits until the earliest
-moment a worker becomes idle, and starts then. A worker that finishes at time `t` is idle at time `t`.
+### Output
+- A list where element `j` is the index of the worker that ran job `j`
 
-Return a list where element `j` is the index of the worker that ran job `j`.
+### Rules
+- Jobs are dispatched **in queue order**: job `j` cannot start before job `j - 1` was dispatched
+- A dispatched job goes to the **idle** worker with the smallest weight; ties go to the smallest index
+- If no worker is idle, the job waits for the earliest moment one becomes idle and starts then
+- A worker that finishes at time `t` is idle at time `t`
 
 ## 5. Input / Output format and Constraints
 - `assign_jobs(weights: list[int], durations: list[int]) -> list[int]`

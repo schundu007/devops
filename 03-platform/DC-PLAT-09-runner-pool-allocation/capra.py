@@ -98,13 +98,20 @@ VARIANTS = [
         "approach": "Idle heap by (cost, index) + busy heap by free time · O((n + m) log n) · O(n)",
         "spec": {"kind": "fn", "fn": "assign_builds", "params": ["weights", "durations"]},
         "statement": (
-            "Runners differ in cost: `weights[i]` is runner `i`'s hourly price. Build `j` is queued at second `j` and "
-            "takes `durations[j]` seconds.\n\n"
-            "- A queued build goes to the idle runner with the **lowest weight**, then the lowest index.\n"
-            "- If no runner is idle, builds wait in queue order. As soon as runners free up, the next waiting build "
-            "takes the cheapest of them the same way.\n"
-            "- A runner that frees at second `t` can start a build at `t`.\n\n"
-            "Return the runner index each build ran on."
+            "Runners differ in cost, so builds prefer cheap runners.\n"
+            "\n"
+            "### Input\n"
+            "- `weights[i]`: runner `i`'s hourly price\n"
+            "- `durations[j]`: seconds build `j` takes; build `j` is queued at second `j`\n"
+            "\n"
+            "### Output\n"
+            "- A list where element `j` is the runner index build `j` ran on\n"
+            "\n"
+            "### Rules\n"
+            "- A queued build goes to the idle runner with the **lowest weight**, then the lowest index\n"
+            "- If no runner is idle, builds wait in queue order\n"
+            "- As soon as runners free up, the next waiting build takes the cheapest of them the same way\n"
+            "- A runner that frees at second `t` can start a build at `t`"
         ),
         "examples": [
             {"args": {"weights": [3, 3, 2], "durations": [1, 2, 3, 2, 1, 2]},
@@ -184,10 +191,16 @@ def assign_builds(weights, durations):
         "approach": "Sort by start + min-heap of end times · O(m log m) · O(m)",
         "spec": {"kind": "fn", "fn": "min_runners", "params": ["jobs"]},
         "statement": (
-            "Capacity planning for the CI pool: given yesterday's jobs as `[start, end]`, how many runners would have "
-            "let **every job start on time**?\n\n"
-            "A job occupies a runner from `start` until `end`; a runner freed at `t` can start another job at `t`. "
-            "Return the minimum number of runners. With no jobs, return `0`."
+            "Find how many runners would have let **every job start on time** yesterday.\n"
+            "\n"
+            "### Input\n"
+            "- `jobs[i] = [start, end]`: a job occupies a runner from `start` until `end`\n"
+            "\n"
+            "### Output\n"
+            "- The minimum number of runners. With no jobs, `0`\n"
+            "\n"
+            "### Rules\n"
+            "- A runner freed at `t` can start another job at `t`"
         ),
         "examples": [
             {"args": {"jobs": [[0, 30], [5, 10], [15, 20]]},

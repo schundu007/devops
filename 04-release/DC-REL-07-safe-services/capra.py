@@ -135,11 +135,19 @@ VARIANTS = [
         "approach": "Level-by-level Kahn peel · O(n + E) · O(n + E)",
         "spec": {"kind": "fn", "fn": "startup_waves", "params": ["waits_on"], "cmp": "exact"},
         "statement": (
-            "The rollout controller starts services in **waves**: wave 0 is every service that waits on nothing; "
-            "wave `k` is every service whose dependencies all started in earlier waves (and at least one in wave `k - 1`).\n\n"
-            "Using the same `waits_on` lists as the main problem, return the waves in order, each sorted ascending. "
-            "Services in or behind a cycle never start and appear in no wave. No services gives `[]`.\n\n"
-            "This is the same peel as finding safe services, but it keeps track of the layer each service joins."
+            "The rollout controller starts services in **waves**.\n"
+            "\n"
+            "### Input\n"
+            "- `waits_on`: the same lists as the main problem\n"
+            "\n"
+            "### Output\n"
+            "- The waves in order, each sorted ascending\n"
+            "- `[]` when there are no services\n"
+            "\n"
+            "### Rules\n"
+            "- Wave 0 is every service that waits on nothing\n"
+            "- Wave `k` is every service whose dependencies all started in earlier waves, with at least one in wave `k - 1`\n"
+            "- Services in or behind a cycle never start and appear in no wave"
         ),
         "examples": [
             {"args": {"waits_on": [[], [0], [0], [1, 2], [4]]},
@@ -213,11 +221,18 @@ VARIANTS = [
         "approach": "Reverse-edge peel over names · O(V + E + V log V) · O(V + E)",
         "spec": {"kind": "fn", "fn": "stuck_services", "params": ["deps"], "cmp": "exact"},
         "statement": (
-            "A Compose or Helm chart lists dependencies by name: `deps[i] = [service, dependency]` means `service` "
-            "waits for `dependency`. Pairs may repeat, and a service may appear only as a dependency.\n\n"
-            "Return the names of every service that can **never** start, because it is in a cycle or waits "
-            "(directly or indirectly) on one. Sort the names ascending; return `[]` if every service can start.\n\n"
-            "This is the complement of the main problem's safe set, over names instead of indices."
+            "A Compose or Helm chart lists dependencies by name.\n"
+            "\n"
+            "### Input\n"
+            "- `deps[i] = [service, dependency]`: `service` waits for `dependency`\n"
+            "\n"
+            "### Output\n"
+            "- The names of every service that can **never** start, sorted ascending\n"
+            "- `[]` if every service can start\n"
+            "\n"
+            "### Rules\n"
+            "- Pairs may repeat, and a service may appear only as a dependency\n"
+            "- A service can never start when it is in a cycle or waits, directly or indirectly, on one"
         ),
         "examples": [
             {"args": {"deps": [["api", "db"], ["api", "cache"], ["cache", "queue"], ["queue", "cache"], ["web", "api"]]},

@@ -85,10 +85,18 @@ VARIANTS = [
         "approach": "Monotonic decreasing deque · O(n) · O(k)",
         "spec": {"kind": "fn", "fn": "rolling_peak", "params": ["latency_ms", "k"]},
         "statement": (
-            "A dashboard plots the **peak** latency over the last `k` samples, updated on every sample once `k` "
-            "samples have arrived.\n\n"
-            "Given `latency_ms` in time order and a window size `k`, return a list with the maximum of every "
-            "window of `k` consecutive samples, from left to right. Return an empty list if there are fewer than `k` samples."
+            "A dashboard plots the **peak** latency over the last `k` samples; compute every value it shows.\n"
+            "\n"
+            "### Input\n"
+            "- `latency_ms`: latency samples, in time order\n"
+            "- `k`: the window size\n"
+            "\n"
+            "### Output\n"
+            "- A list with the maximum of every window of `k` consecutive samples, from left to right\n"
+            "- An empty list if there are fewer than `k` samples\n"
+            "\n"
+            "### Rules\n"
+            "- The dashboard updates on every sample once `k` samples have arrived"
         ),
         "examples": [
             {"args": {"latency_ms": [120, 310, 140, 90, 95, 400, 130], "k": 3},
@@ -153,11 +161,15 @@ def rolling_peak(latency_ms, k):
         "approach": "Shrinking window + two monotonic deques · O(n) · O(n)",
         "spec": {"kind": "fn", "fn": "fastest_ramp", "params": ["latency_ms", "swing"]},
         "statement": (
-            "During a postmortem you want to know how quickly latency can swing. Given samples `latency_ms` in "
-            "time order and a threshold `swing`, find the **shortest** run of consecutive samples whose "
-            "`max − min` is at least `swing`.\n\n"
-            "Return its length, or `0` if no run swings that much. A short run means a sharp jump or drop "
-            "that an alert with a long evaluation window would smooth over."
+            "Find how quickly latency can swing; a short run means a sharp jump or drop that an alert with a long evaluation window would smooth over.\n"
+            "\n"
+            "### Input\n"
+            "- `latency_ms`: latency samples, in time order\n"
+            "- `swing`: the threshold\n"
+            "\n"
+            "### Output\n"
+            "- The length of the **shortest** run of consecutive samples whose `max − min` is at least `swing`\n"
+            "- `0` if no run swings that much"
         ),
         "examples": [
             {"args": {"latency_ms": [100, 104, 180, 176, 110, 300], "swing": 150},

@@ -296,12 +296,16 @@ VARIANTS = [
         "approach": "Count buckets of ordered sets plus a max pointer · O(1) per call · O(keys)",
         "spec": {"kind": "design", "fn": "HotKeys", "params": []},
         "statement": (
-            "A Redis cluster slows down when one key takes most of the traffic. The proxy tracks hits and must name the hottest key at any moment. "
-            "Build `HotKeys` with:\n\n"
+            "A Redis cluster slows down when one key takes most of the traffic, so the proxy must name the hottest key at any moment. Build `HotKeys`.\n"
+            "\n"
+            "### Methods\n"
             "- `hit(key)`: count one request for `key` and return its new count\n"
-            "- `count(key)`: the key's count, 0 if never seen\n"
-            "- `top()`: the key with the most hits; on a tie, the one that **reached** that count first; `None` if there are no hits\n\n"
-            "Every call must be O(1): this runs on every request."
+            "- `count(key)`: the key's count; `0` if never seen\n"
+            "- `top()`: the key with the most hits; `None` if there are no hits\n"
+            "\n"
+            "### Rules\n"
+            "- On a tie, `top()` returns the key that **reached** that count first\n"
+            "- Every call must be O(1): this runs on every request"
         ),
         "examples": [
             {"args": _hops(("hit", "user:1"), ("hit", "user:2"), ("top",), ("hit", "user:2"), ("top",), ("hit", "user:1"), ("top",)),
@@ -346,12 +350,18 @@ VARIANTS = [
         "approach": "Frequency buckets for unpinned keys only · O(1) per operation · O(capacity)",
         "spec": {"kind": "design", "fn": "PinnedLFUCache", "params": []},
         "statement": (
-            "The edge cache holds a few objects that must never be evicted (feature-flag and routing configs). "
-            "Build `PinnedLFUCache(capacity)` with `get(key)` and `put(key, value, pinned)`:\n\n"
-            "- `pinned` only matters when the key is first inserted; a pinned key is never evicted and its uses are not counted\n"
-            "- unpinned keys follow the LFU rule of the main problem (fewest uses, then touched longest ago)\n"
-            "- pinned keys still take up capacity; if the cache is full and **every** key is pinned, the new key is not stored\n\n"
-            "`get` returns the value or `None`. Updating an existing key's value counts as a use."
+            "The edge cache holds a few objects that must never be evicted (feature-flag and routing configs). Build `PinnedLFUCache(capacity)`.\n"
+            "\n"
+            "### Methods\n"
+            "- `get(key)`: return the value, or `None`\n"
+            "- `put(key, value, pinned)`: insert the key, or update its value\n"
+            "\n"
+            "### Rules\n"
+            "- `pinned` only matters when the key is **first** inserted\n"
+            "- A pinned key is never evicted, and its uses are not counted\n"
+            "- Unpinned keys follow the LFU rule of the main problem: fewest uses, then touched longest ago\n"
+            "- Updating an existing key's value counts as a use\n"
+            "- Pinned keys still take up capacity; if the cache is full and **every** key is pinned, the new key is not stored"
         ),
         "examples": [
             {"args": _pops(2, ("put", "flags", "F", True), ("put", "a", "1", False), ("put", "b", "2", False), ("get", "flags"), ("get", "a"), ("get", "b")),

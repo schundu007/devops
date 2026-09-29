@@ -45,14 +45,18 @@ allow `prod.example.com` too.
 `notexample.com` and pass an allow-list check that uses `endswith("example.com")`.
 
 ## 4. Problem Statement
-Write `compact(hostnames)` and `encoded_length(hostnames)`.
+Drop hostnames that are suffixes of other hostnames, and measure the shared encoding.
 
-- First clean each name: lowercase it and remove a trailing dot. Ignore empty names and duplicates.
-- Name `A` is **covered** if some other name `B` ends with `"." + A`. For example, `prod.example.com`
-  is covered by `api.prod.example.com`, but `ample.com` is not covered by `example.com`.
-- `compact` returns the names that are not covered, sorted alphabetically.
-- `encoded_length` returns the length of a single string that stores every kept name, each
-  followed by one `#`. Covered names can point into that string, so they cost nothing extra.
+### Methods
+- `compact(hostnames)`: return the names that are not covered, sorted alphabetically
+- `encoded_length(hostnames)`: return the length of a single string that stores every kept name, each followed by one `#`
+
+### Rules
+- First clean each name: lowercase it and remove a trailing dot
+- Ignore empty names and duplicates
+- Name `A` is **covered** if some other name `B` ends with `"." + A`
+- For example, `prod.example.com` is covered by `api.prod.example.com`, but `ample.com` is not covered by `example.com`
+- Covered names can point into the encoded string, so they cost nothing extra
 
 ## 5. Input / Output format and Constraints
 - `compact(hostnames: list[str]) -> list[str]`, `encoded_length(hostnames: list[str]) -> int`.

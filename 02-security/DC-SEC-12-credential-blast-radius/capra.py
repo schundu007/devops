@@ -91,11 +91,15 @@ VARIANTS = [
         "approach": "BFS from the leaked resource · O(n + E) · O(n)",
         "spec": {"kind": "fn", "fn": "exposure_tiers", "params": ["holds", "leaked"]},
         "statement": (
-            "Incident response rotates credentials in order of urgency: resources the attacker can reach in one step "
-            "first, then two steps, and so on.\n\n"
-            "`holds[i]` lists the resources whose credentials sit in resource `i`. The attacker controls `leaked`.\n\n"
-            "Return a list `dist` of length `n`: `dist[r]` is the fewest takeovers needed to control `r` "
-            "(`0` for `leaked`), or `-1` if `r` can never be reached."
+            "Incident response rotates credentials in order of urgency: one step away first, then two, and so on.\n"
+            "\n"
+            "### Input\n"
+            "- `holds[i]`: the resources whose credentials sit in resource `i`\n"
+            "- `leaked`: the resource the attacker controls\n"
+            "\n"
+            "### Output\n"
+            "- A list `dist` of length `n`: `dist[r]` is the fewest takeovers needed to control `r`\n"
+            "- `0` for `leaked`, `-1` if `r` can never be reached"
         ),
         "examples": [
             {"args": case([[1, 2], [3], [3], [], [0]], 0),
@@ -168,11 +172,16 @@ def exposure_tiers(holds, leaked):
         "approach": "Strongly connected components (Kosaraju, iterative) · O(n + E) · O(n + E)",
         "spec": {"kind": "fn", "fn": "credential_rings", "params": ["holds"]},
         "statement": (
-            "A **credential ring** is a group of resources where each one can, directly or through others, take over "
-            "every other one. Leaking any member exposes the whole ring, so rings are rotated together.\n\n"
-            "`holds[i]` lists the resources whose credentials sit in resource `i`. Find every ring with **at least two** "
-            "resources.\n\n"
-            "Return the rings as sorted lists, ordered by their smallest member."
+            "Leaking any member of a ring exposes the whole ring, so rings are rotated together.\n"
+            "\n"
+            "### Input\n"
+            "- `holds[i]`: the resources whose credentials sit in resource `i`\n"
+            "\n"
+            "### Output\n"
+            "- Every ring with **at least two** resources, each as a sorted list, ordered by their smallest member\n"
+            "\n"
+            "### Rules\n"
+            "- A **credential ring** is a group of resources where each one can, directly or through others, take over every other one"
         ),
         "examples": [
             {"args": {"holds": [[1], [2], [0, 3], [4], [3], []]},

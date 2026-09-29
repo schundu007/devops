@@ -102,11 +102,17 @@ VARIANTS = [
         "approach": "Sort by normalized integer tuple · O(n log n · L) · O(n · L)",
         "spec": {"kind": "fn", "fn": "sort_versions", "params": ["versions"]},
         "statement": (
-            "The release page lists tags in the order they were pushed. Show them oldest to newest instead.\n\n"
-            "Versions follow the same rules as the main problem: parts compare as integers, leading zeros are "
-            "ignored and missing parts count as `0`. Versions that are equal (like `1.2` and `1.2.0`) keep their "
-            "original relative order.\n\n"
-            "Return the sorted list of the original strings."
+            "Show the release page's tags oldest to newest instead of in push order.\n"
+            "\n"
+            "### Input\n"
+            "- `versions`: version strings, in the order they were pushed\n"
+            "\n"
+            "### Output\n"
+            "- The sorted list of the original strings, oldest first\n"
+            "\n"
+            "### Rules\n"
+            "- Versions follow the main problem's rules: parts compare as integers, leading zeros are ignored and missing parts count as `0`\n"
+            "- Equal versions (like `1.2` and `1.2.0`) keep their **original** relative order"
         ),
         "examples": [
             {"args": {"versions": ["1.10", "1.9", "1.2.0", "1.2"]},
@@ -174,12 +180,20 @@ def sort_versions(versions):
         "approach": "One pass with normalized tuples + banned set · O((n + b) · L) · O(b · L)",
         "spec": {"kind": "fn", "fn": "latest_safe", "params": ["available", "minimum", "banned"]},
         "statement": (
-            "A dependency bot picks the upgrade target for a service. It must be at least `minimum` (the first "
-            "release with the security fix) and must not be any release in `banned` (known-bad builds).\n\n"
-            "Compare versions as in the main problem, so `1.2` and `1.2.0` are the same release (and both are banned "
-            "if either is listed).\n\n"
-            "Return the newest acceptable string from `available`. If several spellings of that release exist, "
-            "return the first one in `available`. If nothing qualifies, return `\"\"`."
+            "A dependency bot picks the upgrade target for a service.\n"
+            "\n"
+            "### Input\n"
+            "- `available`: candidate version strings\n"
+            "- `minimum`: the first release with the security fix\n"
+            "- `banned`: known-bad releases\n"
+            "\n"
+            "### Output\n"
+            "- The newest acceptable string from `available`, or `\"\"` if nothing qualifies\n"
+            "\n"
+            "### Rules\n"
+            "- A target must be at least `minimum` and must not be any release in `banned`\n"
+            "- Compare versions as in the main problem, so `1.2` and `1.2.0` are the same release (and both are banned if either is listed)\n"
+            "- If several spellings of the newest release exist, return the **first** one in `available`"
         ),
         "examples": [
             {"args": {"available": ["1.27.9", "1.28.3", "1.28.4", "1.27.15"], "minimum": "1.27.10", "banned": ["1.28.4"]},

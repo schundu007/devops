@@ -43,14 +43,17 @@ free pool twice. Two sidecars later bind "their" port, and one crashes with
 `address already in use` in the middle of a rollout.
 
 ## 4. Problem Statement
-Build an `IdAllocator` for the IDs `base, base + 1, …, base + size - 1`.
+Build an `IdAllocator` that always hands out the smallest free ID.
 
-- `allocate()` returns the **smallest** ID not currently in use, or `None` if every ID is in use.
-- `release(id)` returns an ID to the pool. If `id` is not currently allocated (a double
-  release, or an ID outside the pool), raise `ValueError` and change nothing.
+### Methods
+- `IdAllocator(size, base)`: a pool of the IDs `base, base + 1, …, base + size - 1`
+- `allocate()`: returns the **smallest** ID not currently in use, or `None` if every ID is in use
+- `release(id)`: returns an ID to the pool
 
-Aim for better than O(size) per call, and avoid building the whole free list up front when
-`size` is large.
+### Rules
+- If `release(id)` gets an `id` that is not currently allocated (a double release, or an ID outside the pool), raise `ValueError` and change nothing
+- Aim for better than O(size) per call
+- Avoid building the whole free list up front when `size` is large
 
 ## 5. Input / Output format and Constraints
 - `size`: `0 <= size <= 10^6`. `base`: any integer, default `0`.

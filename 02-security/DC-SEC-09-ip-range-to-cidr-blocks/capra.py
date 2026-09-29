@@ -133,13 +133,18 @@ VARIANTS = [
         "approach": "Split into two ranges, lowest set bit on each · O(32) · O(1)",
         "spec": {"kind": "fn", "fn": "carve_out", "params": ["parent", "excluded"], "cmp": "exact"},
         "statement": (
-            "A security group allows `parent`, say `10.0.0.0/24`, but one subnet inside it must now be denied. "
-            "Most firewalls cannot express \"allow except\", so the rule has to be rewritten as plain CIDRs.\n\n"
-            "Given two valid, aligned CIDR blocks `parent` and `excluded`, return the **fewest** CIDR blocks that "
-            "cover exactly the addresses of `parent` that are **not** in `excluded`, in address order.\n\n"
-            "- If they do not overlap, the answer is `[parent]`.\n"
-            "- If `excluded` covers all of `parent`, the answer is `[]`.\n\n"
-            "Don't use the `ipaddress` module."
+            "A security group allows `parent`, say `10.0.0.0/24`, but one subnet inside it must now be denied; most firewalls cannot express \"allow except\", so the rule has to be rewritten as plain CIDRs.\n"
+            "\n"
+            "### Input\n"
+            "- `parent`, `excluded`: two valid, aligned CIDR blocks\n"
+            "\n"
+            "### Output\n"
+            "- The **fewest** CIDR blocks that cover exactly the addresses of `parent` that are **not** in `excluded`, in address order\n"
+            "- `[parent]` if they do not overlap\n"
+            "- `[]` if `excluded` covers all of `parent`\n"
+            "\n"
+            "### Rules\n"
+            "- Don't use the `ipaddress` module"
         ),
         "examples": [
             {"args": {"parent": "10.0.0.0/24", "excluded": "10.0.0.64/26"},
@@ -207,11 +212,17 @@ def carve_out(parent, excluded):
         "approach": "Sort + merge intervals, then lowest set bit · O(m log m) · O(m)",
         "spec": {"kind": "fn", "fn": "merge_cidrs", "params": ["cidrs"], "cmp": "exact"},
         "statement": (
-            "An allowlist grew by copy and paste: `cidrs` holds CIDR blocks that may overlap, repeat or sit "
-            "right next to each other. Cloud security groups cap the number of rules, so compact it.\n\n"
-            "Return the **fewest** CIDR blocks that cover exactly the union of all addresses in `cidrs`, in "
-            "address order. Each input block is valid and aligned. An empty list gives `[]`.\n\n"
-            "Don't use the `ipaddress` module."
+            "An allowlist grew by copy and paste, and cloud security groups cap the number of rules, so compact it.\n"
+            "\n"
+            "### Input\n"
+            "- `cidrs`: valid, aligned CIDR blocks that may overlap, repeat or sit right next to each other\n"
+            "\n"
+            "### Output\n"
+            "- The **fewest** CIDR blocks that cover exactly the union of all addresses in `cidrs`, in address order\n"
+            "- `[]` for an empty list\n"
+            "\n"
+            "### Rules\n"
+            "- Don't use the `ipaddress` module"
         ),
         "examples": [
             {"args": {"cidrs": ["10.0.0.0/25", "10.0.0.128/25", "10.0.1.0/24"]},

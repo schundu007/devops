@@ -46,12 +46,18 @@ pods is unplugged during maintenance and half the fleet is unreachable, with eve
 "redundant" top-of-rack pair still shown healthy.
 
 ## 4. Problem Statement
-The network has `n` devices, numbered `0` to `n - 1`, and a list of undirected links
-`(a, b)`. The same pair may be linked more than once. A link is **critical** if removing it
-leaves at least one pair of devices, previously connected, with no path between them.
+Find every link whose loss disconnects devices.
 
-Return every critical link, in any order. Each link may be written as `(a, b)` or `(b, a)`.
-The network does not have to be connected.
+### Input
+- `n`: number of devices, numbered `0` to `n - 1`
+- `links`: undirected links `(a, b)`; the same pair may be linked more than once
+
+### Output
+- Every critical link, in any order; each may be written as `(a, b)` or `(b, a)`
+
+### Rules
+- A link is **critical** if removing it leaves at least one pair of previously connected devices with no path between them
+- The network does not have to be connected
 
 ## 5. Input / Output format and Constraints
 - `n: int`, `links: list[tuple[int, int]]`. Returns `list[tuple[int, int]]`.

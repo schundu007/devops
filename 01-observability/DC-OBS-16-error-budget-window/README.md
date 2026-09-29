@@ -42,11 +42,15 @@ was more headroom than there was. The team then ships a risky migration into a b
 already spent, and the next incident breaches the SLO and the customer contract.
 
 ## 4. Problem Statement
-You get `checks`, a list of health-check results in time order, where `1` means passed and
-`0` means failed. You also get `budget`, the number of failures you can tolerate.
+Find the longest stretch of health checks that stays within the failure budget.
 
-Return the length of the longest run of **consecutive** checks that contains at most `budget` failures.
-Return `0` if no run qualifies (for example, an empty list).
+### Input
+- `checks`: health-check results in time order; `1` means passed, `0` means failed
+- `budget`: the number of failures you can tolerate
+
+### Output
+- The length of the longest run of **consecutive** checks that contains at most `budget` failures
+- `0` if no run qualifies (for example, an empty list)
 
 ## 5. Input / Output format and Constraints
 - `checks: list[int]`, each value 0 or 1, with `0 <= len(checks) <= 10^5`.

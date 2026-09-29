@@ -43,18 +43,22 @@ flags). Input also has to be URL-decoded exactly once *before* this check, or
 Either way, an unauthenticated request reads credentials straight off the host.
 
 ## 4. Problem Statement
-Write two functions.
+Write two functions: one normalizes a Unix path, the other checks that a request stays inside a root.
 
-`normalize_path(path)` turns a Unix-style path into its canonical absolute form:
-- Split on `/`. Empty segments (from `//`) and `.` add nothing.
-- `..` removes the most recent name. At the top (`/`) there is nothing to remove, so it stays at `/`.
-- Every other segment is a name, even `...`.
-- The result starts with `/`, has single slashes, and no trailing slash (except the root itself).
+### Input
+- `normalize_path(path)`: a Unix-style path
+- `is_within_root(root, requested)`: a root and a requested path; `requested` is absolute if it starts with `/`, otherwise relative to `root`
 
-`is_within_root(root, requested)` decides whether a request stays inside `root`:
-- If `requested` starts with `/`, it is absolute. Otherwise it is relative to `root`.
-- Normalize both, then return `True` only if the target equals the root or sits under it by
-  whole segments (`/srv/app2` is **not** under `/srv/app`).
+### Output
+- `normalize_path`: the path's canonical absolute form
+- `is_within_root`: after normalizing both, `True` only if the target equals the root or sits under it by **whole segments**
+
+### Rules
+- Split on `/`; empty segments (from `//`) and `.` add nothing
+- `..` removes the most recent name; at the top (`/`) there is nothing to remove, so it stays at `/`
+- Every other segment is a name, even `...`
+- The result starts with `/`, has single slashes, and no trailing slash (except the root itself)
+- `/srv/app2` is **not** under `/srv/app`
 
 ## 5. Input / Output format and Constraints
 - `normalize_path(path: str) -> str`, `is_within_root(root: str, requested: str) -> bool`.

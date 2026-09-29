@@ -110,11 +110,18 @@ VARIANTS = [
         "approach": "Union-find in cable order · O(n + E · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "redundant_links", "params": ["n", "links"]},
         "statement": (
-            "A rack audit wants to reclaim spare cables before the next build-out. Cables were plugged in the order "
-            "given by `links`, each one an undirected `[a, b]` between devices `0` to `n - 1`.\n\n"
-            "A cable is **redundant** if, at the moment it was plugged in, its two ends could already reach each "
-            "other through earlier cables. Unplugging every redundant cable leaves the same segments.\n\n"
-            "Return the indices of the redundant cables in ascending order."
+            "A rack audit wants to reclaim spare cables before the next build-out.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: number of devices, numbered `0` to `n - 1`\n"
+            "- `links`: undirected cables `[a, b]`, in the order they were plugged in\n"
+            "\n"
+            "### Output\n"
+            "- The indices of the redundant cables, in ascending order\n"
+            "\n"
+            "### Rules\n"
+            "- A cable is **redundant** if, when it was plugged in, its two ends could already reach each other through earlier cables\n"
+            "- Unplugging every redundant cable leaves the same segments"
         ),
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [1, 2], [0, 2], [2, 3]]},
@@ -203,10 +210,17 @@ def redundant_links(n, links):
         "approach": "Incremental union-find · O(n + E · α(n)) · O(n)",
         "spec": {"kind": "fn", "fn": "segments_after_each", "params": ["n", "links"]},
         "statement": (
-            "During a repair window, technicians plug cables in one at a time. The NOC dashboard shows how many "
-            "separate segments the `n` devices form after every cable.\n\n"
-            "Before any cable, every device is its own segment. `links[i] = [a, b]` is the `i`-th cable plugged in.\n\n"
-            "Return a list whose `i`-th entry is the number of segments right after cable `i` is plugged in."
+            "Report how many separate segments the devices form after each cable is plugged in.\n"
+            "\n"
+            "### Input\n"
+            "- `n`: number of devices\n"
+            "- `links[i] = [a, b]`: the `i`-th cable plugged in\n"
+            "\n"
+            "### Output\n"
+            "- A list whose `i`-th entry is the number of segments right after cable `i` is plugged in\n"
+            "\n"
+            "### Rules\n"
+            "- Before any cable, every device is its own segment"
         ),
         "examples": [
             {"args": {"n": 4, "links": [[0, 1], [2, 3], [1, 0], [1, 2]]},

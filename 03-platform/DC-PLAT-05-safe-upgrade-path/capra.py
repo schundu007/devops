@@ -107,11 +107,19 @@ VARIANTS = [
         "approach": "BFS generating ±1 neighbors · O(N · L²) · O(N · L)",
         "spec": {"kind": "fn", "fn": "min_skew_steps", "params": ["start", "target", "approved"], "cmp": "exact"},
         "statement": (
-            "Kubernetes' version skew policy allows a component to move only **one minor version** at a time. "
-            "States are now lists of integer minor versions, for example `[28, 27, 5]`.\n\n"
-            "One step changes exactly one component by **+1 or -1**, and the new state must be in `approved`. "
-            "The start does not need to be approved.\n\n"
-            "Return the fewest steps from `start` to `target`, `0` if they are equal, or `-1` if the target cannot be reached."
+            "Kubernetes' version skew policy allows a component to move only **one minor version** at a time.\n"
+            "\n"
+            "### Input\n"
+            "- `start`, `target`: states as lists of integer minor versions, for example `[28, 27, 5]`\n"
+            "- `approved`: the list of allowed states\n"
+            "\n"
+            "### Output\n"
+            "- The fewest steps from `start` to `target`, `0` if they are equal, or `-1` if the target cannot be reached\n"
+            "\n"
+            "### Rules\n"
+            "- One step changes exactly one component by **+1 or -1**\n"
+            "- The new state must be in `approved`\n"
+            "- The start does not need to be approved"
         ),
         "examples": [
             {"args": {"start": [27, 27], "target": [28, 28], "approved": [[28, 27], [28, 28], [27, 28]]},
@@ -203,12 +211,19 @@ def min_skew_steps(start, target, approved):
         "approach": "Depth-limited BFS with wildcard buckets · O(N · L²) · O(N · L²)",
         "spec": {"kind": "fn", "fn": "reachable_within", "params": ["start", "approved", "k"], "cmp": "exact"},
         "statement": (
-            "A maintenance window allows at most `k` component changes. Before picking a target, the platform team "
-            "wants to know how many approved states are even on the table.\n\n"
-            "Steps work as in the main problem: change exactly one component to any other version, landing on an "
-            "approved state. Return the number of **distinct approved states** other than `start` that can be "
-            "reached in **at most** `k` steps.\n\n"
-            "The start does not need to be approved, and it never counts."
+            "A maintenance window allows at most `k` component changes: count the approved states on the table.\n"
+            "\n"
+            "### Input\n"
+            "- `start`: the current state\n"
+            "- `approved`: the list of allowed states\n"
+            "- `k`: the most steps allowed\n"
+            "\n"
+            "### Output\n"
+            "- The number of **distinct approved states** other than `start` that can be reached in **at most** `k` steps\n"
+            "\n"
+            "### Rules\n"
+            "- Steps work as in the main problem: change exactly one component to any other version, landing on an approved state\n"
+            "- The start does not need to be approved, and it never counts"
         ),
         "examples": [
             {"args": {"start": ["1.27", "1.27"], "approved": [["1.28", "1.27"], ["1.28", "1.28"], ["1.29", "1.29"]], "k": 2},

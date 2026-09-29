@@ -42,14 +42,17 @@ minute of the incident, which is often the minute where the fix landed. A text c
 without zero-padding puts `2026:9:…` after `2026:10:…`, and the query returns the wrong month.
 
 ## 4. Problem Statement
-Build a `LogStore`.
+Build a `LogStore` that answers time-range queries at a chosen granularity.
 
-- `put(log_id, timestamp)`: store a log line's ID with its timestamp `YYYY:MM:DD:hh:mm:ss`.
-  Every field is zero-padded.
-- `retrieve(start, end, granularity)`: return the IDs of all logs whose timestamp lies between
-  `start` and `end`, inclusive, **comparing only the fields down to `granularity`**. `granularity`
-  is one of `Year`, `Month`, `Day`, `Hour`, `Minute`, `Second`. Finer fields are ignored, on
-  `start`, on `end` and on the logs. Return the IDs in ascending order.
+### Methods
+- `put(log_id, timestamp)`: store a log line's ID with its timestamp `YYYY:MM:DD:hh:mm:ss`
+- `retrieve(start, end, granularity)`: return the IDs of all logs whose timestamp lies between `start` and `end`, in ascending order
+
+### Rules
+- Every timestamp field is zero-padded
+- The range is **inclusive**
+- Compare **only the fields down to `granularity`**: one of `Year`, `Month`, `Day`, `Hour`, `Minute`, `Second`
+- Finer fields are ignored, on `start`, on `end` and on the logs
 
 ## 5. Input / Output format and Constraints
 - `log_id: int`, unique, `0 <= log_id <= 10^9`.

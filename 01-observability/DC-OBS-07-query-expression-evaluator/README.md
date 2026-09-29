@@ -40,16 +40,26 @@ number wrong, but plausible. Nobody notices until the capacity planning or the a
 based on it fails.
 
 ## 4. Problem Statement
-Write `evaluate(expr, values)` that returns the integer value of an expression built from:
+Write `evaluate(expr, values)`, which returns the integer value of a metric expression.
 
-- non-negative integers, such as `100`
-- metric names matching `[A-Za-z_][A-Za-z0-9_]*`, each replaced by `values[name]`
-- the binary operators `+` and `-`
-- parentheses, and any number of spaces
-- a unary minus, allowed only at the very start of the expression or right after `(`
+### Input
+- `expr`: an expression built from:
+  - non-negative integers, such as `100`
+  - metric names matching `[A-Za-z_][A-Za-z0-9_]*`
+  - the binary operators `+` and `-`
+  - parentheses, and any number of spaces
+  - a unary minus
+- `values`: the value of each metric name
 
-Do not use `eval` or any other built-in expression evaluator. If a name is missing from
-`values`, raise `KeyError`. A blank expression evaluates to `0`.
+### Output
+- The integer value of the expression
+
+### Rules
+- Each metric name is replaced by `values[name]`
+- A unary minus is allowed only at the very start of the expression or right after `(`
+- If a name is missing from `values`, raise `KeyError`
+- A blank expression evaluates to `0`
+- Do not use `eval` or any other built-in expression evaluator
 
 ## 5. Input / Output format and Constraints
 - `expr: str`, `0 <= len(expr) <= 3 * 10^5`. It is always a valid expression under the rules above.

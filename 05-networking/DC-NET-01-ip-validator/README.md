@@ -45,14 +45,21 @@ those libraries build on.
 metadata endpoint, and leaks credentials.
 
 ## 4. Problem Statement
-Write `classify_address(addr)`, which takes one string and returns:
+Write `classify_address(addr)`: say whether a string is an IPv4 address, an IPv6 address, or neither.
 
-- `"IPv4"` if it is four decimal parts separated by dots, each part from 0 to 255, with **no
-  leading zeros** (`"0"` on its own is fine, `"01"` is not).
-- `"IPv6"` if it is exactly eight groups separated by colons, each group 1 to 4 hexadecimal
-  digits (upper or lower case). Leading zeros inside a group are allowed. The `::` shorthand is
-  **not** accepted.
-- `"Neither"` for anything else: signs, spaces, empty parts, extra separators, non-ASCII digits.
+### Input
+- `addr`: the string to classify
+
+### Output
+- `"IPv4"`, `"IPv6"` or `"Neither"`
+
+### Rules
+- `"IPv4"`: four decimal parts separated by dots, each part from 0 to 255
+- IPv4 parts have **no leading zeros**: `"0"` on its own is fine, `"01"` is not
+- `"IPv6"`: exactly eight groups separated by colons, each group 1 to 4 hexadecimal digits (upper or lower case)
+- Leading zeros inside an IPv6 group are allowed
+- The `::` shorthand is **not** accepted
+- `"Neither"` for anything else: signs, spaces, empty parts, extra separators, non-ASCII digits
 
 ## 5. Input / Output format and Constraints
 - Input: `addr: str`, length 0 to 100, any printable characters.

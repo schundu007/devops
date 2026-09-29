@@ -210,12 +210,21 @@ VARIANTS = [
         "approach": "Greedy matcher per statement, deny first · O(P · n·m) worst · O(1)",
         "spec": {"kind": "fn", "fn": "evaluate", "params": ["allow", "deny", "action"], "cmp": "exact"},
         "statement": (
-            "An IAM policy has `Allow` statements and `Deny` statements, each an action pattern with `*` "
-            "(any run, including empty) and `?` (exactly one character). Decide one request for `action`:\n\n"
+            "Decide one request against an IAM policy's `Allow` and `Deny` statements.\n"
+            "\n"
+            "### Input\n"
+            "- `allow`: the action patterns of the `Allow` statements\n"
+            "- `deny`: the action patterns of the `Deny` statements\n"
+            "- `action`: the requested action\n"
+            "\n"
+            "### Output\n"
             "- `\"Deny\"` if **any** deny pattern matches: an explicit deny always wins\n"
-            "- otherwise `\"Allow\"` if any allow pattern matches\n"
-            "- otherwise `\"ImplicitDeny\"`: nothing granted it\n\n"
-            "Matching is case-sensitive and covers the whole action, as in the main problem."
+            "- Otherwise `\"Allow\"` if any allow pattern matches\n"
+            "- Otherwise `\"ImplicitDeny\"`: nothing granted it\n"
+            "\n"
+            "### Rules\n"
+            "- `*` matches any run, including an empty one; `?` matches exactly one character\n"
+            "- Matching is case-sensitive and covers the whole action, as in the main problem"
         ),
         "examples": [
             {"args": {"allow": ["s3:*"], "deny": ["s3:Delete*"], "action": "s3:DeleteBucket"},
@@ -260,13 +269,21 @@ VARIANTS = [
         "approach": "Token DP with a rolling row · O(n·m) · O(m)",
         "spec": {"kind": "fn", "fn": "glob_match", "params": ["pattern", "path"], "cmp": "exact"},
         "statement": (
-            "Ownership and branch-protection rules match file paths with globs where `/` is special:\n\n"
+            "Ownership and branch-protection rules match file paths with globs where `/` is special.\n"
+            "\n"
+            "### Input\n"
+            "- `pattern`: the glob\n"
+            "- `path`: the file path\n"
+            "\n"
+            "### Output\n"
+            "- Whether `pattern` matches the whole `path`\n"
+            "\n"
+            "### Rules\n"
             "- `?` matches exactly one character other than `/`\n"
             "- `*` matches any run of characters (possibly empty) **not** containing `/`\n"
             "- `**` (two or more stars in a row) matches any run, including `/`\n"
-            "- every other character matches itself\n\n"
-            "Return whether `pattern` matches the whole `path`. Unlike IAM, a single `*` stops at a directory "
-            "boundary, so the greedy \"remember the last star\" trick no longer works on its own."
+            "- Every other character matches itself\n"
+            "- Unlike IAM, a single `*` stops at a directory boundary"
         ),
         "examples": [
             {"args": {"pattern": "docs/*.md", "path": "docs/guide/setup.md"},

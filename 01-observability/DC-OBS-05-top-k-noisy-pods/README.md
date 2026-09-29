@@ -42,12 +42,15 @@ blocks the wrong customer while the abuse continues.
 ## 4. Problem Statement
 Build a `NoisyBoard` that keeps a running total per key.
 
-- `add(key, amount)`: add `amount` (≥ 1) to the key's total. A new key starts at 0.
-- `reset(key)`: forget the key completely. Resetting an unknown key does nothing.
-- `top(k)`: return the `k` largest totals as `(key, total)` pairs, largest first. Break ties
-  by key in ascending order. If fewer than `k` keys exist, return all of them.
-- `top_total(k)`: return the sum of the totals in `top(k)`. This is the number the classic
-  problem asks for.
+### Methods
+- `add(key, amount)`: add `amount` (≥ 1) to the key's total. A new key starts at `0`
+- `reset(key)`: forget the key completely. Resetting an unknown key does nothing
+- `top(k)`: return the `k` largest totals as `(key, total)` pairs, largest first
+- `top_total(k)`: return the sum of the totals in `top(k)`. This is the number the classic problem asks for
+
+### Rules
+- In `top`, ties go to the key in **ascending** order
+- If fewer than `k` keys exist, `top` returns all of them
 
 ## 5. Input / Output format and Constraints
 - `key`: a non-empty string (a pod name or an API key ID). `amount`: an int, `1 <= amount <= 10^4`.

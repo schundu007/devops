@@ -45,12 +45,19 @@ anchored at the start matches `billing-logs-prod` against `logs-*`. Both silentl
 Going the other way and blocking valid requests takes down the log pipeline.
 
 ## 4. Problem Statement
-Write `matches(pattern, value)`. It returns `True` if the **whole** of `value` matches the
-**whole** of `pattern`:
+Write `matches(pattern, value)`: decide whether `value` matches a wildcard `pattern`.
 
-- `*` matches any sequence of characters, including an empty one, and including `:` and `/`.
-- `?` matches exactly one character.
-- Every other character matches only itself, case-sensitive.
+### Input
+- `pattern`: the pattern, which may use `*` and `?`
+- `value`: the string to test
+
+### Output
+- `True` if the **whole** of `value` matches the **whole** of `pattern`, otherwise `False`
+
+### Rules
+- `*` matches any sequence of characters, including an empty one, and including `:` and `/`
+- `?` matches exactly one character
+- Every other character matches only itself, case-sensitive
 
 ## 5. Input / Output format and Constraints
 - `matches(pattern: str, value: str) -> bool`.
